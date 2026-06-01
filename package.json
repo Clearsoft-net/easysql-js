@@ -1,0 +1,26 @@
+{
+  "name": "@clearsoft/easysql-sdk",
+  "version": "0.1.0",
+  "description": "EasySQL API TypeScript SDK — Ask questions in natural language to your MySQL, MariaDB or PostgreSQL databases.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "prepublish": "npm run build"
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": ["easysql", "sql", "nlp", "api", "sdk"],
+  "license": "MIT",
+  "dependencies": {
+    "openapi-fetch": "^0.13.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.0.0",
+    "typescript": "^5.5.0"
+  }
+}
