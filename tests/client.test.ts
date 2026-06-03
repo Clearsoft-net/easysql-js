@@ -86,7 +86,7 @@ describe("Path parameters", () => {
     const f = mockFetch({});
     const client = createEasySQLClient({ baseUrl, fetch: f });
 
-    await client.getQuery({ path: { query_id: "q-42" } });
+    await client.getQuery({ query_id: "q-42" });
 
     expect(lastFetchArgs(f).url).toBe(
       "https://api.example.com/v1/queries/q-42",
@@ -103,7 +103,7 @@ describe("Query parameters", () => {
     const f = mockFetch({});
     const client = createEasySQLClient({ baseUrl, fetch: f });
 
-    await client.listQueries({ query: { page: 2, per_page: 10 } });
+    await client.listQueries({ page: 2, per_page: 10 });
 
     const url = new URL(lastFetchArgs(f).url);
     expect(url.searchParams.get("page")).toBe("2");
