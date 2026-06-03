@@ -118,6 +118,8 @@ make smoke                           # smoke test (needs credentials in .env)
 
 Or use `make all` for the full pipeline.
 
+> Full API reference: [`docs/API.md`](docs/API.md)
+
 ## License
 
 MIT
