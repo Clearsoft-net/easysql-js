@@ -82,10 +82,7 @@ function extractMethods(spec: any): GeneratedMethod[] {
         false;
 
       const pathSignature = `"${path}"`;
-      const typeSignature = `paths${path
-        .split("/")
-        .map((seg) => `["${seg}"]`)
-        .join("")}["${httpMethod}"]`;
+      const typeSignature = `paths["${path}"]["${httpMethod}"]`;
 
       methods.push({
         name: methodName,
