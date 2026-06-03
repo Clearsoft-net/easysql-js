@@ -41,6 +41,8 @@ async function generateClient(url: string) {
 
   await Bun.write("src/client.ts", output);
   console.log("✅ src/client.ts generated successfully.");
+
+  await generateDocs(methods);
 }
 
 // ─── 3. Extract methods from spec ───────────────────────────────────
@@ -172,7 +174,73 @@ function buildExample(
   return parts.length ? parts.join(", ") : "";
 }
 
-// ─── 4. Build code strings ────────────────────────────────────────
+// ─── 4. Generate markdown docs ─────────────────────────────────────
+
+async function generateDocs(methods: GeneratedMethod[]) {
+  const groups = new Map<string, GeneratedMethod[]>();
+
+  for (const m of methods) {
+    const category = categoryFromPath(m.path);
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category)!.push(m);
+  }
+
+  let md = "# EasySQL SDK — API Reference\n\n";
+  md += "Auto-generated from the OpenAPI spec.\n";
+  md += `Regenerate: \`make generate\`\n\n`;
+  md += "---\n\n";
+
+  for (const [category, ms] of groups) {
+    md += `## ${category}\n\n`;
+    for (const m of ms) {
+      md += formatMethod(m);
+    }
+  }
+
+  await Bun.write("docs/API.md", md);
+  console.log("✅ docs/API.md generated successfully.");
+}
+
+function categoryFromPath(path: string): string {
+  // Extract the category from the path: /v1/auth/login -> Auth
+  const parts = path.split("/").filter(Boolean);
+  if (parts.length >= 2 && parts[0] === "v1") {
+    const name = parts[1];
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+  // Fallback for paths like /health
+  const name = parts[0] || "Other";
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+function formatMethod(m: GeneratedMethod): string {
+  const tag = `\`${m.httpMethod.toUpperCase()}\``;
+  const sig = buildCallSignature(m);
+  const example = m.example ? `\n\n${m.example}` : "";
+  return `### \`client.${m.name}(${sig})\`\n\n${tag} ${m.path}${example}\n\n`;
+}
+
+function buildCallSignature(m: GeneratedMethod): string {
+  if (!m.hasBody && !m.hasPathParams && !m.hasQueryParams) return "";
+
+  if (m.flatten) {
+    if (m.hasBody) {
+      // Could extract property names from example, but just use example string
+      return m.example ? `{ ... }` : `{ }`;
+    }
+    if (m.hasPathParams || m.hasQueryParams) {
+      return m.example ? `{ ... }` : `{ }`;
+    }
+  }
+
+  // Multiple param types — show both
+  const parts: string[] = [];
+  if (m.hasBody) parts.push(m.example ? `{ ... }, ` : `{ }, `);
+  if (m.hasPathParams || m.hasQueryParams) parts.push(`{ ... }`);
+  return parts.join("");
+}
+
+// ─── 5. Build code strings ────────────────────────────────────────
 
 function buildInterface(m: GeneratedMethod): string {
   const params = buildParams(m);
