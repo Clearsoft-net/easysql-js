@@ -26,24 +26,22 @@ const api = createEasySQLClient({
 ### Authentication
 
 ```typescript
-// Login
-const anon = createEasySQLClient({ baseUrl: "https://api.easysql.net" });
+const api = createEasySQLClient({ baseUrl: "https://api.easysql.net" });
 
-const { data: token, error } = await anon.login({
+const { data: token, error } = await api.login({
   email: "user@example.com",
   password: "my-password",
 });
 
 if (error) throw new Error(`Login failed: ${error}`);
 
-// Authenticated client
-const api = createEasySQLClient({
+// Use the token for authenticated requests
+const authApi = createEasySQLClient({
   baseUrl: "https://api.easysql.net",
   accessToken: token.access_token,
 });
 
-// Get current user
-const { data: user } = await api.me();
+const { data: user } = await authApi.me();
 ```
 
 ### Running queries
