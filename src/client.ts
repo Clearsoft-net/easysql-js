@@ -13,17 +13,26 @@ export interface CreateClientOptions {
 }
 
 export interface EasySQLClient {
-  /** POST /v1/auth/register */
+  /** POST /v1/auth/register
+   * @example
+   * await client.register({ email: "...", password: "...", name: "..." })
+   */
   register(
     body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"],
   ): Promise<any>;
 
-  /** POST /v1/auth/login */
+  /** POST /v1/auth/login
+   * @example
+   * await client.login({ email: "...", password: "..." })
+   */
   login(
     body: paths["/v1/auth/login"]["post"]["requestBody"]["content"]["application/json"],
   ): Promise<any>;
 
-  /** POST /v1/auth/refresh */
+  /** POST /v1/auth/refresh
+   * @example
+   * await client.refresh({ refresh_token: "..." })
+   */
   refresh(
     body: paths["/v1/auth/refresh"]["post"]["requestBody"]["content"]["application/json"],
   ): Promise<any>;
@@ -34,12 +43,18 @@ export interface EasySQLClient {
   /** DELETE /v1/auth/me */
   deleteMe(): Promise<any>;
 
-  /** PATCH /v1/auth/me */
+  /** PATCH /v1/auth/me
+   * @example
+   * await client.updateMe({ name: "...", locale: "..." })
+   */
   updateMe(
     body: paths["/v1/auth/me"]["patch"]["requestBody"]["content"]["application/json"],
   ): Promise<any>;
 
-  /** POST /v1/auth/change-password */
+  /** POST /v1/auth/change-password
+   * @example
+   * await client.changePassword({ current_password: "...", new_password: "..." })
+   */
   changePassword(
     body: paths["/v1/auth/change-password"]["post"]["requestBody"]["content"]["application/json"],
   ): Promise<any>;
@@ -47,27 +62,42 @@ export interface EasySQLClient {
   /** GET /v1/connectors */
   listConnectors(): Promise<any>;
 
-  /** POST /v1/connectors */
+  /** POST /v1/connectors
+   * @example
+   * await client.createConnector({ type: "...", name: "...", config: { ... } })
+   */
   createConnector(
     body: paths["/v1/connectors"]["post"]["requestBody"]["content"]["application/json"],
   ): Promise<any>;
 
-  /** POST /v1/connectors/test */
+  /** POST /v1/connectors/test
+   * @example
+   * await client.testConnector({ type: "...", config: { ... } })
+   */
   testConnector(
     body: paths["/v1/connectors/test"]["post"]["requestBody"]["content"]["application/json"],
   ): Promise<any>;
 
-  /** GET /v1/connectors/{connector_id} */
+  /** GET /v1/connectors/{connector_id}
+   * @example
+   * await client.getConnector({ connector_id: "..." })
+   */
   getConnector(
     params: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"],
   ): Promise<any>;
 
-  /** DELETE /v1/connectors/{connector_id} */
+  /** DELETE /v1/connectors/{connector_id}
+   * @example
+   * await client.deleteConnector({ connector_id: "..." })
+   */
   deleteConnector(
     params: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"],
   ): Promise<any>;
 
-  /** PATCH /v1/connectors/{connector_id} */
+  /** PATCH /v1/connectors/{connector_id}
+   * @example
+   * await client.updateConnector({ name: "..." }, { connector_id: "..." })
+   */
   updateConnector(
     body: paths["/v1/connectors/{connector_id}"]["patch"]["requestBody"]["content"]["application/json"],
     params: {
@@ -75,7 +105,10 @@ export interface EasySQLClient {
     },
   ): Promise<any>;
 
-  /** POST /v1/connectors/{connector_id}/sync */
+  /** POST /v1/connectors/{connector_id}/sync
+   * @example
+   * await client.syncConnector({ connector_id: "..." })
+   */
   syncConnector(
     params: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"],
   ): Promise<any>;
@@ -86,7 +119,10 @@ export interface EasySQLClient {
   /** GET /v1/billing/plan */
   getPlan(): Promise<any>;
 
-  /** POST /v1/billing/checkout */
+  /** POST /v1/billing/checkout
+   * @example
+   * await client.checkout({ price_id: "..." })
+   */
   checkout(
     params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"],
   ): Promise<any>;
@@ -94,17 +130,26 @@ export interface EasySQLClient {
   /** POST /v1/billing/portal */
   portal(): Promise<any>;
 
-  /** GET /v1/queries */
+  /** GET /v1/queries
+   * @example
+   * await client.listQueries({ page: 1, per_page: 10 })
+   */
   listQueries(
     params: paths["/v1/queries"]["get"]["parameters"]["query"],
   ): Promise<any>;
 
-  /** POST /v1/queries */
+  /** POST /v1/queries
+   * @example
+   * await client.createQuery({ connector_id: "...", question: "..." })
+   */
   createQuery(
     body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"],
   ): Promise<any>;
 
-  /** GET /v1/queries/{query_id} */
+  /** GET /v1/queries/{query_id}
+   * @example
+   * await client.getQuery({ query_id: "..." })
+   */
   getQuery(
     params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"],
   ): Promise<any>;
