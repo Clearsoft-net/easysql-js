@@ -1,4 +1,4 @@
-.PHONY: all build clean docs generate help install smoke test typecheck
+.PHONY: all build clean docs generate help install test typecheck
 
 CYAN  := \033[36m
 RESET := \033[0m
@@ -29,9 +29,6 @@ install: ## Install dependencies (bun)
 
 test: ## Run unit tests (bun test)
 	bun test
-
-smoke: ## Run smoke test against the API (needs credentials)
-	bun run test.ts
 
 typecheck: ## Check TypeScript types (no emit)
 	bun run typecheck
