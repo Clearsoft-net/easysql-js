@@ -1,0 +1,45 @@
+name: Generate SDK
+
+on:
+  repository_dispatch:
+    types: [generate-sdk]
+
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun run generate
+        env:
+          EASYSQL_API_URL: ${{ vars.EASYSQL_API_URL || 'https://api.easysql.net' }}
+
+      - run: bun run typecheck
+
+      - run: bun run build
+
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore: regenerate API types from OpenAPI spec"
+          title: "🤖 Regenerate API types"
+          body: |
+            Types auto-generated via `openapi-typescript`.
+
+            **Spec**: `${{ vars.EASYSQL_API_URL || 'https://api.easysql.net' }}/openapi.json`
+
+            ✅ `bun run typecheck && bun run build` passed.
+          branch: "auto/generate-sdk"
+          delete-branch: true
+          labels: "auto-generated"

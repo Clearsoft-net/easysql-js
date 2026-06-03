@@ -6,20 +6,33 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "generate": "bun run scripts/generate.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "prepublish": "npm run build"
+    "clean": "rm -rf dist",
+    "prebuild": "bun run clean",
+    "prepublish": "bun run build"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   },
-  "keywords": ["easysql", "sql", "nlp", "api", "sdk"],
+  "keywords": [
+    "easysql",
+    "sql",
+    "nlp",
+    "api",
+    "sdk"
+  ],
   "license": "MIT",
   "dependencies": {
     "openapi-fetch": "^0.13.0"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
+    "dotenv": "^16.4.0",
     "openapi-typescript": "^7.0.0",
     "typescript": "^5.5.0"
   }
