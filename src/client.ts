@@ -12,7 +12,113 @@ export interface CreateClientOptions {
   fetch?: typeof fetch;
 }
 
-export function createEasySQLClient(options: CreateClientOptions) {
+export interface EasySQLClient {
+  /** POST /v1/auth/register */
+  register(
+    body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"],
+  ): Promise<any>;
+
+  /** POST /v1/auth/login */
+  login(
+    body: paths["/v1/auth/login"]["post"]["requestBody"]["content"]["application/json"],
+  ): Promise<any>;
+
+  /** POST /v1/auth/refresh */
+  refresh(
+    body: paths["/v1/auth/refresh"]["post"]["requestBody"]["content"]["application/json"],
+  ): Promise<any>;
+
+  /** GET /v1/auth/me */
+  me(): Promise<any>;
+
+  /** DELETE /v1/auth/me */
+  deleteMe(): Promise<any>;
+
+  /** PATCH /v1/auth/me */
+  updateMe(
+    body: paths["/v1/auth/me"]["patch"]["requestBody"]["content"]["application/json"],
+  ): Promise<any>;
+
+  /** POST /v1/auth/change-password */
+  changePassword(
+    body: paths["/v1/auth/change-password"]["post"]["requestBody"]["content"]["application/json"],
+  ): Promise<any>;
+
+  /** GET /v1/connectors */
+  listConnectors(): Promise<any>;
+
+  /** POST /v1/connectors */
+  createConnector(
+    body: paths["/v1/connectors"]["post"]["requestBody"]["content"]["application/json"],
+  ): Promise<any>;
+
+  /** POST /v1/connectors/test */
+  testConnector(
+    body: paths["/v1/connectors/test"]["post"]["requestBody"]["content"]["application/json"],
+  ): Promise<any>;
+
+  /** GET /v1/connectors/{connector_id} */
+  getConnector(params: {
+    path: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"];
+  }): Promise<any>;
+
+  /** DELETE /v1/connectors/{connector_id} */
+  deleteConnector(params: {
+    path: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"];
+  }): Promise<any>;
+
+  /** PATCH /v1/connectors/{connector_id} */
+  updateConnector(
+    body: paths["/v1/connectors/{connector_id}"]["patch"]["requestBody"]["content"]["application/json"],
+    params: {
+      path: paths["/v1/connectors/{connector_id}"]["patch"]["parameters"]["path"];
+    },
+  ): Promise<any>;
+
+  /** POST /v1/connectors/{connector_id}/sync */
+  syncConnector(params: {
+    path: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"];
+  }): Promise<any>;
+
+  /** GET /v1/dashboard/stats */
+  dashboardStats(): Promise<any>;
+
+  /** GET /v1/billing/plan */
+  getPlan(): Promise<any>;
+
+  /** POST /v1/billing/checkout */
+  checkout(params: {
+    query: paths["/v1/billing/checkout"]["post"]["parameters"]["query"];
+  }): Promise<any>;
+
+  /** POST /v1/billing/portal */
+  portal(): Promise<any>;
+
+  /** GET /v1/queries */
+  listQueries(params?: {
+    query: paths["/v1/queries"]["get"]["parameters"]["query"];
+  }): Promise<any>;
+
+  /** POST /v1/queries */
+  createQuery(
+    body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"],
+  ): Promise<any>;
+
+  /** GET /v1/queries/{query_id} */
+  getQuery(params: {
+    path: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"];
+  }): Promise<any>;
+
+  /** GET /health */
+  health(): Promise<any>;
+
+  /** GET /v1/health */
+  healthV1(): Promise<any>;
+}
+
+export function createEasySQLClient(
+  options: CreateClientOptions,
+): EasySQLClient {
   const client = createClient<paths>({
     baseUrl: options.baseUrl,
     fetch: options.fetch,
@@ -169,7 +275,5 @@ export function createEasySQLClient(options: CreateClientOptions) {
     healthV1() {
       return client.GET("/v1/health");
     },
-  };
+  } as EasySQLClient;
 }
-
-export type EasySQLClient = ReturnType<typeof createEasySQLClient>;
