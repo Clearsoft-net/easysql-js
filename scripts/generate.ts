@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { execSync } from "node:child_process";
+import openapiTS from "openapi-typescript";
 
 const apiUrl = process.env.EASYSQL_API_URL;
 
@@ -13,8 +13,8 @@ const specUrl = `${apiUrl.replace(/\/+$/, "")}/openapi.json`;
 
 console.log(`🔽 Downloading spec from: ${specUrl}`);
 
-execSync(`openapi-typescript "${specUrl}" -o src/api-types.ts`, {
-  stdio: "inherit",
-});
+const output = await openapiTS(specUrl);
+
+await Bun.write("src/api-types.ts", output);
 
 console.log("✅ src/api-types.ts generated successfully.");
