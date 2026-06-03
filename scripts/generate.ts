@@ -54,8 +54,8 @@ interface GeneratedMethod {
   hasQueryParams: boolean;
   pathSignature: string;
   typeSignature: string;
-  /** Whether params can be flattened (only one of body/path/query) */
   flatten: boolean;
+  example: string;
 }
 
 function extractMethods(spec: any): GeneratedMethod[] {
@@ -85,6 +85,14 @@ function extractMethods(spec: any): GeneratedMethod[] {
       const pathSignature = `"${path}"`;
       const typeSignature = `paths["${path}"]["${httpMethod}"]`;
 
+      const example = buildExample(
+        operation,
+        path,
+        hasBody,
+        hasPathParams,
+        hasQueryParams,
+      );
+
       methods.push({
         name: methodName,
         path,
@@ -96,6 +104,7 @@ function extractMethods(spec: any): GeneratedMethod[] {
         typeSignature,
         flatten:
           [hasBody, hasPathParams, hasQueryParams].filter(Boolean).length <= 1,
+        example,
       });
     }
   }
@@ -123,11 +132,54 @@ function deriveMethodName(operationId: string, httpMethod: string): string {
   return action.replace(/_([a-z])/g, (_: string, c: string) => c.toUpperCase());
 }
 
+function buildExample(
+  operation: any,
+  path: string,
+  hasBody: boolean,
+  hasPathParams: boolean,
+  hasQueryParams: boolean,
+): string {
+  if (!hasBody && !hasPathParams && !hasQueryParams) return "";
+
+  const parts: string[] = [];
+
+  if (hasBody) {
+    const schema = operation.requestBody?.content?.["application/json"]?.schema;
+    if (schema?.properties) {
+      const props = Object.keys(schema.properties).map((k) => `${k}: "..."`);
+      parts.push(`{ ${props.join(", ")} }`);
+    }
+  }
+
+  if (hasPathParams) {
+    const pathParams =
+      operation.parameters?.filter((p: any) => p.in === "path") ?? [];
+    if (pathParams.length) {
+      const props = pathParams.map((p: any) => `${p.name}: "..."`);
+      parts.push(`{ ${props.join(", ")} }`);
+    }
+  }
+
+  if (hasQueryParams && !hasBody && !hasPathParams) {
+    const queryParams =
+      operation.parameters?.filter((p: any) => p.in === "query") ?? [];
+    if (queryParams.length) {
+      const props = queryParams.map((p: any) => `${p.name}: 1`);
+      parts.push(`{ ${props.join(", ")} }`);
+    }
+  }
+
+  return parts.length ? parts.join(", ") : "";
+}
+
 // ─── 4. Build code strings ────────────────────────────────────────
 
 function buildInterface(m: GeneratedMethod): string {
   const params = buildParams(m);
-  return `  /** ${m.httpMethod.toUpperCase()} ${m.path} */\n  ${m.name}(${params}): Promise<any>;`;
+  const example = m.example
+    ? `\n   * @example\n   * await client.${m.name}(${m.example})`
+    : "";
+  return `  /** ${m.httpMethod.toUpperCase()} ${m.path}${example} */\n  ${m.name}(${params}): Promise<any>;`;
 }
 
 function buildImpl(m: GeneratedMethod): string {
