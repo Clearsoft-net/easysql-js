@@ -34,10 +34,7 @@ async function generateClient(url: string) {
   const methods = extractMethods(spec);
   const methodCode = methods.map(buildMethod).join(",\n\n");
 
-  const template = await Bun.file(
-    import.meta.dirname + "/client.ts.tpl",
-  ).text();
-
+  let template = await Bun.file(import.meta.dirname + "/client.ts.tpl").text();
   const output = template.replace("{{METHODS}}", indent(methodCode, 4));
 
   await Bun.write("src/client.ts", output);
@@ -126,8 +123,7 @@ function buildMethod(m: GeneratedMethod): string {
   const params = buildParams(m);
   const args = buildArgs(m);
   const methodCall = `client.${m.httpMethod.toUpperCase()}(${m.pathSignature}${args})`;
-
-  return `/** ${m.httpMethod.toUpperCase()} ${m.path} */\n  ${m.name}(${params}) {\n    return ${methodCall};\n  }`;
+  return `/** ${m.httpMethod.toUpperCase()} ${m.path} */\n${m.name}(${params}) {\n  return ${methodCall};\n}`;
 }
 
 function buildParams(m: GeneratedMethod): string {
