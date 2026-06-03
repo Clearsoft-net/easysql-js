@@ -54,6 +54,8 @@ interface GeneratedMethod {
   hasQueryParams: boolean;
   pathSignature: string;
   typeSignature: string;
+  /** Whether params can be flattened (only one of body/path/query) */
+  flatten: boolean;
 }
 
 function extractMethods(spec: any): GeneratedMethod[] {
@@ -92,6 +94,8 @@ function extractMethods(spec: any): GeneratedMethod[] {
         hasQueryParams,
         pathSignature,
         typeSignature,
+        flatten:
+          [hasBody, hasPathParams, hasQueryParams].filter(Boolean).length <= 1,
       });
     }
   }
@@ -134,8 +138,21 @@ function buildImpl(m: GeneratedMethod): string {
 }
 
 function buildParams(m: GeneratedMethod): string {
-  const parts: string[] = [];
+  if (m.flatten) {
+    if (m.hasBody) {
+      return `body: ${m.typeSignature}["requestBody"]["content"]["application/json"]`;
+    }
+    if (m.hasPathParams) {
+      return `params: ${m.typeSignature}["parameters"]["path"]`;
+    }
+    if (m.hasQueryParams) {
+      return `params: ${m.typeSignature}["parameters"]["query"]`;
+    }
+    return "";
+  }
 
+  // Multiple param types — keep explicit wrapper
+  const parts: string[] = [];
   if (m.hasBody) {
     parts.push(
       `body: ${m.typeSignature}["requestBody"]["content"]["application/json"]`,
@@ -149,7 +166,6 @@ function buildParams(m: GeneratedMethod): string {
       paramParts.push(`query: ${m.typeSignature}["parameters"]["query"]`);
     parts.push(`params: { ${paramParts.join("; ")} }`);
   }
-
   return parts.join(", ");
 }
 
@@ -157,6 +173,13 @@ function buildArgs(m: GeneratedMethod): string {
   if (!m.hasBody && !m.hasPathParams && !m.hasQueryParams) {
     return "";
   }
+
+  if (m.flatten) {
+    if (m.hasBody) return ", { body }";
+    if (m.hasPathParams) return ", { params: { path: params } }";
+    if (m.hasQueryParams) return ", { params: { query: params } }";
+  }
+
   const argParts: string[] = [];
   if (m.hasBody) argParts.push("body");
   if (m.hasPathParams || m.hasQueryParams) argParts.push("params");

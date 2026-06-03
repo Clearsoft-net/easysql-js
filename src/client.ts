@@ -58,14 +58,14 @@ export interface EasySQLClient {
   ): Promise<any>;
 
   /** GET /v1/connectors/{connector_id} */
-  getConnector(params: {
-    path: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"];
-  }): Promise<any>;
+  getConnector(
+    params: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"],
+  ): Promise<any>;
 
   /** DELETE /v1/connectors/{connector_id} */
-  deleteConnector(params: {
-    path: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"];
-  }): Promise<any>;
+  deleteConnector(
+    params: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"],
+  ): Promise<any>;
 
   /** PATCH /v1/connectors/{connector_id} */
   updateConnector(
@@ -76,9 +76,9 @@ export interface EasySQLClient {
   ): Promise<any>;
 
   /** POST /v1/connectors/{connector_id}/sync */
-  syncConnector(params: {
-    path: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"];
-  }): Promise<any>;
+  syncConnector(
+    params: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"],
+  ): Promise<any>;
 
   /** GET /v1/dashboard/stats */
   dashboardStats(): Promise<any>;
@@ -87,17 +87,17 @@ export interface EasySQLClient {
   getPlan(): Promise<any>;
 
   /** POST /v1/billing/checkout */
-  checkout(params: {
-    query: paths["/v1/billing/checkout"]["post"]["parameters"]["query"];
-  }): Promise<any>;
+  checkout(
+    params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"],
+  ): Promise<any>;
 
   /** POST /v1/billing/portal */
   portal(): Promise<any>;
 
   /** GET /v1/queries */
-  listQueries(params?: {
-    query: paths["/v1/queries"]["get"]["parameters"]["query"];
-  }): Promise<any>;
+  listQueries(
+    params: paths["/v1/queries"]["get"]["parameters"]["query"],
+  ): Promise<any>;
 
   /** POST /v1/queries */
   createQuery(
@@ -105,9 +105,9 @@ export interface EasySQLClient {
   ): Promise<any>;
 
   /** GET /v1/queries/{query_id} */
-  getQuery(params: {
-    path: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"];
-  }): Promise<any>;
+  getQuery(
+    params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"],
+  ): Promise<any>;
 
   /** GET /health */
   health(): Promise<any>;
@@ -193,17 +193,21 @@ export function createEasySQLClient(
     },
 
     /** GET /v1/connectors/{connector_id} */
-    getConnector(params: {
-      path: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"];
-    }) {
-      return client.GET("/v1/connectors/{connector_id}", { params });
+    getConnector(
+      params: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"],
+    ) {
+      return client.GET("/v1/connectors/{connector_id}", {
+        params: { path: params },
+      });
     },
 
     /** DELETE /v1/connectors/{connector_id} */
-    deleteConnector(params: {
-      path: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"];
-    }) {
-      return client.DELETE("/v1/connectors/{connector_id}", { params });
+    deleteConnector(
+      params: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"],
+    ) {
+      return client.DELETE("/v1/connectors/{connector_id}", {
+        params: { path: params },
+      });
     },
 
     /** PATCH /v1/connectors/{connector_id} */
@@ -217,10 +221,12 @@ export function createEasySQLClient(
     },
 
     /** POST /v1/connectors/{connector_id}/sync */
-    syncConnector(params: {
-      path: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"];
-    }) {
-      return client.POST("/v1/connectors/{connector_id}/sync", { params });
+    syncConnector(
+      params: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"],
+    ) {
+      return client.POST("/v1/connectors/{connector_id}/sync", {
+        params: { path: params },
+      });
     },
 
     /** GET /v1/dashboard/stats */
@@ -234,10 +240,10 @@ export function createEasySQLClient(
     },
 
     /** POST /v1/billing/checkout */
-    checkout(params: {
-      query: paths["/v1/billing/checkout"]["post"]["parameters"]["query"];
-    }) {
-      return client.POST("/v1/billing/checkout", { params });
+    checkout(
+      params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"],
+    ) {
+      return client.POST("/v1/billing/checkout", { params: { query: params } });
     },
 
     /** POST /v1/billing/portal */
@@ -246,10 +252,8 @@ export function createEasySQLClient(
     },
 
     /** GET /v1/queries */
-    listQueries(params?: {
-      query: paths["/v1/queries"]["get"]["parameters"]["query"];
-    }) {
-      return client.GET("/v1/queries", { params } as any);
+    listQueries(params: paths["/v1/queries"]["get"]["parameters"]["query"]) {
+      return client.GET("/v1/queries", { params: { query: params } });
     },
 
     /** POST /v1/queries */
@@ -260,10 +264,10 @@ export function createEasySQLClient(
     },
 
     /** GET /v1/queries/{query_id} */
-    getQuery(params: {
-      path: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"];
-    }) {
-      return client.GET("/v1/queries/{query_id}", { params });
+    getQuery(
+      params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"],
+    ) {
+      return client.GET("/v1/queries/{query_id}", { params: { path: params } });
     },
 
     /** GET /health */
