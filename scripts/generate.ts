@@ -14,6 +14,26 @@ if (!apiUrl) {
 
 const specUrl = `${apiUrl.replace(/\/+$/, "")}/openapi.json`;
 
+async function retryFetch(
+  url: string,
+  retries = 3,
+  delayMs = 1000,
+): Promise<Response> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return res;
+      throw new Error(`HTTP ${res.status}`);
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      console.warn(`  ⚠ Retry ${i + 1}/${retries} after ${delayMs}ms…`);
+      await new Promise((r) => setTimeout(r, delayMs));
+      delayMs *= 2;
+    }
+  }
+  throw new Error("Unreachable");
+}
+
 console.log(`🔽 Downloading spec from: ${specUrl}`);
 
 const [typesOutput] = await Promise.all([
@@ -25,7 +45,7 @@ await Bun.write("src/api-types.ts", typesOutput);
 console.log("✅ src/api-types.ts generated successfully.");
 
 async function generateClient(url: string) {
-  const response = await fetch(url);
+  const response = await retryFetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch spec: ${response.status}`);
   }

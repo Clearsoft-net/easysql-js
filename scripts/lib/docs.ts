@@ -47,12 +47,12 @@ function buildCallSignature(m: GeneratedMethod): string {
 
   if (m.flatten) {
     if (m.hasBody || m.hasPathParams || m.hasQueryParams) {
-      return m.example ? `{ ... }` : `{ }`;
+      return m.example ? ` (${m.example.slice(1, -1)})` : "";
     }
   }
 
   const parts: string[] = [];
-  if (m.hasBody) parts.push("{ ... }, ");
-  if (m.hasPathParams || m.hasQueryParams) parts.push(`{ ... }`);
-  return parts.join("");
+  if (m.hasBody) parts.push(" ...");
+  if (m.hasPathParams || m.hasQueryParams) parts.push(" ...");
+  return parts.join(",");
 }

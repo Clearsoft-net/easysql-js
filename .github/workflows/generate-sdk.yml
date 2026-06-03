@@ -28,6 +28,8 @@ jobs:
 
       - run: make typecheck
 
+      - run: make test
+
       - run: make build
 
       - uses: peter-evans/create-pull-request@v7
@@ -39,7 +41,7 @@ jobs:
 
             **Spec**: `${{ vars.EASYSQL_API_URL || 'https://api.easysql.net' }}/openapi.json`
 
-            ✅ `make typecheck && make build` passed.
+            ✅ `make typecheck && make test && make build` passed.
           branch: "auto/generate-sdk"
           delete-branch: true
           labels: "auto-generated"
