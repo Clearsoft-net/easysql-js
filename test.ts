@@ -2,12 +2,12 @@
  * Smoke test for the EasySQL SDK.
  *
  * Usage:
- *   npm run generate       # first time only, or when the API spec changes
- *   npx tsx src/test.ts
+ *   make generate           # first time only, or when the API spec changes
+ *   bun run test.ts
  */
 
 import "dotenv/config";
-import { createEasySQLClient } from "./client";
+import { createEasySQLClient } from "./src/client";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -52,10 +52,10 @@ async function main() {
 
   const anonClient = createEasySQLClient({ baseUrl });
 
-  const { data: token, error: loginError } = await anonClient.POST(
-    "/v1/auth/login",
-    { body: { email, password } },
-  );
+  const { data: token, error: loginError } = await anonClient.login({
+    email,
+    password,
+  });
 
   if (loginError || !token) {
     console.error("  ❌ Login failed:", loginError);
@@ -77,7 +77,7 @@ async function main() {
     accessToken: token.access_token,
   });
 
-  const { data: user, error: meError } = await authedClient.GET("/v1/auth/me");
+  const { data: user, error: meError } = await authedClient.me();
 
   if (meError || !user) {
     console.error("  ❌ Failed to fetch user:", meError);
@@ -85,7 +85,7 @@ async function main() {
   }
 
   console.log(`  ✓ Authenticated as:`);
-  console.log(`     ID    : ${(user as any).id ?? user.email}`);
+  console.log(`     ID    : ${user.id}`);
   console.log(`     Email : ${user.email}`);
 
   /* ------------------------------------------------------------------ */
@@ -95,9 +95,8 @@ async function main() {
   divider("4. Fetching dashboard stats");
 
   try {
-    const { data: stats, error: statsError } = await authedClient.GET(
-      "/v1/dashboard/stats",
-    );
+    const { data: stats, error: statsError } =
+      await authedClient.dashboardStats();
 
     if (statsError) {
       throw new Error(String(statsError));
@@ -120,7 +119,7 @@ async function main() {
 
   try {
     const { data: connectors, error: connError } =
-      await authedClient.GET("/v1/connectors");
+      await authedClient.listConnectors();
 
     if (connError) {
       throw new Error(String(connError));

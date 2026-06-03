@@ -112,7 +112,8 @@ bun install                           # install dependencies
 make generate                         # download OpenAPI spec → src/api-types.ts
 make typecheck                        # check TypeScript types
 make build                            # compile to dist/
-bun run src/test.ts                   # smoke test (needs credentials in .env)
+make test                            # run unit tests
+make smoke                           # smoke test (needs credentials in .env)
 ```
 
 Or use `make all` for the full pipeline.

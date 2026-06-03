@@ -9,6 +9,7 @@
     "generate": "bun run scripts/generate.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "test": "bun test",
     "clean": "rm -rf dist",
     "prebuild": "bun run clean",
     "prepublish": "bun run build"
@@ -31,7 +32,6 @@
     "openapi-fetch": "^0.13.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
     "dotenv": "^16.4.0",
     "openapi-typescript": "^7.0.0",
     "typescript": "^5.5.0"
