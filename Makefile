@@ -1,4 +1,4 @@
-.PHONY: all build clean generate help install smoke test typecheck
+.PHONY: all build clean docs generate help install smoke test typecheck
 
 CYAN  := \033[36m
 RESET := \033[0m
@@ -13,6 +13,9 @@ build: clean ## Compile TypeScript → dist/
 
 clean: ## Remove dist/ directory
 	rm -rf dist
+
+docs: ## Generate API documentation (typedoc)
+	bun run docs
 
 generate: ## Download API spec and generate src/api-types.ts
 	bun run generate
