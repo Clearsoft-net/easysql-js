@@ -32,10 +32,12 @@ async function generateClient(url: string) {
   const spec = await response.json();
 
   const methods = extractMethods(spec);
-  const methodCode = methods.map(buildMethod).join(",\n\n");
+  const interfaceCode = methods.map(buildInterface).join("\n");
+  const implCode = methods.map(buildImpl).join(",\n\n");
 
   let template = await Bun.file(import.meta.dirname + "/client.ts.tpl").text();
-  const output = template.replace("{{METHODS}}", indent(methodCode, 4));
+  template = template.replace("{{INTERFACE}}", interfaceCode);
+  template = template.replace("{{IMPLEMENTATION}}", indent(implCode, 4));
 
   await Bun.write("src/client.ts", output);
   console.log("✅ src/client.ts generated successfully.");
@@ -117,9 +119,14 @@ function deriveMethodName(operationId: string, httpMethod: string): string {
   return action.replace(/_([a-z])/g, (_: string, c: string) => c.toUpperCase());
 }
 
-// ─── 4. Build method code ───────────────────────────────────────────
+// ─── 4. Build code strings ────────────────────────────────────────
 
-function buildMethod(m: GeneratedMethod): string {
+function buildInterface(m: GeneratedMethod): string {
+  const params = buildParams(m);
+  return `  /** ${m.httpMethod.toUpperCase()} ${m.path} */\n  ${m.name}(${params}): Promise<any>;`;
+}
+
+function buildImpl(m: GeneratedMethod): string {
   const params = buildParams(m);
   const args = buildArgs(m);
   const methodCall = `client.${m.httpMethod.toUpperCase()}(${m.pathSignature}${args})`;

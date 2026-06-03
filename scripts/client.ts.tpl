@@ -12,7 +12,11 @@ export interface CreateClientOptions {
   fetch?: typeof fetch;
 }
 
-export function createEasySQLClient(options: CreateClientOptions) {
+export interface EasySQLClient {
+{{INTERFACE}}
+}
+
+export function createEasySQLClient(options: CreateClientOptions): EasySQLClient {
   const client = createClient<paths>({
     baseUrl: options.baseUrl,
     fetch: options.fetch,
@@ -22,8 +26,6 @@ export function createEasySQLClient(options: CreateClientOptions) {
   });
 
   return {
-{{METHODS}}
-  };
+{{IMPLEMENTATION}}
+  } as EasySQLClient;
 }
-
-export type EasySQLClient = ReturnType<typeof createEasySQLClient>;
