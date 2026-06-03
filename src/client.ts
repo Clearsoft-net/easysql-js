@@ -22,8 +22,6 @@ export function createEasySQLClient(options: CreateClientOptions) {
   });
 
   return {
-    // ── Auth ──────────────────────────────────────────────────
-
     /** POST /v1/auth/register */
     register(
       body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"],
@@ -68,8 +66,6 @@ export function createEasySQLClient(options: CreateClientOptions) {
     ) {
       return client.POST("/v1/auth/change-password", { body });
     },
-
-    // ── Connectors ────────────────────────────────────────────
 
     /** GET /v1/connectors */
     listConnectors() {
@@ -121,14 +117,10 @@ export function createEasySQLClient(options: CreateClientOptions) {
       return client.POST("/v1/connectors/{connector_id}/sync", { params });
     },
 
-    // ── Dashboard ─────────────────────────────────────────────
-
     /** GET /v1/dashboard/stats */
     dashboardStats() {
       return client.GET("/v1/dashboard/stats");
     },
-
-    // ── Billing ───────────────────────────────────────────────
 
     /** GET /v1/billing/plan */
     getPlan() {
@@ -146,8 +138,6 @@ export function createEasySQLClient(options: CreateClientOptions) {
     portal() {
       return client.POST("/v1/billing/portal");
     },
-
-    // ── Queries ───────────────────────────────────────────────
 
     /** GET /v1/queries */
     listQueries(params?: {
@@ -169,8 +159,6 @@ export function createEasySQLClient(options: CreateClientOptions) {
     }) {
       return client.GET("/v1/queries/{query_id}", { params });
     },
-
-    // ── Health ────────────────────────────────────────────────
 
     /** GET /health */
     health() {
