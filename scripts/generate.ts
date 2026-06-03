@@ -35,7 +35,7 @@ async function generateClient(url: string) {
   const methodCode = methods.map(buildMethod).join(",\n\n");
 
   const template = await Bun.file(
-    import.meta.dirname + "/client.template.ts",
+    import.meta.dirname + "/client.template",
   ).text();
 
   const output = template.replace("{{METHODS}}", indent(methodCode, 4));
