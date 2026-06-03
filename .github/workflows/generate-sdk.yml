@@ -22,13 +22,13 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      - run: bun run generate
+      - run: make generate
         env:
           EASYSQL_API_URL: ${{ vars.EASYSQL_API_URL || 'https://api.easysql.net' }}
 
-      - run: bun run typecheck
+      - run: make typecheck
 
-      - run: bun run build
+      - run: make build
 
       - uses: peter-evans/create-pull-request@v7
         with:
@@ -39,7 +39,7 @@ jobs:
 
             **Spec**: `${{ vars.EASYSQL_API_URL || 'https://api.easysql.net' }}/openapi.json`
 
-            ✅ `bun run typecheck && bun run build` passed.
+            ✅ `make typecheck && make build` passed.
           branch: "auto/generate-sdk"
           delete-branch: true
           labels: "auto-generated"
