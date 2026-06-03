@@ -63,8 +63,8 @@ async function main() {
   }
 
   console.log(`  ✓ Login successful`);
-  console.log(`  Access token : ${token.accessToken.slice(0, 20)}…`);
-  console.log(`  Refresh token: ${token.refreshToken.slice(0, 20)}…`);
+  console.log(`  Access token : ${token.access_token.slice(0, 20)}…`);
+  console.log(`  Refresh token: ${token.refresh_token.slice(0, 20)}…`);
 
   /* ------------------------------------------------------------------ */
   /*  3. Fetch current user                                              */
@@ -74,7 +74,7 @@ async function main() {
 
   const authedClient = createEasySQLClient({
     baseUrl,
-    accessToken: token.accessToken,
+    accessToken: token.access_token,
   });
 
   const { data: user, error: meError } = await authedClient.GET("/v1/auth/me");
