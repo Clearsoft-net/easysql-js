@@ -1,5 +1,5 @@
 import "dotenv/config";
-import openapiTS from "openapi-typescript";
+import openapiTS, { astToString } from "openapi-typescript";
 import { extractMethods } from "./lib/extract";
 import { buildInterface, buildImpl, indent } from "./lib/build";
 import { generateDocs } from "./lib/docs";
@@ -36,12 +36,12 @@ async function retryFetch(
 
 console.log(`🔽 Downloading spec from: ${specUrl}`);
 
-const [typesOutput] = await Promise.all([
+const [typesAst] = await Promise.all([
   openapiTS(specUrl),
   generateClient(specUrl),
 ]);
 
-await Bun.write("src/api-types.ts", typesOutput);
+await Bun.write("src/api-types.ts", astToString(typesAst));
 console.log("✅ src/api-types.ts generated successfully.");
 
 async function generateClient(url: string) {
