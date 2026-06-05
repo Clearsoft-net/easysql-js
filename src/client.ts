@@ -13,6 +13,14 @@ export interface CreateClientOptions {
 }
 
 export interface EasySQLClient {
+  /** GET /v1/api-keys */
+  listApiKeys(): Promise<any>;
+  /** POST /v1/api-keys */
+  createApiKey(body: paths["/v1/api-keys"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** DELETE /v1/api-keys/{key_id}
+   * @example
+   * await client.deleteApiKey({ key_id: "..." }) */
+  deleteApiKey(params: paths["/v1/api-keys/{key_id}"]["delete"]["parameters"]["path"]): Promise<any>;
   /** POST /v1/auth/register */
   register(body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** POST /v1/auth/login */
@@ -89,6 +97,21 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
   });
 
   return {
+    /** GET /v1/api-keys */
+    listApiKeys() {
+      return client.GET("/v1/api-keys");
+    },
+
+    /** POST /v1/api-keys */
+    createApiKey(body: paths["/v1/api-keys"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/api-keys", { body });
+    },
+
+    /** DELETE /v1/api-keys/{key_id} */
+    deleteApiKey(params: paths["/v1/api-keys/{key_id}"]["delete"]["parameters"]["path"]) {
+      return client.DELETE("/v1/api-keys/{key_id}", { params: { path: params } });
+    },
+
     /** POST /v1/auth/register */
     register(body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"]) {
       return client.POST("/v1/auth/register", { body });
