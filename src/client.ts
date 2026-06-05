@@ -13,157 +13,73 @@ export interface CreateClientOptions {
 }
 
 export interface EasySQLClient {
-  /** POST /v1/auth/register
-   * @example
-   * await client.register({ email: "...", password: "...", name: "..." })
-   */
-  register(
-    body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"],
-  ): Promise<any>;
-
-  /** POST /v1/auth/login
-   * @example
-   * await client.login({ email: "...", password: "..." })
-   */
-  login(
-    body: paths["/v1/auth/login"]["post"]["requestBody"]["content"]["application/json"],
-  ): Promise<any>;
-
-  /** POST /v1/auth/refresh
-   * @example
-   * await client.refresh({ refresh_token: "..." })
-   */
-  refresh(
-    body: paths["/v1/auth/refresh"]["post"]["requestBody"]["content"]["application/json"],
-  ): Promise<any>;
-
+  /** POST /v1/auth/register */
+  register(body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** POST /v1/auth/login */
+  login(body: paths["/v1/auth/login"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** POST /v1/auth/refresh */
+  refresh(body: paths["/v1/auth/refresh"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** GET /v1/auth/me */
   me(): Promise<any>;
-
+  /** PATCH /v1/auth/me */
+  updateMe(body: paths["/v1/auth/me"]["patch"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** DELETE /v1/auth/me */
   deleteMe(): Promise<any>;
-
-  /** PATCH /v1/auth/me
-   * @example
-   * await client.updateMe({ name: "...", locale: "..." })
-   */
-  updateMe(
-    body: paths["/v1/auth/me"]["patch"]["requestBody"]["content"]["application/json"],
-  ): Promise<any>;
-
-  /** POST /v1/auth/change-password
-   * @example
-   * await client.changePassword({ current_password: "...", new_password: "..." })
-   */
-  changePassword(
-    body: paths["/v1/auth/change-password"]["post"]["requestBody"]["content"]["application/json"],
-  ): Promise<any>;
-
+  /** POST /v1/auth/change-password */
+  changePassword(body: paths["/v1/auth/change-password"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** GET /v1/connectors */
   listConnectors(): Promise<any>;
-
-  /** POST /v1/connectors
-   * @example
-   * await client.createConnector({ type: "...", name: "...", config: { ... } })
-   */
-  createConnector(
-    body: paths["/v1/connectors"]["post"]["requestBody"]["content"]["application/json"],
-  ): Promise<any>;
-
-  /** POST /v1/connectors/test
-   * @example
-   * await client.testConnector({ type: "...", config: { ... } })
-   */
-  testConnector(
-    body: paths["/v1/connectors/test"]["post"]["requestBody"]["content"]["application/json"],
-  ): Promise<any>;
-
+  /** POST /v1/connectors */
+  createConnector(body: paths["/v1/connectors"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** POST /v1/connectors/test */
+  testConnector(body: paths["/v1/connectors/test"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** GET /v1/connectors/{connector_id}
    * @example
-   * await client.getConnector({ connector_id: "..." })
-   */
-  getConnector(
-    params: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"],
-  ): Promise<any>;
-
-  /** DELETE /v1/connectors/{connector_id}
-   * @example
-   * await client.deleteConnector({ connector_id: "..." })
-   */
-  deleteConnector(
-    params: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"],
-  ): Promise<any>;
-
+   * await client.getConnector({ connector_id: "..." }) */
+  getConnector(params: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"]): Promise<any>;
   /** PATCH /v1/connectors/{connector_id}
    * @example
-   * await client.updateConnector({ name: "..." }, { connector_id: "..." })
-   */
-  updateConnector(
-    body: paths["/v1/connectors/{connector_id}"]["patch"]["requestBody"]["content"]["application/json"],
-    params: {
-      path: paths["/v1/connectors/{connector_id}"]["patch"]["parameters"]["path"];
-    },
-  ): Promise<any>;
-
+   * await client.updateConnector({ connector_id: "..." }) */
+  updateConnector(body: paths["/v1/connectors/{connector_id}"]["patch"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}"]["patch"]["parameters"]["path"] }): Promise<any>;
+  /** DELETE /v1/connectors/{connector_id}
+   * @example
+   * await client.deleteConnector({ connector_id: "..." }) */
+  deleteConnector(params: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"]): Promise<any>;
   /** POST /v1/connectors/{connector_id}/sync
    * @example
-   * await client.syncConnector({ connector_id: "..." })
-   */
-  syncConnector(
-    params: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"],
-  ): Promise<any>;
-
+   * await client.syncConnector({ connector_id: "..." }) */
+  syncConnector(params: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"]): Promise<any>;
+  /** GET /v1/connectors/{connector_id}/schema
+   * @example
+   * await client.getConnectorSchema({ connector_id: "..." }) */
+  getConnectorSchema(params: paths["/v1/connectors/{connector_id}/schema"]["get"]["parameters"]["path"]): Promise<any>;
   /** GET /v1/dashboard/stats */
   dashboardStats(): Promise<any>;
-
   /** GET /v1/billing/plan */
   getPlan(): Promise<any>;
-
   /** POST /v1/billing/checkout
    * @example
-   * await client.checkout({ price_id: "..." })
-   */
-  checkout(
-    params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"],
-  ): Promise<any>;
-
+   * await client.checkout({ price_id: 1 }) */
+  checkout(params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"]): Promise<any>;
   /** POST /v1/billing/portal */
   portal(): Promise<any>;
-
   /** GET /v1/queries
    * @example
-   * await client.listQueries({ page: 1, per_page: 10 })
-   */
-  listQueries(
-    params: paths["/v1/queries"]["get"]["parameters"]["query"],
-  ): Promise<any>;
-
-  /** POST /v1/queries
-   * @example
-   * await client.createQuery({ connector_id: "...", question: "..." })
-   */
-  createQuery(
-    body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"],
-  ): Promise<any>;
-
+   * await client.listQueries({ page: 1, per_page: 1 }) */
+  listQueries(params: paths["/v1/queries"]["get"]["parameters"]["query"]): Promise<any>;
+  /** POST /v1/queries */
+  createQuery(body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** GET /v1/queries/{query_id}
    * @example
-   * await client.getQuery({ query_id: "..." })
-   */
-  getQuery(
-    params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"],
-  ): Promise<any>;
-
+   * await client.getQuery({ query_id: "..." }) */
+  getQuery(params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"]): Promise<any>;
   /** GET /health */
-  health(): Promise<any>;
-
+  healthHealth(): Promise<any>;
   /** GET /v1/health */
-  healthV1(): Promise<any>;
+  health(): Promise<any>;
 }
 
-export function createEasySQLClient(
-  options: CreateClientOptions,
-): EasySQLClient {
+export function createEasySQLClient(options: CreateClientOptions): EasySQLClient {
   const client = createClient<paths>({
     baseUrl: options.baseUrl,
     fetch: options.fetch,
@@ -174,23 +90,17 @@ export function createEasySQLClient(
 
   return {
     /** POST /v1/auth/register */
-    register(
-      body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"],
-    ) {
+    register(body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"]) {
       return client.POST("/v1/auth/register", { body });
     },
 
     /** POST /v1/auth/login */
-    login(
-      body: paths["/v1/auth/login"]["post"]["requestBody"]["content"]["application/json"],
-    ) {
+    login(body: paths["/v1/auth/login"]["post"]["requestBody"]["content"]["application/json"]) {
       return client.POST("/v1/auth/login", { body });
     },
 
     /** POST /v1/auth/refresh */
-    refresh(
-      body: paths["/v1/auth/refresh"]["post"]["requestBody"]["content"]["application/json"],
-    ) {
+    refresh(body: paths["/v1/auth/refresh"]["post"]["requestBody"]["content"]["application/json"]) {
       return client.POST("/v1/auth/refresh", { body });
     },
 
@@ -199,22 +109,18 @@ export function createEasySQLClient(
       return client.GET("/v1/auth/me");
     },
 
+    /** PATCH /v1/auth/me */
+    updateMe(body: paths["/v1/auth/me"]["patch"]["requestBody"]["content"]["application/json"]) {
+      return client.PATCH("/v1/auth/me", { body });
+    },
+
     /** DELETE /v1/auth/me */
     deleteMe() {
       return client.DELETE("/v1/auth/me");
     },
 
-    /** PATCH /v1/auth/me */
-    updateMe(
-      body: paths["/v1/auth/me"]["patch"]["requestBody"]["content"]["application/json"],
-    ) {
-      return client.PATCH("/v1/auth/me", { body });
-    },
-
     /** POST /v1/auth/change-password */
-    changePassword(
-      body: paths["/v1/auth/change-password"]["post"]["requestBody"]["content"]["application/json"],
-    ) {
+    changePassword(body: paths["/v1/auth/change-password"]["post"]["requestBody"]["content"]["application/json"]) {
       return client.POST("/v1/auth/change-password", { body });
     },
 
@@ -224,54 +130,38 @@ export function createEasySQLClient(
     },
 
     /** POST /v1/connectors */
-    createConnector(
-      body: paths["/v1/connectors"]["post"]["requestBody"]["content"]["application/json"],
-    ) {
+    createConnector(body: paths["/v1/connectors"]["post"]["requestBody"]["content"]["application/json"]) {
       return client.POST("/v1/connectors", { body });
     },
 
     /** POST /v1/connectors/test */
-    testConnector(
-      body: paths["/v1/connectors/test"]["post"]["requestBody"]["content"]["application/json"],
-    ) {
+    testConnector(body: paths["/v1/connectors/test"]["post"]["requestBody"]["content"]["application/json"]) {
       return client.POST("/v1/connectors/test", { body });
     },
 
     /** GET /v1/connectors/{connector_id} */
-    getConnector(
-      params: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"],
-    ) {
-      return client.GET("/v1/connectors/{connector_id}", {
-        params: { path: params },
-      });
-    },
-
-    /** DELETE /v1/connectors/{connector_id} */
-    deleteConnector(
-      params: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"],
-    ) {
-      return client.DELETE("/v1/connectors/{connector_id}", {
-        params: { path: params },
-      });
+    getConnector(params: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/connectors/{connector_id}", { params: { path: params } });
     },
 
     /** PATCH /v1/connectors/{connector_id} */
-    updateConnector(
-      body: paths["/v1/connectors/{connector_id}"]["patch"]["requestBody"]["content"]["application/json"],
-      params: {
-        path: paths["/v1/connectors/{connector_id}"]["patch"]["parameters"]["path"];
-      },
-    ) {
+    updateConnector(body: paths["/v1/connectors/{connector_id}"]["patch"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}"]["patch"]["parameters"]["path"] }) {
       return client.PATCH("/v1/connectors/{connector_id}", { body, params });
     },
 
+    /** DELETE /v1/connectors/{connector_id} */
+    deleteConnector(params: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"]) {
+      return client.DELETE("/v1/connectors/{connector_id}", { params: { path: params } });
+    },
+
     /** POST /v1/connectors/{connector_id}/sync */
-    syncConnector(
-      params: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"],
-    ) {
-      return client.POST("/v1/connectors/{connector_id}/sync", {
-        params: { path: params },
-      });
+    syncConnector(params: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"]) {
+      return client.POST("/v1/connectors/{connector_id}/sync", { params: { path: params } });
+    },
+
+    /** GET /v1/connectors/{connector_id}/schema */
+    getConnectorSchema(params: paths["/v1/connectors/{connector_id}/schema"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/connectors/{connector_id}/schema", { params: { path: params } });
     },
 
     /** GET /v1/dashboard/stats */
@@ -285,9 +175,7 @@ export function createEasySQLClient(
     },
 
     /** POST /v1/billing/checkout */
-    checkout(
-      params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"],
-    ) {
+    checkout(params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"]) {
       return client.POST("/v1/billing/checkout", { params: { query: params } });
     },
 
@@ -302,27 +190,23 @@ export function createEasySQLClient(
     },
 
     /** POST /v1/queries */
-    createQuery(
-      body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"],
-    ) {
+    createQuery(body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"]) {
       return client.POST("/v1/queries", { body });
     },
 
     /** GET /v1/queries/{query_id} */
-    getQuery(
-      params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"],
-    ) {
+    getQuery(params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"]) {
       return client.GET("/v1/queries/{query_id}", { params: { path: params } });
     },
 
     /** GET /health */
-    health() {
+    healthHealth() {
       return client.GET("/health");
     },
 
     /** GET /v1/health */
-    healthV1() {
+    health() {
       return client.GET("/v1/health");
-    },
+    }
   } as EasySQLClient;
 }
