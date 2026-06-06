@@ -61,6 +61,14 @@ export interface EasySQLClient {
    * @example
    * await client.getConnectorSchema({ connector_id: "..." }) */
   getConnectorSchema(params: paths["/v1/connectors/{connector_id}/schema"]["get"]["parameters"]["path"]): Promise<any>;
+  /** GET /v1/connectors/{connector_id}/suggestions
+   * @example
+   * await client.getSuggestions({ connector_id: "..." }) */
+  getSuggestions(params: paths["/v1/connectors/{connector_id}/suggestions"]["get"]["parameters"]["path"]): Promise<any>;
+  /** POST /v1/connectors/{connector_id}/autocomplete
+   * @example
+   * await client.autocomplete({ connector_id: "..." }) */
+  autocomplete(body: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["parameters"]["path"] }): Promise<any>;
   /** GET /v1/dashboard/stats */
   dashboardStats(): Promise<any>;
   /** GET /v1/billing/plan */
@@ -185,6 +193,16 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     /** GET /v1/connectors/{connector_id}/schema */
     getConnectorSchema(params: paths["/v1/connectors/{connector_id}/schema"]["get"]["parameters"]["path"]) {
       return client.GET("/v1/connectors/{connector_id}/schema", { params: { path: params } });
+    },
+
+    /** GET /v1/connectors/{connector_id}/suggestions */
+    getSuggestions(params: paths["/v1/connectors/{connector_id}/suggestions"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/connectors/{connector_id}/suggestions", { params: { path: params } });
+    },
+
+    /** POST /v1/connectors/{connector_id}/autocomplete */
+    autocomplete(body: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["parameters"]["path"] }) {
+      return client.POST("/v1/connectors/{connector_id}/autocomplete", { body, params });
     },
 
     /** GET /v1/dashboard/stats */

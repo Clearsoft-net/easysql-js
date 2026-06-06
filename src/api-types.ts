@@ -220,6 +220,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/connectors/{connector_id}/suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Suggestions
+         * @description Generate 5 suggested questions based on the connector's schema.
+         *
+         *     Requires the connector to have been synced first via POST /v1/connectors/{id}/sync.
+         */
+        get: operations["get_suggestions_v1_connectors__connector_id__suggestions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connectors/{connector_id}/autocomplete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Autocomplete
+         * @description Autocomplete a partial question based on the connector's schema.
+         */
+        post: operations["autocomplete_v1_connectors__connector_id__autocomplete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/dashboard/stats": {
         parameters: {
             query?: never;
@@ -408,6 +450,16 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** AutocompleteRequest */
+        AutocompleteRequest: {
+            /** Question */
+            question: string;
+        };
+        /** AutocompleteResponse */
+        AutocompleteResponse: {
+            /** Suggestions */
+            suggestions: string[];
         };
         /** ChangePasswordRequest */
         ChangePasswordRequest: {
@@ -668,6 +720,11 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** SuggestionsResponse */
+        SuggestionsResponse: {
+            /** Suggestions */
+            suggestions: string[];
         };
         /** TableSchema */
         TableSchema: {
@@ -1280,6 +1337,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConnectorSchemaResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_suggestions_v1_connectors__connector_id__suggestions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                connector_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuggestionsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    autocomplete_v1_connectors__connector_id__autocomplete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                connector_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AutocompleteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutocompleteResponse"];
                 };
             };
             /** @description Validation Error */
