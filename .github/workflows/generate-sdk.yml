@@ -34,8 +34,8 @@ jobs:
 
       - uses: peter-evans/create-pull-request@v7
         with:
-          commit-message: "chore: regenerate API types from OpenAPI spec"
-          title: "🤖 Regenerate API types"
+          commit-message: "feat(sdk): regenerate API types from OpenAPI spec"
+          title: "feat(sdk): regenerate API types from OpenAPI spec"
           body: |
             Types auto-generated via `openapi-typescript`.
 
