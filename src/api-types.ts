@@ -431,6 +431,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ActivePlan */
+        ActivePlan: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Max Queries Daily */
+            max_queries_daily: number;
+            /** Max Queries Weekly */
+            max_queries_weekly: number;
+            /** Max Queries Monthly */
+            max_queries_monthly: number;
+        };
         /** ApiKeyCreate */
         ApiKeyCreate: {
             /** Name */
@@ -705,13 +718,12 @@ export interface components {
             price: number;
             /** Max Connections */
             max_connections: number;
+            /** Max Queries Daily */
+            max_queries_daily: number;
+            /** Max Queries Weekly */
+            max_queries_weekly: number;
             /** Max Queries Monthly */
             max_queries_monthly: number;
-            /**
-             * Is Active
-             * @default false
-             */
-            is_active: boolean;
         };
         /** PortalResponse */
         PortalResponse: {
@@ -835,6 +847,26 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+        };
+        /** UserMeResponse */
+        UserMeResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Email */
+            email: string;
+            /** Name */
+            name: string;
+            /** Locale */
+            locale: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            active_plan?: components["schemas"]["ActivePlan"] | null;
         };
         /** UserResponse */
         UserResponse: {
@@ -1080,7 +1112,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponse"];
+                    "application/json": components["schemas"]["UserMeResponse"];
                 };
             };
         };
