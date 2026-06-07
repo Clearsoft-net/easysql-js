@@ -79,6 +79,18 @@ export interface EasySQLClient {
   checkout(params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"]): Promise<any>;
   /** POST /v1/billing/portal */
   portal(): Promise<any>;
+  /** GET /v1/feedbacks/{query_id}
+   * @example
+   * await client.getFeedback({ query_id: "..." }) */
+  getFeedback(params: paths["/v1/feedbacks/{query_id}"]["get"]["parameters"]["path"]): Promise<any>;
+  /** PUT /v1/feedbacks/{query_id}
+   * @example
+   * await client.upsertFeedback({ query_id: "..." }) */
+  upsertFeedback(body: paths["/v1/feedbacks/{query_id}"]["put"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/feedbacks/{query_id}"]["put"]["parameters"]["path"] }): Promise<any>;
+  /** DELETE /v1/feedbacks/{query_id}
+   * @example
+   * await client.deleteFeedback({ query_id: "..." }) */
+  deleteFeedback(params: paths["/v1/feedbacks/{query_id}"]["delete"]["parameters"]["path"]): Promise<any>;
   /** GET /v1/queries
    * @example
    * await client.listQueries({ page: 1, per_page: 1 }) */
@@ -223,6 +235,21 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     /** POST /v1/billing/portal */
     portal() {
       return client.POST("/v1/billing/portal");
+    },
+
+    /** GET /v1/feedbacks/{query_id} */
+    getFeedback(params: paths["/v1/feedbacks/{query_id}"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/feedbacks/{query_id}", { params: { path: params } });
+    },
+
+    /** PUT /v1/feedbacks/{query_id} */
+    upsertFeedback(body: paths["/v1/feedbacks/{query_id}"]["put"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/feedbacks/{query_id}"]["put"]["parameters"]["path"] }) {
+      return client.PUT("/v1/feedbacks/{query_id}", { body, params });
+    },
+
+    /** DELETE /v1/feedbacks/{query_id} */
+    deleteFeedback(params: paths["/v1/feedbacks/{query_id}"]["delete"]["parameters"]["path"]) {
+      return client.DELETE("/v1/feedbacks/{query_id}", { params: { path: params } });
     },
 
     /** GET /v1/queries */

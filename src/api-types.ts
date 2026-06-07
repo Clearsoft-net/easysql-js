@@ -330,6 +330,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/feedbacks/{query_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Feedback
+         * @description Get feedback for a query.
+         */
+        get: operations["get_feedback_v1_feedbacks__query_id__get"];
+        /**
+         * Upsert Feedback
+         * @description Create or update a feedback for a query. Only one feedback per query per user.
+         */
+        put: operations["upsert_feedback_v1_feedbacks__query_id__put"];
+        post?: never;
+        /**
+         * Delete Feedback
+         * @description Delete feedback for a query.
+         */
+        delete: operations["delete_feedback_v1_feedbacks__query_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/queries": {
         parameters: {
             query?: never;
@@ -607,6 +635,40 @@ export interface components {
              * Format: date-time
              */
             fetched_at: string;
+        };
+        /** FeedbackCreate */
+        FeedbackCreate: {
+            /** Positive */
+            positive: boolean;
+            /** Comment */
+            comment?: string | null;
+        };
+        /** FeedbackResponse */
+        FeedbackResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Query Id
+             * Format: uuid
+             */
+            query_id: string;
+            /** Positive */
+            positive: boolean;
+            /** Comment */
+            comment: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** ForeignKeySchema */
         ForeignKeySchema: {
@@ -1503,6 +1565,101 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PortalResponse"];
+                };
+            };
+        };
+    };
+    get_feedback_v1_feedbacks__query_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                query_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upsert_feedback_v1_feedbacks__query_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                query_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FeedbackCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_feedback_v1_feedbacks__query_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                query_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
