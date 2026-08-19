@@ -578,6 +578,8 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Schema Only */
+            schema_only?: boolean;
         };
         /** ConnectorSchemaResponse */
         ConnectorSchemaResponse: {
