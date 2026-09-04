@@ -44,3 +44,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GIT_AUTHOR_NAME: 'Clearsoft Bot'
+          GIT_AUTHOR_EMAIL: 'support@clearsoft.net'
+          GIT_COMMITTER_NAME: 'Clearsoft Bot'
+          GIT_COMMITTER_EMAIL: 'support@clearsoft.net'
