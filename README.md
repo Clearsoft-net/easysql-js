@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@clearsoft/easysql-sdk"><img src="https://img.shields.io/npm/v/@clearsoft/easysql-sdk?color=F97316&style=flat-square" alt="NPM Version"></a>
   <a href="https://github.com/Clearsoft-net/easysql-js/actions"><img src="https://img.shields.io/github/actions/workflow/status/Clearsoft-net/easysql-js/release.yml?branch=main&style=flat-square" alt="CI Status"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
+  <a href="https://github.com/Clearsoft-net/easysql-js/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
   <a href="https://easysql.net"><img src="https://img.shields.io/badge/Product-easysql.net-F97316?style=flat-square" alt="Website"></a>
   <a href="https://clearsoft.net"><img src="https://img.shields.io/badge/Company-clearsoft.net-0F2B3D?style=flat-square" alt="Company"></a>
 </p>
@@ -139,7 +139,9 @@ const { data: stats } = await api.dashboardStats();
 
 ## Development & Contributing
 
-Contributions are welcome! To run tests and build locally:
+Contributions are welcome! Please read our **[Contributing Guidelines](./CONTRIBUTING.md)** for details on the development workflow, testing, and pull request process.
+
+To run tests and build locally:
 
 ```bash
 cp .env.example .env                 # configure API URL

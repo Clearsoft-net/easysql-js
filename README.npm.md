@@ -137,7 +137,9 @@ const { data: stats } = await api.dashboardStats();
 
 ## Development & Contributing
 
-Contributions are welcome! To run tests and build locally:
+Contributions are welcome! Please read our **[Contributing Guidelines](https://github.com/Clearsoft-net/easysql-js/blob/main/CONTRIBUTING.md)** for details on the development workflow, testing, and pull request process.
+
+To run tests and build locally:
 
 ```bash
 cp .env.example .env                 # configure API URL
