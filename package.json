@@ -1,7 +1,7 @@
 {
   "name": "@clearsoft/easysql-sdk",
   "version": "0.2.0",
-  "description": "EasySQL API TypeScript SDK — Ask questions in natural language to your MySQL, MariaDB or PostgreSQL databases.",
+  "description": "EasySQL API JavaScript/TypeScript SDK — Ask questions in natural language to your MySQL, MariaDB or PostgreSQL databases.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,10 +9,10 @@
   "homepage": "https://easysql.net",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Clearsoft-net/easysql-sdk-ts.git"
+    "url": "git+https://github.com/Clearsoft-net/easysql-js.git"
   },
   "bugs": {
-    "url": "https://github.com/Clearsoft-net/easysql-sdk-ts/issues"
+    "url": "https://github.com/Clearsoft-net/easysql-js/issues"
   },
   "scripts": {
     "generate": "bun run scripts/generate.ts",
@@ -39,6 +39,7 @@
     "database",
     "api",
     "sdk",
+    "javascript",
     "typescript"
   ],
   "license": "MIT",

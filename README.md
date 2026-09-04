@@ -6,15 +6,15 @@
   </picture>
 </p>
 
-<h1 align="center">EasySQL TypeScript SDK</h1>
+<h1 align="center">EasySQL JavaScript & TypeScript SDK</h1>
 
 <p align="center">
-  <strong>Official TypeScript/JavaScript SDK for the <a href="https://easysql.net">EasySQL API</a> · A <a href="https://clearsoft.net">Clearsoft</a> Product</strong>
+  <strong>Official JavaScript / TypeScript SDK for the <a href="https://easysql.net">EasySQL API</a> · A <a href="https://clearsoft.net">Clearsoft</a> Product</strong>
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@clearsoft/easysql-sdk"><img src="https://img.shields.io/npm/v/@clearsoft/easysql-sdk?color=F97316&style=flat-square" alt="NPM Version"></a>
-  <a href="https://github.com/Clearsoft-net/easysql-sdk-ts/actions"><img src="https://img.shields.io/github/actions/workflow/status/Clearsoft-net/easysql-sdk-ts/release.yml?branch=main&style=flat-square" alt="CI Status"></a>
+  <a href="https://github.com/Clearsoft-net/easysql-js/actions"><img src="https://img.shields.io/github/actions/workflow/status/Clearsoft-net/easysql-js/release.yml?branch=main&style=flat-square" alt="CI Status"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
   <a href="https://easysql.net"><img src="https://img.shields.io/badge/Product-easysql.net-F97316?style=flat-square" alt="Website"></a>
   <a href="https://clearsoft.net"><img src="https://img.shields.io/badge/Company-clearsoft.net-0F2B3D?style=flat-square" alt="Company"></a>
@@ -22,7 +22,7 @@
 
 ---
 
-Ask questions in natural language to your MySQL, MariaDB, or PostgreSQL databases directly from your TypeScript and Node.js/Bun applications.
+Ask questions in natural language to your MySQL, MariaDB, or PostgreSQL databases directly from your JavaScript and TypeScript applications (Node.js, Bun, Deno, and modern browser runtimes).
 
 ## Installation
 
