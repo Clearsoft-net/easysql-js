@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/Clearsoft-net/easysql-js/compare/v1.0.0...v1.0.1) (2026-09-04)
+
+
+### Bug Fixes
+
+* **docs:** use light logo with forced background for npm registry ([0890dfd](https://github.com/Clearsoft-net/easysql-js/commit/0890dfd9a3e8e8225561aac61fe842b1a95a1db3))
+
 # 1.0.0 (2026-09-04)
 
 
