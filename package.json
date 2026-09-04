@@ -5,6 +5,15 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "Clearsoft <contact@clearsoft.net>",
+  "homepage": "https://easysql.net",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Clearsoft-net/easysql-sdk-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Clearsoft-net/easysql-sdk-ts/issues"
+  },
   "scripts": {
     "generate": "bun run scripts/generate.ts",
     "build": "tsc",
@@ -23,10 +32,14 @@
   },
   "keywords": [
     "easysql",
+    "clearsoft",
     "sql",
     "nlp",
+    "ai",
+    "database",
     "api",
-    "sdk"
+    "sdk",
+    "typescript"
   ],
   "license": "MIT",
   "dependencies": {
