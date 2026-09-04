@@ -1,3 +1,19 @@
+# 1.0.0 (2026-09-04)
+
+
+### Bug Fixes
+
+* **docs:** use light logo with forced background for npm registry ([c46976a](https://github.com/Clearsoft-net/easysql-js/commit/c46976ab0e5e4ceabfec9c39b87b6d7243c36c18))
+* regenerate API types using astToString for openapi-typescript v7 ([d64c3a8](https://github.com/Clearsoft-net/easysql-js/commit/d64c3a818da46ae327b4069fffbca52fdcb6f9db))
+
+
+### Features
+
+* initial project scaffold ([01157a8](https://github.com/Clearsoft-net/easysql-js/commit/01157a851bacc364c7dcd5a0283ccee12af7bc6a))
+* **sdk:** add schema_only field to ConnectorResponse type ([55ade34](https://github.com/Clearsoft-net/easysql-js/commit/55ade34af95abf53068adf112ed734ec6f6ea1b6))
+* **sdk:** regenerate API types from OpenAPI spec ([4a1262b](https://github.com/Clearsoft-net/easysql-js/commit/4a1262b1e06c5b70dc8077b2021219312521485b))
+* **sdk:** regenerate API types from OpenAPI spec ([f24b931](https://github.com/Clearsoft-net/easysql-js/commit/f24b9315aba59e40d8ae3906d58ffa807a4e1e10))
+
 ## [1.0.1](https://github.com/Clearsoft-net/easysql-js/compare/v1.0.0...v1.0.1) (2026-09-04)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@clearsoft/easysql-sdk",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "EasySQL API JavaScript/TypeScript SDK — Ask questions in natural language to your MySQL, MariaDB or PostgreSQL databases.",
   "type": "module",
   "main": "dist/index.js",
