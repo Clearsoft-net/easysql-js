@@ -1,3 +1,18 @@
+# 1.0.0 (2026-09-04)
+
+
+### Bug Fixes
+
+* regenerate API types using astToString for openapi-typescript v7 ([3fb60a1](https://github.com/Clearsoft-net/easysql-js/commit/3fb60a193ff60529660fa214a4d2defcb5bc6d14))
+
+
+### Features
+
+* initial project scaffold ([01157a8](https://github.com/Clearsoft-net/easysql-js/commit/01157a851bacc364c7dcd5a0283ccee12af7bc6a))
+* **sdk:** add schema_only field to ConnectorResponse type ([c1ce773](https://github.com/Clearsoft-net/easysql-js/commit/c1ce773dcb70cb08ec759daca8496d5ae88c3a19))
+* **sdk:** regenerate API types from OpenAPI spec ([d6a4427](https://github.com/Clearsoft-net/easysql-js/commit/d6a442706a849d1e9b4c091157a4c82a1a407814))
+* **sdk:** regenerate API types from OpenAPI spec ([5deb849](https://github.com/Clearsoft-net/easysql-js/commit/5deb84950a36baa521d43d85a3ad44cb156ddf03))
+
 # Changelog
 
 ## [0.2.0] — 2026-06-03
