@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/Clearsoft-net/easysql-js/compare/v1.0.1...v1.1.0) (2026-09-07)
+
+
+### Features
+
+* **sdk:** regenerate API types from OpenAPI spec ([#8](https://github.com/Clearsoft-net/easysql-js/issues/8)) ([c43b1b4](https://github.com/Clearsoft-net/easysql-js/commit/c43b1b4db414826b094d2534acf9c13df1bf3c22))
+
 # 1.0.0 (2026-09-04)
 
 
