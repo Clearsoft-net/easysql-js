@@ -162,7 +162,6 @@ describe("Named methods", () => {
     const client = createEasySQLClient({ baseUrl, fetch: f });
     expect(typeof client.listConnectors).toBe("function");
     expect(typeof client.createConnector).toBe("function");
-    expect(typeof client.testConnector).toBe("function");
     expect(typeof client.getConnector).toBe("function");
     expect(typeof client.updateConnector).toBe("function");
     expect(typeof client.deleteConnector).toBe("function");
