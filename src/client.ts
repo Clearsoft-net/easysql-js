@@ -13,14 +13,10 @@ export interface CreateClientOptions {
 }
 
 export interface EasySQLClient {
-  /** GET /v1/api-keys */
-  listApiKeys(): Promise<any>;
-  /** POST /v1/api-keys */
-  createApiKey(body: paths["/v1/api-keys"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
-  /** DELETE /v1/api-keys/{key_id}
-   * @example
-   * await client.deleteApiKey({ key_id: "..." }) */
-  deleteApiKey(params: paths["/v1/api-keys/{key_id}"]["delete"]["parameters"]["path"]): Promise<any>;
+  /** GET /health */
+  healthHealth(): Promise<any>;
+  /** GET /v1/health */
+  health(): Promise<any>;
   /** POST /v1/auth/register */
   register(body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** POST /v1/auth/login */
@@ -35,40 +31,66 @@ export interface EasySQLClient {
   deleteMe(): Promise<any>;
   /** POST /v1/auth/change-password */
   changePassword(body: paths["/v1/auth/change-password"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** POST /v1/auth/verify-email
+   * @example
+   * await client.verifyEmail({ token: "..." }) */
+  verifyEmail(body: paths["/v1/auth/verify-email"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** POST /v1/auth/resend-verification
+   * @example
+   * await client.resendVerification({ email: "..." }) */
+  resendVerification(body: paths["/v1/auth/resend-verification"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** POST /v1/auth/forgot-password
+   * @example
+   * await client.forgotPassword({ email: "..." }) */
+  forgotPassword(body: paths["/v1/auth/forgot-password"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** POST /v1/auth/reset-password
+   * @example
+   * await client.resetPassword({ token: "...", new_password: "..." }) */
+  resetPassword(body: paths["/v1/auth/reset-password"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** GET /v1/api-keys */
+  listApiKeys(): Promise<any>;
+  /** POST /v1/api-keys */
+  createApiKey(body: paths["/v1/api-keys"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** DELETE /v1/api-keys/{key_id}
+   * @example
+   * await client.deleteApiKey({ key_id: "..." }) */
+  deleteApiKey(params: paths["/v1/api-keys/{key_id}"]["delete"]["parameters"]["path"]): Promise<any>;
   /** GET /v1/connectors */
   listConnectors(): Promise<any>;
   /** POST /v1/connectors */
   createConnector(body: paths["/v1/connectors"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
-  /** POST /v1/connectors/test */
-  testConnector(body: paths["/v1/connectors/test"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
-  /** GET /v1/connectors/{connector_id}
-   * @example
-   * await client.getConnector({ connector_id: "..." }) */
+  /** GET /v1/connectors/{connector_id} */
   getConnector(params: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"]): Promise<any>;
-  /** PATCH /v1/connectors/{connector_id}
-   * @example
-   * await client.updateConnector({ connector_id: "..." }) */
+  /** PATCH /v1/connectors/{connector_id} */
   updateConnector(body: paths["/v1/connectors/{connector_id}"]["patch"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}"]["patch"]["parameters"]["path"] }): Promise<any>;
-  /** DELETE /v1/connectors/{connector_id}
-   * @example
-   * await client.deleteConnector({ connector_id: "..." }) */
+  /** DELETE /v1/connectors/{connector_id} */
   deleteConnector(params: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"]): Promise<any>;
-  /** POST /v1/connectors/{connector_id}/sync
-   * @example
-   * await client.syncConnector({ connector_id: "..." }) */
-  syncConnector(params: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"]): Promise<any>;
-  /** GET /v1/connectors/{connector_id}/schema
-   * @example
-   * await client.getConnectorSchema({ connector_id: "..." }) */
+  /** POST /v1/connectors/{connector_id}/sync */
+  syncConnector(body: paths["/v1/connectors/{connector_id}/sync"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"] }): Promise<any>;
+  /** GET /v1/connectors/{connector_id}/schema */
   getConnectorSchema(params: paths["/v1/connectors/{connector_id}/schema"]["get"]["parameters"]["path"]): Promise<any>;
-  /** GET /v1/connectors/{connector_id}/suggestions
-   * @example
-   * await client.getSuggestions({ connector_id: "..." }) */
+  /** GET /v1/connectors/{connector_id}/suggestions */
   getSuggestions(params: paths["/v1/connectors/{connector_id}/suggestions"]["get"]["parameters"]["path"]): Promise<any>;
-  /** POST /v1/connectors/{connector_id}/autocomplete
-   * @example
-   * await client.autocomplete({ connector_id: "..." }) */
+  /** POST /v1/connectors/{connector_id}/autocomplete */
   autocomplete(body: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["parameters"]["path"] }): Promise<any>;
+  /** GET /v1/queries
+   * @example
+   * await client.listQueries({ page: 1, per_page: 1 }) */
+  listQueries(params: paths["/v1/queries"]["get"]["parameters"]["query"]): Promise<any>;
+  /** POST /v1/queries */
+  createQuery(body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** GET /v1/queries/{query_id} */
+  getQuery(params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"]): Promise<any>;
+  /** POST /v1/queries/{query_id}/answer */
+  answerQuery(body: paths["/v1/queries/{query_id}/answer"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/queries/{query_id}/answer"]["post"]["parameters"]["path"] }): Promise<any>;
+  /** GET /v1/queries/{query_id}/stream */
+  streamQuery(params: paths["/v1/queries/{query_id}/stream"]["get"]["parameters"]["path"]): Promise<any>;
+  /** GET /v1/feedbacks/{query_id} */
+  getFeedback(params: paths["/v1/feedbacks/{query_id}"]["get"]["parameters"]["path"]): Promise<any>;
+  /** PUT /v1/feedbacks/{query_id} */
+  upsertFeedback(body: paths["/v1/feedbacks/{query_id}"]["put"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/feedbacks/{query_id}"]["put"]["parameters"]["path"] }): Promise<any>;
+  /** DELETE /v1/feedbacks/{query_id} */
+  deleteFeedback(params: paths["/v1/feedbacks/{query_id}"]["delete"]["parameters"]["path"]): Promise<any>;
   /** GET /v1/dashboard/stats */
   dashboardStats(): Promise<any>;
   /** GET /v1/billing/plan */
@@ -79,32 +101,16 @@ export interface EasySQLClient {
   checkout(params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"]): Promise<any>;
   /** POST /v1/billing/portal */
   portal(): Promise<any>;
-  /** GET /v1/feedbacks/{query_id}
+  /** POST /v1/billing/webhook */
+  webhook(body: paths["/v1/billing/webhook"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** POST /v1/internal/email/test
    * @example
-   * await client.getFeedback({ query_id: "..." }) */
-  getFeedback(params: paths["/v1/feedbacks/{query_id}"]["get"]["parameters"]["path"]): Promise<any>;
-  /** PUT /v1/feedbacks/{query_id}
+   * await client.testInternalEmail({ template: "...", to: "...", name: "...", token: "..." }) */
+  testInternalEmail(body: paths["/v1/internal/email/test"]["post"]["requestBody"]["content"]["application/json"], params: { query: paths["/v1/internal/email/test"]["post"]["parameters"]["query"] }): Promise<any>;
+  /** GET /v1/internal/email/preview
    * @example
-   * await client.upsertFeedback({ query_id: "..." }) */
-  upsertFeedback(body: paths["/v1/feedbacks/{query_id}"]["put"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/feedbacks/{query_id}"]["put"]["parameters"]["path"] }): Promise<any>;
-  /** DELETE /v1/feedbacks/{query_id}
-   * @example
-   * await client.deleteFeedback({ query_id: "..." }) */
-  deleteFeedback(params: paths["/v1/feedbacks/{query_id}"]["delete"]["parameters"]["path"]): Promise<any>;
-  /** GET /v1/queries
-   * @example
-   * await client.listQueries({ page: 1, per_page: 1 }) */
-  listQueries(params: paths["/v1/queries"]["get"]["parameters"]["query"]): Promise<any>;
-  /** POST /v1/queries */
-  createQuery(body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
-  /** GET /v1/queries/{query_id}
-   * @example
-   * await client.getQuery({ query_id: "..." }) */
-  getQuery(params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"]): Promise<any>;
-  /** GET /health */
-  healthHealth(): Promise<any>;
-  /** GET /v1/health */
-  health(): Promise<any>;
+   * await client.previewInternalEmail({ template: 1, name: 1, to: 1, token: 1 }) */
+  previewInternalEmail(params: paths["/v1/internal/email/preview"]["get"]["parameters"]["query"]): Promise<any>;
 }
 
 export function createEasySQLClient(options: CreateClientOptions): EasySQLClient {
@@ -117,19 +123,14 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
   });
 
   return {
-    /** GET /v1/api-keys */
-    listApiKeys() {
-      return client.GET("/v1/api-keys");
+    /** GET /health */
+    healthHealth() {
+      return client.GET("/health");
     },
 
-    /** POST /v1/api-keys */
-    createApiKey(body: paths["/v1/api-keys"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/api-keys", { body });
-    },
-
-    /** DELETE /v1/api-keys/{key_id} */
-    deleteApiKey(params: paths["/v1/api-keys/{key_id}"]["delete"]["parameters"]["path"]) {
-      return client.DELETE("/v1/api-keys/{key_id}", { params: { path: params } });
+    /** GET /v1/health */
+    health() {
+      return client.GET("/v1/health");
     },
 
     /** POST /v1/auth/register */
@@ -167,6 +168,41 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
       return client.POST("/v1/auth/change-password", { body });
     },
 
+    /** POST /v1/auth/verify-email */
+    verifyEmail(body: paths["/v1/auth/verify-email"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/auth/verify-email", { body });
+    },
+
+    /** POST /v1/auth/resend-verification */
+    resendVerification(body: paths["/v1/auth/resend-verification"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/auth/resend-verification", { body });
+    },
+
+    /** POST /v1/auth/forgot-password */
+    forgotPassword(body: paths["/v1/auth/forgot-password"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/auth/forgot-password", { body });
+    },
+
+    /** POST /v1/auth/reset-password */
+    resetPassword(body: paths["/v1/auth/reset-password"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/auth/reset-password", { body });
+    },
+
+    /** GET /v1/api-keys */
+    listApiKeys() {
+      return client.GET("/v1/api-keys");
+    },
+
+    /** POST /v1/api-keys */
+    createApiKey(body: paths["/v1/api-keys"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/api-keys", { body });
+    },
+
+    /** DELETE /v1/api-keys/{key_id} */
+    deleteApiKey(params: paths["/v1/api-keys/{key_id}"]["delete"]["parameters"]["path"]) {
+      return client.DELETE("/v1/api-keys/{key_id}", { params: { path: params } });
+    },
+
     /** GET /v1/connectors */
     listConnectors() {
       return client.GET("/v1/connectors");
@@ -175,11 +211,6 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     /** POST /v1/connectors */
     createConnector(body: paths["/v1/connectors"]["post"]["requestBody"]["content"]["application/json"]) {
       return client.POST("/v1/connectors", { body });
-    },
-
-    /** POST /v1/connectors/test */
-    testConnector(body: paths["/v1/connectors/test"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/connectors/test", { body });
     },
 
     /** GET /v1/connectors/{connector_id} */
@@ -198,8 +229,8 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     },
 
     /** POST /v1/connectors/{connector_id}/sync */
-    syncConnector(params: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"]) {
-      return client.POST("/v1/connectors/{connector_id}/sync", { params: { path: params } });
+    syncConnector(body: paths["/v1/connectors/{connector_id}/sync"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"] }) {
+      return client.POST("/v1/connectors/{connector_id}/sync", { body, params });
     },
 
     /** GET /v1/connectors/{connector_id}/schema */
@@ -215,6 +246,46 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     /** POST /v1/connectors/{connector_id}/autocomplete */
     autocomplete(body: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["parameters"]["path"] }) {
       return client.POST("/v1/connectors/{connector_id}/autocomplete", { body, params });
+    },
+
+    /** GET /v1/queries */
+    listQueries(params: paths["/v1/queries"]["get"]["parameters"]["query"]) {
+      return client.GET("/v1/queries", { params: { query: params } });
+    },
+
+    /** POST /v1/queries */
+    createQuery(body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/queries", { body });
+    },
+
+    /** GET /v1/queries/{query_id} */
+    getQuery(params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/queries/{query_id}", { params: { path: params } });
+    },
+
+    /** POST /v1/queries/{query_id}/answer */
+    answerQuery(body: paths["/v1/queries/{query_id}/answer"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/queries/{query_id}/answer"]["post"]["parameters"]["path"] }) {
+      return client.POST("/v1/queries/{query_id}/answer", { body, params });
+    },
+
+    /** GET /v1/queries/{query_id}/stream */
+    streamQuery(params: paths["/v1/queries/{query_id}/stream"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/queries/{query_id}/stream", { params: { path: params } });
+    },
+
+    /** GET /v1/feedbacks/{query_id} */
+    getFeedback(params: paths["/v1/feedbacks/{query_id}"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/feedbacks/{query_id}", { params: { path: params } });
+    },
+
+    /** PUT /v1/feedbacks/{query_id} */
+    upsertFeedback(body: paths["/v1/feedbacks/{query_id}"]["put"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/feedbacks/{query_id}"]["put"]["parameters"]["path"] }) {
+      return client.PUT("/v1/feedbacks/{query_id}", { body, params });
+    },
+
+    /** DELETE /v1/feedbacks/{query_id} */
+    deleteFeedback(params: paths["/v1/feedbacks/{query_id}"]["delete"]["parameters"]["path"]) {
+      return client.DELETE("/v1/feedbacks/{query_id}", { params: { path: params } });
     },
 
     /** GET /v1/dashboard/stats */
@@ -237,44 +308,19 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
       return client.POST("/v1/billing/portal");
     },
 
-    /** GET /v1/feedbacks/{query_id} */
-    getFeedback(params: paths["/v1/feedbacks/{query_id}"]["get"]["parameters"]["path"]) {
-      return client.GET("/v1/feedbacks/{query_id}", { params: { path: params } });
+    /** POST /v1/billing/webhook */
+    webhook(body: paths["/v1/billing/webhook"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/billing/webhook", { body });
     },
 
-    /** PUT /v1/feedbacks/{query_id} */
-    upsertFeedback(body: paths["/v1/feedbacks/{query_id}"]["put"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/feedbacks/{query_id}"]["put"]["parameters"]["path"] }) {
-      return client.PUT("/v1/feedbacks/{query_id}", { body, params });
+    /** POST /v1/internal/email/test */
+    testInternalEmail(body: paths["/v1/internal/email/test"]["post"]["requestBody"]["content"]["application/json"], params: { query: paths["/v1/internal/email/test"]["post"]["parameters"]["query"] }) {
+      return client.POST("/v1/internal/email/test", { body, params });
     },
 
-    /** DELETE /v1/feedbacks/{query_id} */
-    deleteFeedback(params: paths["/v1/feedbacks/{query_id}"]["delete"]["parameters"]["path"]) {
-      return client.DELETE("/v1/feedbacks/{query_id}", { params: { path: params } });
-    },
-
-    /** GET /v1/queries */
-    listQueries(params: paths["/v1/queries"]["get"]["parameters"]["query"]) {
-      return client.GET("/v1/queries", { params: { query: params } });
-    },
-
-    /** POST /v1/queries */
-    createQuery(body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/queries", { body });
-    },
-
-    /** GET /v1/queries/{query_id} */
-    getQuery(params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"]) {
-      return client.GET("/v1/queries/{query_id}", { params: { path: params } });
-    },
-
-    /** GET /health */
-    healthHealth() {
-      return client.GET("/health");
-    },
-
-    /** GET /v1/health */
-    health() {
-      return client.GET("/v1/health");
+    /** GET /v1/internal/email/preview */
+    previewInternalEmail(params: paths["/v1/internal/email/preview"]["get"]["parameters"]["query"]) {
+      return client.GET("/v1/internal/email/preview", { params: { query: params } });
     }
   } as EasySQLClient;
 }
