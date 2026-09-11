@@ -33,40 +33,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/auth/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register new user */
-        post: operations["register_v1_auth_register_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/auth/login": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Login (returns access + refresh tokens) */
-        post: operations["login_v1_auth_login_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/auth/refresh": {
         parameters: {
             query?: never;
@@ -76,7 +42,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Refresh tokens */
+        /** Rotate our access+refresh JWT pair */
         post: operations["refresh_v1_auth_refresh_post"];
         delete?: never;
         options?: never;
@@ -91,7 +57,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get current user (with active plan) */
+        /** Get current user (claims from OIDC ID token + DB state) */
         get: operations["me_v1_auth_me_get"];
         put?: never;
         post?: never;
@@ -99,11 +65,11 @@ export interface paths {
         delete: operations["delete_me_v1_auth_me_delete"];
         options?: never;
         head?: never;
-        /** Update current user (name, locale) */
+        /** Update current user locale (name/email come from OIDC ID token) */
         patch: operations["update_me_v1_auth_me_patch"];
         trace?: never;
     };
-    "/v1/auth/change-password": {
+    "/v1/auth/logout": {
         parameters: {
             query?: never;
             header?: never;
@@ -112,49 +78,49 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Change password */
-        post: operations["change_password_v1_auth_change_password_post"];
+        /** RP-initiated OIDC logout — returns URL to redirect the browser to Authentik end_session_endpoint */
+        post: operations["logout_v1_auth_logout_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/auth/verify-email": {
+    "/v1/auth/oidc/start": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Begin OIDC Authorization Code + PKCE flow (302 to Authentik) */
+        get: operations["oidc_start_v1_auth_oidc_start_get"];
         put?: never;
-        /** Verify email via HMAC-signed token (24h expiry) */
-        post: operations["verify_email_v1_auth_verify_email_post"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/auth/resend-verification": {
+    "/v1/auth/oidc/callback": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** OIDC redirect_uri — exchanges code for tokens, provisions user, sets cookie, redirects to /auth/complete */
+        get: operations["oidc_callback_v1_auth_oidc_callback_get"];
         put?: never;
-        /** Resend verification email (always 200; silent if email unknown) */
-        post: operations["resend_verification_v1_auth_resend_verification_post"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/auth/forgot-password": {
+    "/v1/auth/oidc/complete": {
         parameters: {
             query?: never;
             header?: never;
@@ -163,25 +129,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Trigger password reset email (HMAC-signed token, 1h expiry). Always 200; silent if email unknown. */
-        post: operations["forgot_password_v1_auth_forgot_password_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/auth/reset-password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Apply new password via HMAC-signed token */
-        post: operations["reset_password_v1_auth_reset_password_post"];
+        /** Frontend calls this on /auth/complete to read the one-shot cookie and get tokens */
+        post: operations["oidc_complete_v1_auth_oidc_complete_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -477,6 +426,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/billing/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Current usage vs plan limits (daily/weekly/monthly) */
+        get: operations["get_usage_v1_billing_usage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/billing/checkout": {
         parameters: {
             query?: never;
@@ -566,18 +532,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        UserCreate: {
-            name: string;
-            /** Format: email */
-            email: string;
-            password: string;
-            locale?: string;
-        };
-        UserLogin: {
-            /** Format: email */
-            email: string;
-            password: string;
-        };
         UserResponse: {
             /** Format: uuid */
             id: string;
@@ -592,7 +546,6 @@ export interface components {
             created_at: string;
         };
         UserUpdate: {
-            name?: string;
             locale?: string;
         };
         TokenResponse: {
@@ -604,9 +557,28 @@ export interface components {
         TokenRefresh: {
             refresh_token: string;
         };
-        ChangePasswordRequest: {
-            current_password: string;
-            new_password: string;
+        OidcCompleteRequest: {
+            state: string;
+        };
+        OidcCompleteResponse: {
+            access_token: string;
+            refresh_token: string;
+            /** @enum {string} */
+            token_type: "bearer";
+            user: {
+                /** Format: uuid */
+                id: string;
+                /** Format: email */
+                email: string | null;
+                name: string | null;
+            };
+        };
+        OidcLogoutResponse: {
+            /**
+             * Format: uri
+             * @description URL para RP-initiated logout. null se o usuário não veio via OIDC.
+             */
+            end_session_url: string | null;
         };
         ActivePlan: {
             id: string;
@@ -789,6 +761,19 @@ export interface components {
             /** Format: uri */
             url: string;
         };
+        UsageBucket: {
+            used: number;
+            limit: number;
+        };
+        UsageResponse: {
+            daily: components["schemas"]["UsageBucket"];
+            weekly: components["schemas"]["UsageBucket"];
+            monthly: components["schemas"]["UsageBucket"];
+            plan_id: string;
+            plan_name: string;
+            /** Format: date-time */
+            fetched_at: string;
+        };
         HTTPValidationError: {
             detail: {
                 loc: string[];
@@ -848,90 +833,6 @@ export interface operations {
                     "application/json": {
                         status?: string;
                     };
-                };
-            };
-        };
-    };
-    register_v1_auth_register_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserCreate"];
-            };
-        };
-        responses: {
-            /** @description User created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserResponse"];
-                };
-            };
-            /** @description Email already registered */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    login_v1_auth_login_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UserLogin"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TokenResponse"];
-                };
-            };
-            /** @description Invalid credentials */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1044,7 +945,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponse"];
+                    "application/json": components["schemas"]["UserMeResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -1067,7 +968,93 @@ export interface operations {
             };
         };
     };
-    change_password_v1_auth_change_password_post: {
+    logout_v1_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OidcLogoutResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    oidc_start_v1_auth_oidc_start_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Redirect to {issuer}/authorize?... with state, nonce, code_challenge */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description OIDC not configured */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    oidc_callback_v1_auth_oidc_callback_get: {
+        parameters: {
+            query: {
+                code: string;
+                state: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Redirect to {APP_URL}/auth/complete (cookie set in this hop) */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid/expired state */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    oidc_complete_v1_auth_oidc_complete_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -1076,7 +1063,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ChangePasswordRequest"];
+                "application/json": components["schemas"]["OidcCompleteRequest"];
             };
         };
         responses: {
@@ -1086,198 +1073,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        message?: string;
-                    };
+                    "application/json": components["schemas"]["OidcCompleteResponse"];
                 };
             };
-            /** @description Unauthorized */
+            /** @description Session cookie missing/expired */
             401: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Current password incorrect */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    verify_email_v1_auth_verify_email_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    token: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Email verified */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid or expired token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    resend_verification_v1_auth_resend_verification_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** Format: email */
-                    email: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Verification email queued (if address is registered) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    forgot_password_v1_auth_forgot_password_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** Format: email */
-                    email: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Reset email queued (if address is registered) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limit (5 emails/user/hour) */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    reset_password_v1_auth_reset_password_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    token: string;
-                    new_password: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Password updated */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid or expired token */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2202,6 +2007,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_usage_v1_billing_usage_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

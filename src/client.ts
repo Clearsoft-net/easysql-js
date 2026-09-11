@@ -17,10 +17,6 @@ export interface EasySQLClient {
   healthHealth(): Promise<any>;
   /** GET /v1/health */
   health(): Promise<any>;
-  /** POST /v1/auth/register */
-  register(body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
-  /** POST /v1/auth/login */
-  login(body: paths["/v1/auth/login"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** POST /v1/auth/refresh */
   refresh(body: paths["/v1/auth/refresh"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** GET /v1/auth/me */
@@ -29,24 +25,16 @@ export interface EasySQLClient {
   updateMe(body: paths["/v1/auth/me"]["patch"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** DELETE /v1/auth/me */
   deleteMe(): Promise<any>;
-  /** POST /v1/auth/change-password */
-  changePassword(body: paths["/v1/auth/change-password"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
-  /** POST /v1/auth/verify-email
+  /** POST /v1/auth/logout */
+  logout(): Promise<any>;
+  /** GET /v1/auth/oidc/start */
+  oidcStart(): Promise<any>;
+  /** GET /v1/auth/oidc/callback
    * @example
-   * await client.verifyEmail({ token: "..." }) */
-  verifyEmail(body: paths["/v1/auth/verify-email"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
-  /** POST /v1/auth/resend-verification
-   * @example
-   * await client.resendVerification({ email: "..." }) */
-  resendVerification(body: paths["/v1/auth/resend-verification"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
-  /** POST /v1/auth/forgot-password
-   * @example
-   * await client.forgotPassword({ email: "..." }) */
-  forgotPassword(body: paths["/v1/auth/forgot-password"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
-  /** POST /v1/auth/reset-password
-   * @example
-   * await client.resetPassword({ token: "...", new_password: "..." }) */
-  resetPassword(body: paths["/v1/auth/reset-password"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+   * await client.oidcCallback({ code: 1, state: 1 }) */
+  oidcCallback(params: paths["/v1/auth/oidc/callback"]["get"]["parameters"]["query"]): Promise<any>;
+  /** POST /v1/auth/oidc/complete */
+  oidcComplete(body: paths["/v1/auth/oidc/complete"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** GET /v1/api-keys */
   listApiKeys(): Promise<any>;
   /** POST /v1/api-keys */
@@ -95,6 +83,8 @@ export interface EasySQLClient {
   dashboardStats(): Promise<any>;
   /** GET /v1/billing/plan */
   getPlan(): Promise<any>;
+  /** GET /v1/billing/usage */
+  getUsage(): Promise<any>;
   /** POST /v1/billing/checkout
    * @example
    * await client.checkout({ price_id: 1 }) */
@@ -133,16 +123,6 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
       return client.GET("/v1/health");
     },
 
-    /** POST /v1/auth/register */
-    register(body: paths["/v1/auth/register"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/auth/register", { body });
-    },
-
-    /** POST /v1/auth/login */
-    login(body: paths["/v1/auth/login"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/auth/login", { body });
-    },
-
     /** POST /v1/auth/refresh */
     refresh(body: paths["/v1/auth/refresh"]["post"]["requestBody"]["content"]["application/json"]) {
       return client.POST("/v1/auth/refresh", { body });
@@ -163,29 +143,24 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
       return client.DELETE("/v1/auth/me");
     },
 
-    /** POST /v1/auth/change-password */
-    changePassword(body: paths["/v1/auth/change-password"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/auth/change-password", { body });
+    /** POST /v1/auth/logout */
+    logout() {
+      return client.POST("/v1/auth/logout");
     },
 
-    /** POST /v1/auth/verify-email */
-    verifyEmail(body: paths["/v1/auth/verify-email"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/auth/verify-email", { body });
+    /** GET /v1/auth/oidc/start */
+    oidcStart() {
+      return client.GET("/v1/auth/oidc/start");
     },
 
-    /** POST /v1/auth/resend-verification */
-    resendVerification(body: paths["/v1/auth/resend-verification"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/auth/resend-verification", { body });
+    /** GET /v1/auth/oidc/callback */
+    oidcCallback(params: paths["/v1/auth/oidc/callback"]["get"]["parameters"]["query"]) {
+      return client.GET("/v1/auth/oidc/callback", { params: { query: params } });
     },
 
-    /** POST /v1/auth/forgot-password */
-    forgotPassword(body: paths["/v1/auth/forgot-password"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/auth/forgot-password", { body });
-    },
-
-    /** POST /v1/auth/reset-password */
-    resetPassword(body: paths["/v1/auth/reset-password"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/auth/reset-password", { body });
+    /** POST /v1/auth/oidc/complete */
+    oidcComplete(body: paths["/v1/auth/oidc/complete"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/auth/oidc/complete", { body });
     },
 
     /** GET /v1/api-keys */
@@ -296,6 +271,11 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     /** GET /v1/billing/plan */
     getPlan() {
       return client.GET("/v1/billing/plan");
+    },
+
+    /** GET /v1/billing/usage */
+    getUsage() {
+      return client.GET("/v1/billing/usage");
     },
 
     /** POST /v1/billing/checkout */
