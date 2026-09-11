@@ -55,13 +55,12 @@ describe("Request body", () => {
     const f = mockFetch({});
     const client = createEasySQLClient({ baseUrl, fetch: f });
 
-    await client.login({ email: "a@b.com", password: "s3cret" });
+    await client.refresh({ refresh_token: "old-token" });
 
     const req = lastFetchArgs(f);
     const body = await req.text();
     expect(JSON.parse(body)).toEqual({
-      email: "a@b.com",
-      password: "s3cret",
+      refresh_token: "old-token",
     });
   });
 
@@ -69,7 +68,7 @@ describe("Request body", () => {
     const f = mockFetch({});
     const client = createEasySQLClient({ baseUrl, fetch: f });
 
-    await client.login({ email: "a@b.com", password: "s3cret" });
+    await client.refresh({ refresh_token: "old-token" });
 
     expect(lastFetchArgs(f).headers.get("Content-Type")).toBe(
       "application/json",
@@ -120,9 +119,8 @@ describe("Response parsing", () => {
     const f = mockFetch({ access_token: "t", refresh_token: "r" });
     const client = createEasySQLClient({ baseUrl, fetch: f });
 
-    const { data, error } = await client.login({
-      email: "a@b.com",
-      password: "s3cret",
+    const { data, error } = await client.refresh({
+      refresh_token: "old-token",
     });
 
     expect(error).toBeUndefined();
@@ -149,13 +147,13 @@ describe("Named methods", () => {
 
   it("exposes all expected auth methods", () => {
     const client = createEasySQLClient({ baseUrl, fetch: f });
-    expect(typeof client.login).toBe("function");
-    expect(typeof client.register).toBe("function");
     expect(typeof client.refresh).toBe("function");
     expect(typeof client.me).toBe("function");
     expect(typeof client.updateMe).toBe("function");
     expect(typeof client.deleteMe).toBe("function");
-    expect(typeof client.changePassword).toBe("function");
+    expect(typeof client.logout).toBe("function");
+    expect(typeof client.oidcStart).toBe("function");
+    expect(typeof client.oidcComplete).toBe("function");
   });
 
   it("exposes all expected connector methods", () => {
