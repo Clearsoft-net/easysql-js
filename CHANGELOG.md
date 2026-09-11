@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/Clearsoft-net/easysql-js/compare/v1.1.0...v1.1.1) (2026-09-11)
+
+
+### Bug Fixes
+
+* **tests:** update tests for OIDC auth ([aa571f6](https://github.com/Clearsoft-net/easysql-js/commit/aa571f62d341069ad90dbf8e2589a1d3510a372e))
+
 # [1.1.0](https://github.com/Clearsoft-net/easysql-js/compare/v1.0.1...v1.1.0) (2026-09-07)
 
 
