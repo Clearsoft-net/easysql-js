@@ -166,6 +166,20 @@ Release is lockstep: `.releaserc.json` runs `scripts/release-prepare.mjs` (sets
 the same version on the root and every package, rebuilds) and
 `scripts/release-publish.mjs` (publishes every non-private package).
 
+### npm publishing credentials
+
+The `NPM_TOKEN` Actions secret is an npm **automation/publish token** named
+`easysql-js` (account `joao-jlcm`) with read+write access to both the `@easysql`
+and `@clearsoft` organizations. It **expires 2026-12-03** — rotate it before then
+by creating a replacement with the same access and updating the secret:
+
+```bash
+gh secret set NPM_TOKEN --repo Clearsoft-net/easysql-js
+```
+
+Auth wiring per tool: `bun publish` reads `NPM_CONFIG_TOKEN`; `npm` (deprecate)
+reads `NODE_AUTH_TOKEN` through `~/.npmrc`. Both workflows map the same secret.
+
 ## .env reference
 
 | Variable | Used by | Required? |
