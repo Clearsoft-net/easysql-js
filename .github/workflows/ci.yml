@@ -7,10 +7,6 @@ on:
       - main
       - master
 
-env:
-  EASYSQL_TEST_MYSQL_URL: mysql://root:secret@127.0.0.1:3306/easysql_test
-  EASYSQL_TEST_POSTGRES_URL: postgresql://postgres:secret@127.0.0.1:5432/easysql_test
-
 jobs:
   check:
     name: Check every package
@@ -82,6 +78,10 @@ jobs:
     name: Connector integration (MySQL + PostgreSQL)
     runs-on: ubuntu-latest
 
+    env:
+      EASYSQL_TEST_MYSQL_URL: mysql://root:secret@127.0.0.1:3306/easysql_test
+      EASYSQL_TEST_POSTGRES_URL: postgresql://postgres:secret@127.0.0.1:5432/easysql_test
+
     services:
       mysql:
         image: mysql:8.4
@@ -126,6 +126,10 @@ jobs:
   coverage:
     name: Coverage (hand-written source)
     runs-on: ubuntu-latest
+
+    env:
+      EASYSQL_TEST_MYSQL_URL: mysql://root:secret@127.0.0.1:3306/easysql_test
+      EASYSQL_TEST_POSTGRES_URL: postgresql://postgres:secret@127.0.0.1:5432/easysql_test
 
     services:
       mysql:
