@@ -1,0 +1,35 @@
+name: Deprecate
+
+# Mark an npm package (or a range) as deprecated. Used to point the old
+# @clearsoft/easysql-sdk package at the new @easysql/client packages.
+
+on:
+  workflow_dispatch:
+    inputs:
+      spec:
+        description: "Package or package@range to deprecate"
+        required: true
+        default: "@clearsoft/easysql-sdk"
+      message:
+        description: "Deprecation message"
+        required: true
+        default: "Renamed: use @easysql/client instead. This package is no longer maintained."
+
+permissions:
+  contents: read
+
+jobs:
+  deprecate:
+    name: npm deprecate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure npm auth
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_CONFIG_TOKEN}" > "$HOME/.npmrc"
+      - name: Deprecate ${{ inputs.spec }}
+        run: npm deprecate "$SPEC" "$MESSAGE"
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          SPEC: ${{ inputs.spec }}
+          MESSAGE: ${{ inputs.message }}
