@@ -20,6 +20,9 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const token = process.env.NPM_CONFIG_TOKEN ?? process.env.NPM_TOKEN ?? process.env.NODE_AUTH_TOKEN;
+// Optional filters for targeted (re)publishes, e.g. PUBLISH_PACKAGE=common.
+const filter = process.env.PUBLISH_PACKAGE;
+const verbose = process.env.PUBLISH_VERBOSE === "1";
 
 function packageManifests(base = root) {
   const paths = [join(base, "package.json")];
@@ -43,6 +46,10 @@ for (const manifest of packageManifests()) {
     console.log(`release-publish: skipping ${json.name}`);
     continue;
   }
+  if (filter && !json.name.includes(filter)) {
+    console.log(`release-publish: skipping ${json.name} (filter: ${filter})`);
+    continue;
+  }
   publishable.push({ manifest, json });
 }
 
@@ -55,7 +62,9 @@ if (publishable.length > 0 && !token) {
 
 for (const { manifest, json } of publishable) {
   console.log(`release-publish: publishing ${json.name}@${json.version}`);
-  execFileSync("bun", ["publish", "--access", "public"], {
+  const args = ["publish", "--access", "public"];
+  if (verbose) args.push("--verbose");
+  execFileSync("bun", args, {
     cwd: dirname(manifest),
     stdio: "inherit",
     env: { ...process.env, NPM_CONFIG_TOKEN: token },

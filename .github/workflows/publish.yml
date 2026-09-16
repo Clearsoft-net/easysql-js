@@ -12,6 +12,10 @@ on:
         description: "Expected version to publish (sanity check)"
         required: false
         default: ""
+      package:
+        description: "Only publish packages whose name contains this (e.g. common)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -46,3 +50,5 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PUBLISH_PACKAGE: ${{ inputs.package }}
+          PUBLISH_VERBOSE: "1"
