@@ -35,10 +35,6 @@ jobs:
       - name: Diagnose the token
         run: |
           echo "whoami: $(npm whoami 2>&1)"
-          echo "--- token list (metadata only) ---"
-          npm token list 2>&1 | head -40 || true
-          echo "--- packages this token can access ---"
-          npm access list packages 2>&1 | head -50 || true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
