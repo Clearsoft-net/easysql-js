@@ -4,8 +4,11 @@
  *
  * Called by semantic-release via @semantic-release/exec after the prepare step
  * has set the same version on every package. Publishes every non-private
- * package to npm. Without an npm token (e.g. a dry run) it reports what it
- * would publish and exits successfully.
+ * package to npm.
+ *
+ * `bun publish` authenticates with NPM_CONFIG_TOKEN (it does not read
+ * NPM_TOKEN), so the token is mapped across before spawning. A missing token is
+ * a hard error: a release must never succeed without publishing.
  *
  *   node scripts/release-publish.mjs
  */
@@ -16,7 +19,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const hasToken = Boolean(process.env.NPM_TOKEN ?? process.env.NODE_AUTH_TOKEN);
+const token = process.env.NPM_CONFIG_TOKEN ?? process.env.NPM_TOKEN ?? process.env.NODE_AUTH_TOKEN;
 
 function packageManifests(base = root) {
   const paths = [join(base, "package.json")];
@@ -32,6 +35,7 @@ function packageManifests(base = root) {
   return paths;
 }
 
+const publishable = [];
 for (const manifest of packageManifests()) {
   const json = JSON.parse(readFileSync(manifest, "utf8"));
   // The root manifest is the workspace aggregator, never a published package.
@@ -39,14 +43,21 @@ for (const manifest of packageManifests()) {
     console.log(`release-publish: skipping ${json.name}`);
     continue;
   }
-  if (!hasToken) {
-    console.log(`release-publish: no npm token — would publish ${json.name}@${json.version}`);
-    continue;
-  }
+  publishable.push({ manifest, json });
+}
+
+if (publishable.length > 0 && !token) {
+  console.error(
+    "release-publish: no npm token found. Set NPM_CONFIG_TOKEN (or NPM_TOKEN) with publish rights.",
+  );
+  process.exit(1);
+}
+
+for (const { manifest, json } of publishable) {
   console.log(`release-publish: publishing ${json.name}@${json.version}`);
   execFileSync("bun", ["publish", "--access", "public"], {
     cwd: dirname(manifest),
     stdio: "inherit",
-    env: process.env,
+    env: { ...process.env, NPM_CONFIG_TOKEN: token },
   });
 }
