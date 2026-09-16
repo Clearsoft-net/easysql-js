@@ -1,8 +1,5 @@
 {
-  "branches": [
-    "main",
-    "master"
-  ],
+  "branches": ["main", "master"],
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
@@ -13,18 +10,16 @@
       }
     ],
     [
-      "@semantic-release/npm",
+      "@semantic-release/exec",
       {
-        "npmPublish": true
+        "prepareCmd": "node scripts/release-prepare.mjs ${nextRelease.version}",
+        "publishCmd": "node scripts/release-publish.mjs"
       }
     ],
     [
       "@semantic-release/git",
       {
-        "assets": [
-          "package.json",
-          "CHANGELOG.md"
-        ],
+        "assets": ["package.json", "packages/*/package.json", "CHANGELOG.md", "bun.lock"],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],

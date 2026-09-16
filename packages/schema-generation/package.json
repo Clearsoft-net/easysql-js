@@ -1,0 +1,48 @@
+{
+  "name": "@easysql/schema-generation",
+  "version": "1.1.1",
+  "description": "Normalize introspected database metadata into the EasySQL schema payload the API consumes. Pure, deterministic, no I/O.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "author": "Clearsoft <contact@clearsoft.net>",
+  "homepage": "https://easysql.net",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Clearsoft-net/easysql-js.git",
+    "directory": "packages/schema-generation"
+  },
+  "bugs": {
+    "url": "https://github.com/Clearsoft-net/easysql-js/issues"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18",
+    "bun": ">=1.1.0"
+  },
+  "keywords": [
+    "easysql", "clearsoft", "schema", "introspection", "sql", "mysql", "sqlite"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@easysql/common": "workspace:*"
+  }
+}

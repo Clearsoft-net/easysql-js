@@ -1,64 +1,44 @@
 {
-  "name": "@clearsoft/easysql-sdk",
+  "name": "@easysql/sdk",
   "version": "1.1.1",
-  "description": "EasySQL API JavaScript/TypeScript SDK — Ask questions in natural language to your MySQL, MariaDB or PostgreSQL databases.",
+  "description": "EasySQL TypeScript SDK — multipackage workspace (private root).",
+  "private": true,
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "author": "Clearsoft <contact@clearsoft.net>",
-  "homepage": "https://easysql.net",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Clearsoft-net/easysql-js.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Clearsoft-net/easysql-js/issues"
-  },
+  "workspaces": [
+    "packages/*",
+    "packages/connectors/*"
+  ],
   "scripts": {
-    "generate": "bun run scripts/generate.ts",
-    "build": "tsc",
-    "typecheck": "tsc --noEmit",
-    "test": "bun test",
-    "docs": "typedoc",
-    "clean": "rm -rf dist",
-    "prebuild": "bun run clean",
-    "prepublish": "bun run build",
-    "prepack": "cp README.md .README.github.md && cp README.npm.md README.md",
-    "postpack": "mv .README.github.md README.md"
-  },
-  "files": [
-    "dist"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "keywords": [
-    "easysql",
-    "clearsoft",
-    "sql",
-    "nlp",
-    "ai",
-    "database",
-    "api",
-    "sdk",
-    "javascript",
-    "typescript"
-  ],
-  "license": "MIT",
-  "dependencies": {
-    "openapi-fetch": "^0.13.0"
+    "install:all": "bun install --frozen-lockfile",
+    "generate": "bun run --filter './packages/client' generate",
+    "build": "bun run clean && bun run --filter './packages/common' build && bun run --filter './packages/schema-generation' build && bun run --filter './packages/client' build && bun run --filter './packages/connectors/*' build",
+    "typecheck": "bun run --filter '*' typecheck",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "bun run --filter '*' test",
+    "typecheck:samples": "tsc -p samples/tsconfig.json",
+    "verify:versions": "node scripts/check-versions.mjs",
+    "coverage": "node scripts/check-coverage.mjs",
+    "smoke:node": "node scripts/node-compat-smoke.mjs",
+    "docs": "bun run --filter './packages/client' docs",
+    "clean": "bun run --filter '*' clean",
+    "check": "bun run verify:versions && bun run lint && bun run typecheck && bun run typecheck:samples && bun run test"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.12",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^12.0.8",
-    "@semantic-release/npm": "^13.1.5",
     "@semantic-release/release-notes-generator": "^14.1.1",
+    "@types/bun": "^1.4.1",
+    "@types/node": "^24.0.0",
     "dotenv": "^16.4.0",
     "openapi-typescript": "^7.0.0",
     "semantic-release": "^25.0.3",
     "typedoc": "^0.28.19",
     "typescript": "^5.5.0"
-  }
+  },
+  "license": "MIT"
 }

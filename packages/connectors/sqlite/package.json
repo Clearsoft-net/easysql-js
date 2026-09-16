@@ -1,0 +1,53 @@
+{
+  "name": "@easysql/connector-sqlite",
+  "version": "1.1.1",
+  "description": "EasySQL SQLite connector — local schema introspection and query execution using Node's built-in node:sqlite.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "author": "Clearsoft <contact@clearsoft.net>",
+  "homepage": "https://easysql.net",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Clearsoft-net/easysql-js.git",
+    "directory": "packages/connectors/sqlite"
+  },
+  "bugs": {
+    "url": "https://github.com/Clearsoft-net/easysql-js/issues"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "easysql",
+    "clearsoft",
+    "sqlite",
+    "connector",
+    "introspection",
+    "sql"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.5",
+    "bun": ">=1.1.0"
+  },
+  "dependencies": {
+    "@easysql/common": "workspace:*"
+  }
+}
