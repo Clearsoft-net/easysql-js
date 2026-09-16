@@ -27,6 +27,17 @@ jobs:
       - name: Configure npm auth
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_CONFIG_TOKEN}" > "$HOME/.npmrc"
+
+      - name: Diagnose the token
+        run: |
+          echo "whoami: $(npm whoami 2>&1)"
+          echo "--- packages this token can access ---"
+          npm access list packages 2>&1 | head -50 || true
+          echo "--- token metadata ---"
+          npm token list 2>&1 | head -20 || true
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Deprecate ${{ inputs.spec }}
         run: npm deprecate "$SPEC" "$MESSAGE"
         env:
