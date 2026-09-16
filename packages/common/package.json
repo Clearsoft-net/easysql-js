@@ -1,6 +1,6 @@
 {
   "name": "@easysql/common",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "Shared contracts (types and interfaces) for the EasySQL TypeScript SDK: schema shapes, connector contract and query results.",
   "type": "module",
   "main": "dist/index.js",
@@ -41,7 +41,12 @@
     "bun": ">=1.1.0"
   },
   "keywords": [
-    "easysql", "clearsoft", "types", "contracts", "connector", "schema"
+    "easysql",
+    "clearsoft",
+    "types",
+    "contracts",
+    "connector",
+    "schema"
   ],
   "license": "MIT"
 }

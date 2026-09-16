@@ -1,3 +1,19 @@
+# [2.0.0](https://github.com/Clearsoft-net/easysql-js/compare/v1.1.1...v2.0.0) (2026-09-16)
+
+
+* refactor(sdk)!: restructure into a multipackage repository (EZSQL-51) ([#9](https://github.com/Clearsoft-net/easysql-js/issues/9)) ([c023986](https://github.com/Clearsoft-net/easysql-js/commit/c0239864562187165d4ead713c30e67faec871cc))
+
+
+### BREAKING CHANGES
+
+* @clearsoft/easysql-sdk was replaced by @easysql/client (new
+package name and import path); connectors and schema generation are new
+packages.
+
+* ci: scope connector integration env to the integration and coverage jobs
+
+The global env exposed EASYSQL_TEST_*_URL to the check job, whose runner has no database services, so the connector integration tests failed with ECONNREFUSED.
+
 ## [1.1.1](https://github.com/Clearsoft-net/easysql-js/compare/v1.1.0...v1.1.1) (2026-09-11)
 
 

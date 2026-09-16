@@ -1,6 +1,6 @@
 {
   "name": "@easysql/schema-generation",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "Normalize introspected database metadata into the EasySQL schema payload the API consumes. Pure, deterministic, no I/O.",
   "type": "module",
   "main": "dist/index.js",
@@ -39,7 +39,13 @@
     "bun": ">=1.1.0"
   },
   "keywords": [
-    "easysql", "clearsoft", "schema", "introspection", "sql", "mysql", "sqlite"
+    "easysql",
+    "clearsoft",
+    "schema",
+    "introspection",
+    "sql",
+    "mysql",
+    "sqlite"
   ],
   "license": "MIT",
   "dependencies": {
