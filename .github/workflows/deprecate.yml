@@ -26,21 +26,23 @@ jobs:
     steps:
       - name: Configure npm auth
         run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_CONFIG_TOKEN}" > "$HOME/.npmrc"
+          printf '//registry.npmjs.org/:_authToken=%s\n' "$NODE_AUTH_TOKEN" > "$HOME/.npmrc"
+          echo "userconfig: $(npm config get userconfig)"
+          echo "registry: $(npm config get registry)"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Diagnose the token
         run: |
           echo "whoami: $(npm whoami 2>&1)"
           echo "--- packages this token can access ---"
           npm access list packages 2>&1 | head -50 || true
-          echo "--- token metadata ---"
-          npm token list 2>&1 | head -20 || true
         env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Deprecate ${{ inputs.spec }}
         run: npm deprecate "$SPEC" "$MESSAGE"
         env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           SPEC: ${{ inputs.spec }}
           MESSAGE: ${{ inputs.message }}
