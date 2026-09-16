@@ -1,4 +1,4 @@
-.PHONY: all build clean docs generate help install test typecheck
+.PHONY: all build check clean coverage docs generate help install lint test typecheck
 
 CYAN  := \033[36m
 RESET := \033[0m
@@ -6,18 +6,24 @@ RESET := \033[0m
 HELP_LINE      := ^[a-zA-Z_-]+:.*\#\# .*$$
 HELP_DELIMITER := :.*\#\#
 
-all: install generate typecheck build ## Full pipeline (install → generate → typecheck → build)
+all: install generate check build ## Full pipeline (install → generate → check → build)
 
-build: clean ## Compile TypeScript → dist/
+build: clean ## Compile TypeScript → dist/ (every package)
 	bun run build
 
-clean: ## Remove dist/ directory
-	rm -rf dist
+check: ## Lint + typecheck + tests (every package)
+	bun run check
 
-docs: ## Generate API documentation (typedoc)
+clean: ## Remove dist/ directories (every package)
+	bun run clean
+
+coverage: ## Run tests with coverage and enforce the threshold
+	bun run coverage
+
+docs: ## Generate API documentation (typedoc, api package)
 	bun run docs
 
-generate: ## Download API spec and generate src/api-types.ts
+generate: ## Download API spec and regenerate packages/client/src
 	bun run generate
 
 help: ## Show this help
@@ -27,8 +33,11 @@ help: ## Show this help
 install: ## Install dependencies (bun)
 	bun install --frozen-lockfile
 
-test: ## Run unit tests (bun test)
-	bun test
+lint: ## Lint the workspace (biome)
+	bun run lint
 
-typecheck: ## Check TypeScript types (no emit)
+test: ## Run unit tests (bun test, every package)
+	bun run test
+
+typecheck: ## Check TypeScript types (no emit, every package)
 	bun run typecheck

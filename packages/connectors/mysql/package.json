@@ -1,0 +1,55 @@
+{
+  "name": "@easysql/connector-mysql",
+  "version": "1.1.1",
+  "description": "EasySQL MySQL/MariaDB connector — local schema introspection and query execution. Credentials never leave the process.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "author": "Clearsoft <contact@clearsoft.net>",
+  "homepage": "https://easysql.net",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Clearsoft-net/easysql-js.git",
+    "directory": "packages/connectors/mysql"
+  },
+  "bugs": {
+    "url": "https://github.com/Clearsoft-net/easysql-js/issues"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "easysql",
+    "clearsoft",
+    "mysql",
+    "mariadb",
+    "connector",
+    "introspection",
+    "sql"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "mysql2": "^3.11.5",
+    "@easysql/common": "workspace:*"
+  },
+  "engines": {
+    "node": ">=18",
+    "bun": ">=1.1.0"
+  }
+}

@@ -1,0 +1,172 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+      - master
+
+env:
+  EASYSQL_TEST_MYSQL_URL: mysql://root:secret@127.0.0.1:3306/easysql_test
+  EASYSQL_TEST_POSTGRES_URL: postgresql://postgres:secret@127.0.0.1:5432/easysql_test
+
+jobs:
+  check:
+    name: Check every package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - run: make check
+
+      - run: make build
+
+  generated:
+    name: Generated package is reproducible
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # Regenerate the client package from the contract and fail when the
+      # working tree differs: a hand edit to packages/client cannot survive
+      # regeneration, so any diff means generated code was modified by hand.
+      - run: make generate
+        env:
+          EASYSQL_API_URL: ${{ vars.EASYSQL_API_URL || 'https://api.easysql.net' }}
+
+      - name: Fail if the generated package was edited by hand
+        run: git diff --exit-code -- packages/client
+
+  node-compat:
+    name: Node ${{ matrix.node }} runtime
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["20", "22", "24"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun run build
+
+      - name: Load every built package under Node
+        run: node scripts/node-compat-smoke.mjs
+
+  integration:
+    name: Connector integration (MySQL + PostgreSQL)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: easysql_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -psecret"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: easysql_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: MySQL connector integration
+        run: bun run --filter './packages/connectors/mysql' test
+
+      - name: PostgreSQL connector integration
+        run: bun run --filter './packages/connectors/postgres' test
+
+  coverage:
+    name: Coverage (hand-written source)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: easysql_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -psecret"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: easysql_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun run coverage
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lcov
+          path: .coverage/lcov.info
+          if-no-files-found: ignore

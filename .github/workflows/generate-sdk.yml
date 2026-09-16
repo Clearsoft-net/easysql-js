@@ -26,9 +26,7 @@ jobs:
         env:
           EASYSQL_API_URL: ${{ vars.EASYSQL_API_URL || 'https://api.easysql.net' }}
 
-      - run: make typecheck
-
-      - run: make test
+      - run: make check
 
       - run: make build
 
@@ -37,11 +35,11 @@ jobs:
           commit-message: "feat(sdk): regenerate API types from OpenAPI spec"
           title: "feat(sdk): regenerate API types from OpenAPI spec"
           body: |
-            Types auto-generated via `openapi-typescript`.
+            Types auto-generated via `openapi-typescript` into `packages/client`.
 
             **Spec**: `${{ vars.EASYSQL_API_URL || 'https://api.easysql.net' }}/openapi.json`
 
-            ✅ `make typecheck && make test && make build` passed.
+            ✅ `make check && make build` passed.
           branch: "auto/generate-sdk"
           delete-branch: true
           labels: "auto-generated"

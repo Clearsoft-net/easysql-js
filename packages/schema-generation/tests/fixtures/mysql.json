@@ -1,0 +1,39 @@
+{
+  "engine": "mysql",
+  "tables": [
+    {
+      "name": "users",
+      "rowsApprox": 42,
+      "columns": [
+        { "name": "id", "dataType": "int", "nullable": false, "primaryKey": true, "ordinal": 1 },
+        { "name": "email", "dataType": "varchar(255)", "nullable": false, "ordinal": 2 },
+        { "name": "name", "dataType": "varchar(120)", "nullable": true, "defaultValue": null, "ordinal": 3 },
+        { "name": "role", "dataType": "enum('admin','user')", "nullable": false, "defaultValue": "user", "ordinal": 4 },
+        { "name": "balance", "dataType": "decimal(10,2)", "nullable": false, "defaultValue": "0.00", "ordinal": 5 },
+        { "name": "is_active", "dataType": "tinyint(1)", "nullable": false, "defaultValue": "1", "ordinal": 6 },
+        { "name": "bio", "dataType": "text", "nullable": true, "ordinal": 7 },
+        { "name": "created_at", "dataType": "timestamp", "nullable": false, "defaultValue": "CURRENT_TIMESTAMP", "ordinal": 8 }
+      ]
+    },
+    {
+      "name": "posts",
+      "rowsApprox": 128,
+      "columns": [
+        { "name": "id", "dataType": "bigint", "nullable": false, "primaryKey": true, "ordinal": 1 },
+        { "name": "user_id", "dataType": "int", "nullable": false, "ordinal": 2, "foreignKey": { "table": "users", "column": "id" } },
+        { "name": "title", "dataType": "varchar(200)", "nullable": false, "ordinal": 3 },
+        { "name": "body", "dataType": "longtext", "nullable": true, "ordinal": 4 },
+        { "name": "payload", "dataType": "json", "nullable": true, "ordinal": 5 },
+        { "name": "published_at", "dataType": "datetime", "nullable": true, "ordinal": 6 }
+      ]
+    },
+    {
+      "name": "post_tags",
+      "rowsApprox": 300,
+      "columns": [
+        { "name": "post_id", "dataType": "bigint", "nullable": false, "primaryKey": true, "ordinal": 1, "foreignKey": { "table": "posts", "column": "id" } },
+        { "name": "tag_id", "dataType": "int", "nullable": false, "primaryKey": true, "ordinal": 2 }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Contributing to EasySQL JavaScript & TypeScript SDK
 
-Thank you for your interest in contributing to the **EasySQL JavaScript & TypeScript SDK** (`@clearsoft/easysql-sdk`)! We appreciate your help in making this library better for everyone.
+Thank you for your interest in contributing to the **EasySQL JavaScript & TypeScript SDK**! We appreciate your help in making these packages better for everyone.
 
 This document outlines the guidelines for reporting issues, suggesting features, and submitting code contributions.
 
@@ -61,17 +61,28 @@ You can use `make` or run Bun commands directly:
 
 | Command | Description |
 |---|---|
-| `make typecheck` | Run TypeScript type checks (`tsc --noEmit`) |
-| `make test` | Run the unit test suite (`bun test`) |
-| `make build` | Compile the TypeScript source code to `dist/` |
-| `make generate` | Regenerate client types from the OpenAPI specification |
+| `make lint` | Lint the workspace with Biome |
+| `make typecheck` | Run TypeScript type checks (`tsc --noEmit`) in every package |
+| `make test` | Run the unit test suite (`bun test`) in every package |
+| `make build` | Compile every package to its `dist/` |
+| `make generate` | Regenerate `packages/client` from the OpenAPI specification |
 | `make docs` | Generate TypeDoc API documentation |
-| `make all` | Run full pipeline (`install` → `generate` → `typecheck` → `build`) |
+| `make check` | `verify:versions` + `make lint` + `make typecheck` + samples + `make test` |
+| `make coverage` | Run tests with coverage and enforce the threshold |
+| `make all` | Run full pipeline (`install` → `generate` → `check` → `build`) |
 
-Before submitting any code, ensure that all tests and type checks pass:
+Extra checks: `bun run verify:versions` (all packages share the root version)
+and `bun run smoke:node` (load every built package under Node — run after
+`make build`). Coverage defaults to an 80% line threshold; without local
+databases, run `COVERAGE_THRESHOLD=60 bun run coverage`.
+
+Changes to `packages/client` are generated: never edit them by hand, run
+`make generate` instead. CI fails when the generated package is modified
+manually.
+
+Before submitting any code, ensure that the workspace check passes:
 ```bash
-make typecheck
-make test
+make check
 make build
 ```
 
@@ -117,10 +128,9 @@ If a commit introduces a breaking change, include `BREAKING CHANGE:` in the comm
    git checkout -b feat/my-new-feature
    ```
 2. Make your changes and write unit tests where appropriate.
-3. Ensure the test suite and type check pass:
+3. Ensure the workspace check passes:
    ```bash
-   make test
-   make typecheck
+   make check
    ```
 4. Commit your changes using Conventional Commits.
 5. Push your branch to your fork:

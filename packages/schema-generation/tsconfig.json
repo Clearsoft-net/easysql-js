@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": ".",
+    "types": ["bun"],
+    "paths": {
+      "@easysql/common": ["../common/src/index.ts"],
+      "@easysql/client": ["../client/src/index.ts"],
+      "@easysql/client/types": ["../client/src/api-types.ts"]
+    }
+  },
+  "include": ["src", "tests"],
+  "exclude": ["dist", "node_modules"]
+}

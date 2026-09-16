@@ -9,11 +9,10 @@
 <h1 align="center">EasySQL JavaScript & TypeScript SDK</h1>
 
 <p align="center">
-  <strong>Official JavaScript / TypeScript SDK for the <a href="https://easysql.net">EasySQL API</a> · A <a href="https://clearsoft.net">Clearsoft</a> Product</strong>
+  <strong>Official JavaScript / TypeScript packages for the <a href="https://easysql.net">EasySQL API</a> · A <a href="https://clearsoft.net">Clearsoft</a> Product</strong>
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@clearsoft/easysql-sdk"><img src="https://img.shields.io/npm/v/@clearsoft/easysql-sdk?color=F97316&style=flat-square" alt="NPM Version"></a>
   <a href="https://github.com/Clearsoft-net/easysql-js/actions"><img src="https://img.shields.io/github/actions/workflow/status/Clearsoft-net/easysql-js/release.yml?branch=main&style=flat-square" alt="CI Status"></a>
   <a href="https://github.com/Clearsoft-net/easysql-js/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
   <a href="https://easysql.net"><img src="https://img.shields.io/badge/Product-easysql.net-F97316?style=flat-square" alt="Website"></a>
@@ -22,24 +21,40 @@
 
 ---
 
-Ask questions in natural language to your MySQL, MariaDB, or PostgreSQL databases directly from your JavaScript and TypeScript applications (Node.js, Bun, Deno, and modern browser runtimes).
+This repository (`@easysql/sdk`) is a [Bun workspaces](https://bun.sh/docs/install/workspaces)
+multipackage repository. Everything is versioned and released together, one
+version per repository.
+
+## Packages
+
+| Package | Directory | Source | Description |
+|---|---|---|---|
+| [`@easysql/client`](./packages/client) | `packages/client` | **Generated** | Typed client for the EasySQL API, generated from `/openapi.json`. |
+| [`@easysql/common`](./packages/common) | `packages/common` | Hand-written | Shared contracts: schema shapes, connector interface, query result. |
+| [`@easysql/schema-generation`](./packages/schema-generation) | `packages/schema-generation` | Hand-written | Normalizes introspected database metadata into the schema payload the API consumes. |
+| [`@easysql/connector-mysql`](./packages/connectors/mysql) | `packages/connectors/mysql` | Hand-written | MySQL / MariaDB introspection and query execution. |
+| [`@easysql/connector-postgres`](./packages/connectors/postgres) | `packages/connectors/postgres` | Hand-written | PostgreSQL introspection and query execution. |
+| [`@easysql/connector-sqlite`](./packages/connectors/sqlite) | `packages/connectors/sqlite` | Hand-written | SQLite introspection and query execution (`node:sqlite`). |
+
+The client package is written **only** by the codegen pipeline; nothing
+hand-written lives inside it and no manual edit survives regeneration.
+
+Each connector introspects its engine locally and returns the raw shape that
+`@easysql/schema-generation` normalizes; credentials never leave the machine.
+The Neon and Cloudflare D1 connectors are tracked separately (EZSQL-60).
 
 ## Installation
 
 ```bash
-npm install @clearsoft/easysql-sdk
+npm install @easysql/client
 # or
-bun add @clearsoft/easysql-sdk
-# or
-pnpm add @clearsoft/easysql-sdk
+bun add @easysql/client
 ```
-
----
 
 ## Quick Start
 
 ```typescript
-import { createEasySQLClient } from "@clearsoft/easysql-sdk";
+import { createEasySQLClient } from "@easysql/client";
 
 const api = createEasySQLClient({
   baseUrl: "https://api.easysql.net",
@@ -47,112 +62,35 @@ const api = createEasySQLClient({
 });
 ```
 
-### Authentication
+See [`packages/client/README.md`](./packages/client/README.md) for authentication,
+query and connector examples.
 
-```typescript
-const api = createEasySQLClient({ baseUrl: "https://api.easysql.net" });
+## Migration from the single-package SDK
 
-const { data: token, error } = await api.login({
-  email: "user@example.com",
-  password: "my-password",
-});
+The previous single package `@clearsoft/easysql-sdk` was split:
 
-if (error) throw new Error(`Login failed: ${error}`);
-
-// Authenticated client instance
-const authApi = createEasySQLClient({
-  baseUrl: "https://api.easysql.net",
-  accessToken: token.access_token,
-});
-
-const { data: user } = await authApi.me();
-```
-
-### Running Natural Language Queries
-
-```typescript
-// Ask questions in natural language
-const { data: result } = await api.createQuery({
-  connector_id: "conn_abc123",
-  question: "How many users signed up this month?",
-});
-
-console.log(result?.sql);    // Generated SQL query
-console.log(result?.result); // Execution rows
-
-// List recent query history
-const { data: history } = await api.listQueries({ page: 1, per_page: 10 });
-```
-
-### Managing Database Connectors
-
-```typescript
-// Create a connector
-const { data: connector } = await api.createConnector({
-  name: "Production DB",
-  type: "mysql",
-  config: {
-    host: "db.example.com",
-    port: 3306,
-    database: "myapp",
-    user: "readonly",
-    password: "secret",
-  },
-});
-
-// List connectors
-const { data: connectors } = await api.listConnectors();
-
-// Get connector details
-const { data: conn } = await api.getConnector({ connector_id: "abc-123" });
-
-// Update a connector
-const { data: updated } = await api.updateConnector(
-  { name: "Staging DB" },
-  { path: { connector_id: "abc-123" } },
-);
-
-// Delete a connector
-await api.deleteConnector({ connector_id: "abc-123" });
-```
-
-### Dashboard & Analytics
-
-```typescript
-const { data: stats } = await api.dashboardStats();
-```
-
----
-
-## API Overview
-
-| Module | Available Methods |
+| Before | After |
 |---|---|
-| **Auth** | `register`, `login`, `refresh`, `me`, `deleteMe`, `updateMe`, `changePassword` |
-| **Queries** | `createQuery`, `listQueries`, `getQuery` |
-| **Connectors** | `listConnectors`, `createConnector`, `testConnector`, `getConnector`, `updateConnector`, `deleteConnector`, `syncConnector` |
-| **Billing** | `getPlan`, `checkout`, `portal` |
-| **Dashboard** | `dashboardStats` |
-| **Health** | `health`, `healthV1` |
+| `@clearsoft/easysql-sdk` | `@easysql/client` (same API surface) |
 
----
+Consumers only change the package they require and the import path; the
+generated types and the `createEasySQLClient` wrapper are unchanged.
 
-## Development & Contributing
-
-Contributions are welcome! Please read our **[Contributing Guidelines](./CONTRIBUTING.md)** for details on the development workflow, testing, and pull request process.
-
-To run tests and build locally:
+## Development
 
 ```bash
-cp .env.example .env                 # configure API URL
-make install                          # install dependencies
-make generate                         # download OpenAPI spec -> regenerate client
-make typecheck                        # run TypeScript checks
-make test                             # run test suite
-make build                            # compile to dist/
+cp .env.example .env   # configure the API URL used by `make generate`
+make install           # install workspace dependencies
+make generate          # download the OpenAPI spec → regenerate packages/client
+make check             # lint + typecheck + tests, every package
+make build             # compile every package to dist/
 ```
 
----
+Other targets: `make lint`, `make typecheck`, `make test`, `make docs`,
+`make clean`, `make all`. Run `make help` for the full list.
+
+Runnable examples for every package live in [`samples/`](./samples) — start with
+`bun run samples/01-schema-basic.ts`.
 
 ## License
 

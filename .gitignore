@@ -1,7 +1,16 @@
 node_modules/
 dist/
+*.tsbuildinfo
+.coverage/
+.opencode/
 .DS_Store
 .env
 !.env.example
-docs/
-!docs/API.md
+packages/*/docs/
+!packages/client/docs/API.md
+
+# Guard against stray emit next to sources (builds must go to dist/)
+packages/*/src/**/*.js
+packages/*/src/**/*.js.map
+packages/*/src/**/*.d.ts
+packages/*/src/**/*.d.ts.map

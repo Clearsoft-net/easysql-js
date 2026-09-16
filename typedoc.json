@@ -1,8 +1,0 @@
-{
-  "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["src/client.ts"],
-  "out": "docs",
-  "name": "EasySQL SDK",
-  "excludeExternals": true,
-  "excludePrivate": true
-}

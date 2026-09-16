@@ -1,0 +1,55 @@
+{
+  "name": "@easysql/client",
+  "version": "1.1.1",
+  "description": "EasySQL API TypeScript client — generated from the OpenAPI contract. Ask questions in natural language to your MySQL, MariaDB or PostgreSQL databases.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/api-types.d.ts",
+      "import": "./dist/api-types.js"
+    }
+  },
+  "author": "Clearsoft <contact@clearsoft.net>",
+  "homepage": "https://easysql.net",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Clearsoft-net/easysql-js.git",
+    "directory": "packages/client"
+  },
+  "bugs": {
+    "url": "https://github.com/Clearsoft-net/easysql-js/issues"
+  },
+  "scripts": {
+    "generate": "bun run scripts/generate.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "docs": "typedoc",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18",
+    "bun": ">=1.1.0"
+  },
+  "keywords": [
+    "easysql", "clearsoft", "sql", "nlp", "ai", "database", "api", "sdk",
+    "javascript", "typescript"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "openapi-fetch": "^0.13.0"
+  }
+}

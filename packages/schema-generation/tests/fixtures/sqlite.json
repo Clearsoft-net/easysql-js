@@ -1,0 +1,38 @@
+{
+  "engine": "sqlite",
+  "tables": [
+    {
+      "name": "users",
+      "rowsApprox": 42,
+      "columns": [
+        { "name": "id", "dataType": "INTEGER", "nullable": false, "primaryKey": true, "ordinal": 1 },
+        { "name": "email", "dataType": "VARCHAR(255)", "nullable": false, "ordinal": 2 },
+        { "name": "name", "dataType": "TEXT", "nullable": true, "ordinal": 3 },
+        { "name": "is_active", "dataType": "BOOLEAN", "nullable": false, "defaultValue": "1", "ordinal": 4 },
+        { "name": "created_at", "dataType": "DATETIME", "nullable": false, "defaultValue": "CURRENT_TIMESTAMP", "ordinal": 5 },
+        { "name": "external_id", "dataType": "UUID", "nullable": true, "ordinal": 6 },
+        { "name": "balance", "dataType": "NUMERIC", "nullable": false, "ordinal": 7 },
+        { "name": "avatar", "dataType": "", "nullable": true, "ordinal": 8 }
+      ]
+    },
+    {
+      "name": "posts",
+      "rowsApprox": 128,
+      "columns": [
+        { "name": "id", "dataType": "INTEGER", "nullable": false, "primaryKey": true, "ordinal": 1 },
+        { "name": "user_id", "dataType": "INTEGER", "nullable": false, "ordinal": 2, "foreignKey": { "table": "users", "column": "id" } },
+        { "name": "title", "dataType": "VARCHAR(200)", "nullable": false, "ordinal": 3 },
+        { "name": "body", "dataType": "TEXT", "nullable": true, "ordinal": 4 },
+        { "name": "payload", "dataType": "JSON", "nullable": true, "ordinal": 5 }
+      ]
+    },
+    {
+      "name": "post_tags",
+      "rowsApprox": 300,
+      "columns": [
+        { "name": "post_id", "dataType": "INTEGER", "nullable": false, "primaryKey": true, "ordinal": 1, "foreignKey": { "table": "posts", "column": "id" } },
+        { "name": "tag_id", "dataType": "INTEGER", "nullable": false, "primaryKey": true, "ordinal": 2 }
+      ]
+    }
+  ]
+}
