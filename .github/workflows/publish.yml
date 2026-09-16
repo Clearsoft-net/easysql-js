@@ -1,0 +1,48 @@
+name: Publish
+
+# Manual recovery / emergency publish. Publishes the current version of every
+# non-private package to npm without running semantic-release. Use it after a
+# release whose publish step failed, or to (re)publish the checked-out version.
+# Requires the NPM_TOKEN secret to have publish rights for the @easysql scope.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Expected version to publish (sanity check)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish packages to npm
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - run: make check
+
+      - run: make build
+
+      - name: Verify version
+        if: inputs.version != ''
+        run: |
+          node -e 'const v=require("./package.json").version; if (v !== process.env.EXPECTED) { console.error("version mismatch: "+v+" != "+process.env.EXPECTED); process.exit(1); } console.log("version ok: "+v)'
+        env:
+          EXPECTED: ${{ inputs.version }}
+
+      - name: Publish every non-private package
+        run: node scripts/release-publish.mjs
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
