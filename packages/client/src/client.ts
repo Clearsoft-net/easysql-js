@@ -81,6 +81,12 @@ export interface EasySQLClient {
   deleteFeedback(params: paths["/v1/feedbacks/{query_id}"]["delete"]["parameters"]["path"]): Promise<any>;
   /** GET /v1/dashboard/stats */
   dashboardStats(): Promise<any>;
+  /** GET /v1/analytics/queries
+   * @example
+   * await client.listAnalyticsQueries({ limit: 1, days: 1 }) */
+  listAnalyticsQueries(params: paths["/v1/analytics/queries"]["get"]["parameters"]["query"]): Promise<any>;
+  /** GET /v1/flags */
+  getFlags(): Promise<any>;
   /** GET /v1/billing/plan */
   getPlan(): Promise<any>;
   /** GET /v1/billing/usage */
@@ -266,6 +272,16 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     /** GET /v1/dashboard/stats */
     dashboardStats() {
       return client.GET("/v1/dashboard/stats");
+    },
+
+    /** GET /v1/analytics/queries */
+    listAnalyticsQueries(params: paths["/v1/analytics/queries"]["get"]["parameters"]["query"]) {
+      return client.GET("/v1/analytics/queries", { params: { query: params } });
+    },
+
+    /** GET /v1/flags */
+    getFlags() {
+      return client.GET("/v1/flags");
     },
 
     /** GET /v1/billing/plan */
