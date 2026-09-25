@@ -75,12 +75,13 @@ jobs:
         run: node scripts/node-compat-smoke.mjs
 
   integration:
-    name: Connector integration (MySQL + PostgreSQL)
+    name: Connector integration (MySQL + PostgreSQL + ClickHouse)
     runs-on: ubuntu-latest
 
     env:
       EASYSQL_TEST_MYSQL_URL: mysql://root:secret@127.0.0.1:3306/easysql_test
       EASYSQL_TEST_POSTGRES_URL: postgresql://postgres:secret@127.0.0.1:5432/easysql_test
+      EASYSQL_TEST_CLICKHOUSE_URL: clickhouse://default:secret@127.0.0.1:8123/easysql_test
 
     services:
       mysql:
@@ -104,6 +105,20 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+      clickhouse:
+        image: clickhouse/clickhouse-server:24.8
+        env:
+          CLICKHOUSE_DB: easysql_test
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: secret
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+        ports:
+          - 8123:8123
+        options: >-
+          --health-cmd="clickhouse-client --password secret --query 'SELECT 1'"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=20
@@ -123,6 +138,9 @@ jobs:
       - name: PostgreSQL connector integration
         run: bun run --filter './packages/connectors/postgres' test
 
+      - name: ClickHouse connector integration
+        run: bun run --filter './packages/connectors/clickhouse' test
+
   coverage:
     name: Coverage (hand-written source)
     runs-on: ubuntu-latest
@@ -130,6 +148,7 @@ jobs:
     env:
       EASYSQL_TEST_MYSQL_URL: mysql://root:secret@127.0.0.1:3306/easysql_test
       EASYSQL_TEST_POSTGRES_URL: postgresql://postgres:secret@127.0.0.1:5432/easysql_test
+      EASYSQL_TEST_CLICKHOUSE_URL: clickhouse://default:secret@127.0.0.1:8123/easysql_test
 
     services:
       mysql:
@@ -153,6 +172,20 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+      clickhouse:
+        image: clickhouse/clickhouse-server:24.8
+        env:
+          CLICKHOUSE_DB: easysql_test
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: secret
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+        ports:
+          - 8123:8123
+        options: >-
+          --health-cmd="clickhouse-client --password secret --query 'SELECT 1'"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=20

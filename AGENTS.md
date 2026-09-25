@@ -45,12 +45,13 @@ release per repository; generated code is kept strictly separate from hand-writt
 │   │   ├── src/types.ts           # re-exports the shared schema contracts
 │   │   ├── src/type-map.ts        # engine-native → SchemaType maps
 │   │   ├── src/generate.ts        # generateSchema()
-│   │   ├── tests/                 # fixtures (mysql, sqlite/postgres) + contract test
+│   │   ├── tests/                 # fixtures (mysql, postgres/sqlite, clickhouse) + contract test
 │   │   ├── package.json
 │   │   └── tsconfig.json / tsconfig.build.json
-│   └── connectors/                # @easysql/connector-* — hand-written
-│       ├── mysql/                 #   info_schema introspection (mysql2)
+│   └── connectors/                # @easysql/connector-* — hand-written, opt-in
+│       ├── mysql/                 #   information_schema introspection (mysql2)
 │       ├── postgres/              #   pg_catalog introspection (pg)
+│       ├── clickhouse/            #   system.tables/system.columns over HTTP (@clickhouse/client)
 │       └── sqlite/                #   sqlite_master/PRAGMA introspection (node:sqlite)
 ├── scripts/                       # lockstep release helpers (semantic-release exec)
 ├── .github/workflows/             # ci.yml, generate-sdk.yml, release.yml
@@ -62,9 +63,11 @@ release per repository; generated code is kept strictly separate from hand-writt
 └── package.json                   # @easysql/sdk — private workspace root (aggregator)
 ```
 
-`packages/connectors/*` currently has MySQL, PostgreSQL and SQLite. The Neon and
-Cloudflare D1 connectors are not implemented yet — tracked separately (EZSQL-60).
-The root `workspaces` glob already includes `packages/connectors/*`.
+`packages/connectors/*` currently has MySQL, PostgreSQL, ClickHouse and SQLite.
+Each one is a separate, opt-in package — `@easysql/client` never depends on a
+driver. The Neon and Cloudflare D1 connectors are not implemented yet — tracked
+separately (EZSQL-60). The root `workspaces` glob already includes
+`packages/connectors/*`.
 
 ## Key files
 
@@ -133,6 +136,9 @@ const result = connector.execute("SELECT 1");
 connector.close();
 ```
 
+The same contract is implemented by `MysqlConnector`, `PostgresConnector`,
+`ClickhouseConnector` and `SqliteConnector` — each a separate, optional package.
+
 ## Endpoints
 
 | Prefix | Methods | Paths |
@@ -153,11 +159,12 @@ connector.close();
     manual edit survives regeneration).
   - `node-compat` — matrix Node 20/22/24, builds and runs
     `scripts/node-compat-smoke.mjs` (loads every package under Node).
-  - `integration` — MySQL 8.4 + PostgreSQL 16 services; runs the connector
-    integration tests (`EASYSQL_TEST_*_URL`).
-  - `coverage` — MySQL + PostgreSQL services; `bun run coverage` enforces the
-    line threshold (`COVERAGE_THRESHOLD`, default 80) over hand-written source
-    only (generated `packages/client/src` and codegen scripts are excluded).
+  - `integration` — MySQL 8.4 + PostgreSQL 16 + ClickHouse 24.8 services; runs
+    the connector integration tests (`EASYSQL_TEST_*_URL`).
+  - `coverage` — MySQL + PostgreSQL + ClickHouse services; `bun run coverage`
+    enforces the line threshold (`COVERAGE_THRESHOLD`, default 80) over
+    hand-written source only (generated `packages/client/src` and codegen scripts
+    are excluded).
 - **generate-sdk.yml** (repository_dispatch `generate-sdk` or workflow_dispatch):
   regenerate → check → build → open an `auto/generate-sdk` PR.
 - **release.yml** (push main/master): check + build, then semantic-release.
@@ -191,3 +198,4 @@ reads `NODE_AUTH_TOKEN` through `~/.npmrc`. Both workflows map the same secret.
 | `EASYSQL_SQLITE_FILE` | sample 16 | No |
 | `EASYSQL_TEST_MYSQL_URL` | mysql connector integration test | No |
 | `EASYSQL_TEST_POSTGRES_URL` | postgres connector integration test | No |
+| `EASYSQL_TEST_CLICKHOUSE_URL` | clickhouse connector integration test | No |

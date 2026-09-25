@@ -32,6 +32,26 @@ describe("parseConnectionUrl", () => {
     expect(c).toMatchObject({ type: "sqlite", database: "/tmp/db.sqlite", host: "", port: 0 });
   });
 
+  it("parses a clickhouse URL with the HTTP default port", () => {
+    const c = parseConnectionUrl("clickhouse://default:secret@ch.local/analytics");
+    expect(c).toEqual({
+      type: "clickhouse",
+      host: "ch.local",
+      port: 8123,
+      user: "default",
+      password: "secret",
+      database: "analytics",
+      ssl: false,
+    });
+  });
+
+  it("parses a clickhouses URL as TLS on the HTTPS port", () => {
+    const c = parseConnectionUrl("clickhouses://default:secret@ch.local/db");
+    expect(c.type).toBe("clickhouse");
+    expect(c.port).toBe(8443);
+    expect(c.ssl).toBe(true);
+  });
+
   it("rejects unsupported protocols and missing fields", () => {
     expect(() => parseConnectionUrl("mongodb://localhost/db")).toThrow(/Unsupported protocol/);
     expect(() => parseConnectionUrl("mysql://host/db")).toThrow(/user/i);

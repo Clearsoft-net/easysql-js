@@ -1,16 +1,25 @@
 import { describe, expect, it } from "bun:test";
 import type { RawSchema, TableSchema } from "../src/index";
-import { generateSchema, mapMysqlType, mapPostgresType, mapSqliteType } from "../src/index";
+import {
+  generateSchema,
+  mapClickhouseType,
+  mapMysqlType,
+  mapPostgresType,
+  mapSqliteType,
+} from "../src/index";
+import clickhouseFixture from "./fixtures/clickhouse.json";
 import mysqlFixture from "./fixtures/mysql.json";
 import sqliteFixture from "./fixtures/sqlite.json";
 
 const mysql = mysqlFixture as RawSchema;
 const sqlite = sqliteFixture as RawSchema;
+const clickhouse = clickhouseFixture as RawSchema;
 
 describe("generateSchema — deterministic output", () => {
   it("produces the same payload on every run", () => {
     expect(generateSchema(mysql)).toEqual(generateSchema(mysql));
     expect(generateSchema(sqlite)).toEqual(generateSchema(sqlite));
+    expect(generateSchema(clickhouse)).toEqual(generateSchema(clickhouse));
   });
 
   it("is stable regardless of input table order", () => {
@@ -130,6 +139,60 @@ describe("type mapping — SQLite", () => {
     expect(mapSqliteType("DATE")).toBe("date");
     expect(mapSqliteType("JSON")).toBe("json");
     expect(mapSqliteType("UUID")).toBe("uuid");
+  });
+});
+
+describe("type mapping — ClickHouse", () => {
+  it("maps integers, booleans and numerics", () => {
+    expect(mapClickhouseType("UInt8")).toBe("smallint");
+    expect(mapClickhouseType("UInt32")).toBe("integer");
+    expect(mapClickhouseType("Int64")).toBe("bigint");
+    expect(mapClickhouseType("UInt64")).toBe("bigint");
+    expect(mapClickhouseType("Float64")).toBe("float");
+    expect(mapClickhouseType("Decimal(18, 4)")).toBe("decimal");
+    expect(mapClickhouseType("Bool")).toBe("boolean");
+  });
+
+  it("unwraps Nullable and LowCardinality", () => {
+    expect(mapClickhouseType("Nullable(String)")).toBe("string");
+    expect(mapClickhouseType("LowCardinality(String)")).toBe("string");
+    expect(mapClickhouseType("Nullable(Decimal(18, 4))")).toBe("decimal");
+    expect(mapClickhouseType("LowCardinality(Nullable(String))")).toBe("string");
+  });
+
+  it("maps strings, temporal, uuid, enum and composites", () => {
+    expect(mapClickhouseType("String")).toBe("string");
+    expect(mapClickhouseType("FixedString(2)")).toBe("string");
+    expect(mapClickhouseType("Date")).toBe("date");
+    expect(mapClickhouseType("Date32")).toBe("date");
+    expect(mapClickhouseType("DateTime")).toBe("timestamp");
+    expect(mapClickhouseType("DateTime64(3, 'UTC')")).toBe("timestamp");
+    expect(mapClickhouseType("UUID")).toBe("uuid");
+    expect(mapClickhouseType("Enum8('a' = 1)")).toBe("enum");
+    expect(mapClickhouseType("Array(String)")).toBe("json");
+    expect(mapClickhouseType("Map(String, UInt8)")).toBe("json");
+    expect(mapClickhouseType("Tuple(String, UInt8)")).toBe("json");
+    expect(mapClickhouseType("Nested(x UInt8)")).toBe("json");
+  });
+
+  it("falls back to unknown for unmapped types", () => {
+    expect(mapClickhouseType("AggregateFunction(sum, UInt64)")).toBe("unknown");
+  });
+
+  it("normalizes a whole ClickHouse schema into canonical types", () => {
+    const events = generateSchema(clickhouse).find((t) => t.name === "events") as TableSchema;
+    expect(events.columns.map((c) => c.type)).toEqual([
+      "bigint",
+      "integer",
+      "string",
+      "json",
+      "decimal",
+      "json",
+      "uuid",
+      "timestamp",
+      "date",
+      "boolean",
+    ]);
   });
 });
 

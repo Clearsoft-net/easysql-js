@@ -10,7 +10,8 @@
       "@easysql/schema-generation": ["../packages/schema-generation/src/index.ts"],
       "@easysql/connector-mysql": ["../packages/connectors/mysql/src/index.ts"],
       "@easysql/connector-postgres": ["../packages/connectors/postgres/src/index.ts"],
-      "@easysql/connector-sqlite": ["../packages/connectors/sqlite/src/index.ts"]
+      "@easysql/connector-sqlite": ["../packages/connectors/sqlite/src/index.ts"],
+      "@easysql/connector-clickhouse": ["../packages/connectors/clickhouse/src/index.ts"]
     }
   },
   "include": ["**/*.ts"]

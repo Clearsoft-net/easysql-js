@@ -167,10 +167,82 @@ export function mapPostgresType(raw: string): SchemaType {
   return POSTGRES_TYPES[normalized] ?? "unknown";
 }
 
+const CLICKHOUSE_TYPES: Record<string, SchemaType> = {
+  // integers
+  int8: "smallint",
+  int16: "smallint",
+  int32: "integer",
+  int64: "bigint",
+  int128: "bigint",
+  int256: "bigint",
+  uint8: "smallint",
+  uint16: "smallint",
+  uint32: "integer",
+  uint64: "bigint",
+  uint128: "bigint",
+  uint256: "bigint",
+  // booleans
+  bool: "boolean",
+  boolean: "boolean",
+  // numerics
+  float32: "float",
+  float64: "float",
+  decimal: "decimal",
+  decimal32: "decimal",
+  decimal64: "decimal",
+  decimal128: "decimal",
+  decimal256: "decimal",
+  // strings
+  string: "string",
+  fixedstring: "string",
+  // network / identifiers kept as text
+  ipv4: "string",
+  ipv6: "string",
+  // temporal
+  date: "date",
+  date32: "date",
+  datetime: "timestamp",
+  datetime64: "timestamp",
+  // documents
+  uuid: "uuid",
+  json: "json",
+  object: "json",
+  enum8: "enum",
+  enum16: "enum",
+};
+
+/**
+ * Maps a ClickHouse type (as reported by `system.columns.type`) to the canonical
+ * vocabulary. The type string carries wrappers inline, so `Nullable(T)` and
+ * `LowCardinality(T)` are unwrapped before the lookup, and the composite types
+ * (`Array`, `Map`, `Tuple`, `Nested`) collapse to `json`.
+ */
+export function mapClickhouseType(raw: string): SchemaType {
+  const nullable = unwrap(raw, "Nullable");
+  if (nullable !== null) return mapClickhouseType(nullable);
+  const lowCardinality = unwrap(raw, "LowCardinality");
+  if (lowCardinality !== null) return mapClickhouseType(lowCardinality);
+
+  const normalized = normalize(raw);
+  if (/^(array|map|tuple|nested)\b/.test(normalized)) return "json";
+  return CLICKHOUSE_TYPES[normalized] ?? "unknown";
+}
+
+/** Returns the inner type when `raw` is exactly `Wrapper(...)`, else `null`. */
+function unwrap(raw: string, wrapper: string): string | null {
+  const trimmed = raw.trim();
+  const prefix = `${wrapper}(`;
+  if (trimmed.toLowerCase().startsWith(prefix.toLowerCase()) && trimmed.endsWith(")")) {
+    return trimmed.slice(prefix.length, -1);
+  }
+  return null;
+}
+
 /** Maps an engine-native type using the map for that engine. */
 export function mapType(engine: ConnectorEngine, raw: string): SchemaType {
   if (engine === "sqlite") return mapSqliteType(raw);
   if (engine === "postgresql") return mapPostgresType(raw);
+  if (engine === "clickhouse") return mapClickhouseType(raw);
   return mapMysqlType(raw);
 }
 

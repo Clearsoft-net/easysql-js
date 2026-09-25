@@ -24,7 +24,7 @@ export interface TableSchema {
 }
 
 /** Engines the schema vocabulary knows how to map. */
-export type ConnectorEngine = "mysql" | "mariadb" | "sqlite" | "postgresql";
+export type ConnectorEngine = "mysql" | "mariadb" | "sqlite" | "postgresql" | "clickhouse";
 
 /**
  * A column as reported by a connector, before normalisation. `dataType` is the

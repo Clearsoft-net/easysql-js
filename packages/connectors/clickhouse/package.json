@@ -1,0 +1,54 @@
+{
+  "name": "@easysql/connector-clickhouse",
+  "version": "2.1.0",
+  "description": "EasySQL ClickHouse connector — local schema introspection and query execution over the HTTP interface. Credentials never leave the process.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "author": "Clearsoft <contact@clearsoft.net>",
+  "homepage": "https://easysql.net",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Clearsoft-net/easysql-js.git",
+    "directory": "packages/connectors/clickhouse"
+  },
+  "bugs": {
+    "url": "https://github.com/Clearsoft-net/easysql-js/issues"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "easysql",
+    "clearsoft",
+    "clickhouse",
+    "connector",
+    "introspection",
+    "sql"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@clickhouse/client": "^1.23.1",
+    "@easysql/common": "workspace:*"
+  },
+  "engines": {
+    "node": ">=20",
+    "bun": ">=1.1.0"
+  }
+}
