@@ -1,6 +1,6 @@
 {
   "name": "@easysql/schema-generation",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Normalize introspected database metadata into the EasySQL schema payload the API consumes. Pure, deterministic, no I/O.",
   "type": "module",
   "main": "dist/index.js",
