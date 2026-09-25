@@ -1,6 +1,6 @@
 {
   "name": "@easysql/common",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Shared contracts (types and interfaces) for the EasySQL TypeScript SDK: schema shapes, connector contract and query results.",
   "type": "module",
   "main": "dist/index.js",

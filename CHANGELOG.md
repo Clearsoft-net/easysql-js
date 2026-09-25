@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/Clearsoft-net/easysql-js/compare/v2.1.0...v2.2.0) (2026-09-25)
+
+
+### Features
+
+* **connectors:** add ClickHouse connector support ([#12](https://github.com/Clearsoft-net/easysql-js/issues/12)) ([749e7ea](https://github.com/Clearsoft-net/easysql-js/commit/749e7ea8fd7333f1689bc0e983c633002556903a))
+
 # [2.1.0](https://github.com/Clearsoft-net/easysql-js/compare/v2.0.0...v2.1.0) (2026-09-25)
 
 

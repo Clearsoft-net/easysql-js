@@ -1,6 +1,6 @@
 {
   "name": "@easysql/connector-mysql",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "EasySQL MySQL/MariaDB connector — local schema introspection and query execution. Credentials never leave the process.",
   "type": "module",
   "main": "dist/index.js",

@@ -23,18 +23,18 @@
     },
     "packages/client": {
       "name": "@easysql/client",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "dependencies": {
         "openapi-fetch": "^0.13.0",
       },
     },
     "packages/common": {
       "name": "@easysql/common",
-      "version": "2.1.0",
+      "version": "2.2.0",
     },
     "packages/connectors/clickhouse": {
       "name": "@easysql/connector-clickhouse",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "dependencies": {
         "@clickhouse/client": "^1.23.1",
         "@easysql/common": "workspace:*",
@@ -42,7 +42,7 @@
     },
     "packages/connectors/mysql": {
       "name": "@easysql/connector-mysql",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "dependencies": {
         "@easysql/common": "workspace:*",
         "mysql2": "^3.11.5",
@@ -50,7 +50,7 @@
     },
     "packages/connectors/postgres": {
       "name": "@easysql/connector-postgres",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "dependencies": {
         "@easysql/common": "workspace:*",
         "pg": "^8.13.1",
@@ -61,14 +61,14 @@
     },
     "packages/connectors/sqlite": {
       "name": "@easysql/connector-sqlite",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "dependencies": {
         "@easysql/common": "workspace:*",
       },
     },
     "packages/schema-generation": {
       "name": "@easysql/schema-generation",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "dependencies": {
         "@easysql/common": "workspace:*",
       },

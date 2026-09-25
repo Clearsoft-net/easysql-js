@@ -1,6 +1,6 @@
 {
   "name": "@easysql/connector-clickhouse",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "EasySQL ClickHouse connector — local schema introspection and query execution over the HTTP interface. Credentials never leave the process.",
   "type": "module",
   "main": "dist/index.js",

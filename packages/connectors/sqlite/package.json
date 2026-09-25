@@ -1,6 +1,6 @@
 {
   "name": "@easysql/connector-sqlite",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "EasySQL SQLite connector — local schema introspection and query execution using Node's built-in node:sqlite.",
   "type": "module",
   "main": "dist/index.js",
