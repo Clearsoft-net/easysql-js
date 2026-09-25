@@ -414,6 +414,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/analytics/queries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** User's queries from Cloudflare Analytics Engine (last N days) */
+        get: operations["list_analytics_queries_v1_analytics_queries_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Feature flags for the current user (Cloudflare Flagship) */
+        get: operations["get_flags_v1_flags_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/billing/plan": {
         parameters: {
             query?: never;
@@ -594,6 +628,15 @@ export interface components {
         } | null;
         UserMeResponse: components["schemas"]["UserResponse"] & {
             active_plan: components["schemas"]["ActivePlan"];
+            /** @description Claims completos do ID token OIDC (fonte do perfil). */
+            claims: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Format: uri
+             * @description URL da interface de usuário do IdP para editar o perfil.
+             */
+            idp_profile_url: string | null;
         };
         ApiKeyCreate: {
             name: string;
@@ -632,23 +675,30 @@ export interface components {
         };
         ConnectorCreate: {
             /** @enum {string} */
-            type: "mysql" | "mariadb" | "postgresql" | "wp" | "sqlite";
+            type: "mysql" | "mariadb" | "postgresql" | "wp" | "sqlite" | "clickhouse";
             name: string;
             schema?: components["schemas"]["TableSchema"][];
+            /** @description DB engine version reported by the client runtime (e.g. 'MySQL 8.0.36', 'SQLite 3.45.1') */
+            db_version?: string;
         };
         ConnectorUpdate: {
             name?: string;
             schema?: components["schemas"]["TableSchema"][];
+            /** @description DB engine version reported by the client runtime (e.g. 'MySQL 8.0.36', 'SQLite 3.45.1') */
+            db_version?: string;
         };
         ConnectorSyncRequest: {
             schema: components["schemas"]["TableSchema"][];
+            /** @description DB engine version reported by the client runtime (e.g. 'MySQL 8.0.36', 'SQLite 3.45.1') */
+            db_version?: string;
         };
         ConnectorResponse: {
             /** Format: uuid */
             id: string;
-            /** @description "mysql" | "postgresql" | "sqlite" */
+            /** @description "mysql" | "mariadb" | "postgresql" | "sqlite" | "clickhouse" */
             type: string;
             name: string;
+            db_version: string | null;
             /** Format: date-time */
             last_sync_at: string | null;
             /** Format: date-time */
@@ -656,6 +706,7 @@ export interface components {
         };
         ConnectorSchemaResponse: {
             tables: components["schemas"]["TableSchema"][];
+            db_version: string | null;
         };
         SuggestionsResponse: {
             suggestions: string[];
@@ -748,6 +799,25 @@ export interface components {
             most_used_connectors: components["schemas"]["ConnectorUsage"][];
             /** Format: date-time */
             fetched_at: string;
+        };
+        FlagsResponse: {
+            /** @description Visibilidade da tela Analytics no app web (flag analytics-screen). */
+            analytics_screen: boolean;
+        };
+        AnalyticsQueryEvent: {
+            timestamp: string;
+            operation: string;
+            question: string;
+            sql: string | null;
+            status: string;
+            error_code: string | null;
+            total_tokens: number;
+            latency_ms: number;
+        };
+        AnalyticsQueriesResponse: {
+            items: components["schemas"]["AnalyticsQueryEvent"][];
+            count: number;
+            days: number;
         };
         PlanResponse: {
             id: string;
@@ -1983,6 +2053,94 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DashboardStats"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_analytics_queries_v1_analytics_queries_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsQueriesResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Invalid limit/days */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Analytics Engine upstream error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Analytics Engine read not configured */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_flags_v1_flags_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FlagsResponse"];
                 };
             };
             /** @description Unauthorized */
