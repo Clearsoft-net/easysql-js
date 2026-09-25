@@ -1,0 +1,32 @@
+{
+  "engine": "clickhouse",
+  "tables": [
+    {
+      "name": "events",
+      "rowsApprox": 128000,
+      "columns": [
+        { "name": "id", "dataType": "UInt64", "nullable": false, "primaryKey": true, "ordinal": 1 },
+        { "name": "user_id", "dataType": "UInt32", "nullable": false, "ordinal": 2 },
+        { "name": "event_name", "dataType": "LowCardinality(String)", "nullable": false, "ordinal": 3 },
+        { "name": "props", "dataType": "Map(String, String)", "nullable": false, "ordinal": 4 },
+        { "name": "amount", "dataType": "Nullable(Decimal(18, 4))", "nullable": true, "ordinal": 5 },
+        { "name": "tags", "dataType": "Array(String)", "nullable": false, "ordinal": 6 },
+        { "name": "session_id", "dataType": "UUID", "nullable": true, "ordinal": 7 },
+        { "name": "created_at", "dataType": "DateTime64(3, 'UTC')", "nullable": false, "defaultValue": "now()", "ordinal": 8 },
+        { "name": "event_date", "dataType": "Date", "nullable": false, "ordinal": 9 },
+        { "name": "is_bot", "dataType": "Bool", "nullable": false, "defaultValue": "false", "ordinal": 10 }
+      ]
+    },
+    {
+      "name": "users",
+      "rowsApprox": 900,
+      "columns": [
+        { "name": "id", "dataType": "UInt64", "nullable": false, "primaryKey": true, "ordinal": 1 },
+        { "name": "email", "dataType": "String", "nullable": false, "ordinal": 2 },
+        { "name": "country", "dataType": "FixedString(2)", "nullable": true, "ordinal": 3 },
+        { "name": "signup_at", "dataType": "DateTime", "nullable": false, "ordinal": 4 },
+        { "name": "plan", "dataType": "Enum8('free' = 0, 'pro' = 1)", "nullable": false, "ordinal": 5 }
+      ]
+    }
+  ]
+}

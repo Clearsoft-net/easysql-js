@@ -44,13 +44,14 @@ bun run samples/09-client-list-connectors.ts
 | `12-client-api-keys.ts` | Create / list / delete an API key. |
 | `13-client-dashboard-billing.ts` | Dashboard stats + plan + usage. |
 
-## MySQL / PostgreSQL connectors
+## MySQL / PostgreSQL / ClickHouse connectors
 
 | Sample | Shows |
 |---|---|
 | `14-mysql-introspect.ts` | Introspect a MySQL/MariaDB database. |
 | `15-postgres-introspect.ts` | Introspect PostgreSQL and run a query. |
 | `16-full-local-execution.ts` | Full flow: introspect → ask → execute locally → answer. |
+| `17-clickhouse-introspect.ts` | Introspect a ClickHouse database. |
 
 ## Environment
 
@@ -62,3 +63,4 @@ bun run samples/09-client-list-connectors.ts
 | `EASYSQL_SQLITE_FILE` | Sample 16 |
 | `EASYSQL_TEST_MYSQL_URL` | Sample 14 (or pass a URL as argv) |
 | `EASYSQL_TEST_POSTGRES_URL` | Sample 15 (or pass a URL as argv) |
+| `EASYSQL_TEST_CLICKHOUSE_URL` | Sample 17 (or pass a URL as argv) |

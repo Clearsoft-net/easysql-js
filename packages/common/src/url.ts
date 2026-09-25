@@ -5,6 +5,8 @@
  *   mysql://user:pass@host:port/db
  *   mariadb://user:pass@host:port/db
  *   postgresql://user:pass@host:port/db
+ *   clickhouse://user:pass@host:8123/db      (HTTP interface)
+ *   clickhouses://user:pass@host:8443/db     (HTTPS interface)
  *   sqlite:///absolute/path/to.db
  *
  * The returned object keeps the password in memory only; callers decide
@@ -27,6 +29,7 @@ const DEFAULT_PORTS: Record<ConnectorEngine, number> = {
   mysql: 3306,
   mariadb: 3306,
   postgresql: 5432,
+  clickhouse: 8123,
   sqlite: 0,
 };
 
@@ -68,21 +71,34 @@ export function parseConnectionUrl(raw: string): ParsedConnection {
     case "postgresql":
       type = "postgresql";
       break;
+    case "clickhouse":
+    case "clickhouses":
+      type = "clickhouse";
+      break;
     default:
       throw new Error(
-        `Unsupported protocol '${protocol}'. Use mysql://, postgresql://, or sqlite:///path/to.db`,
+        `Unsupported protocol '${protocol}'. Use mysql://, postgresql://, clickhouse://, or sqlite:///path/to.db`,
       );
   }
 
   const host = url.hostname || "127.0.0.1";
-  const port = url.port ? Number.parseInt(url.port, 10) : DEFAULT_PORTS[type];
+  const port = url.port
+    ? Number.parseInt(url.port, 10)
+    : protocol === "clickhouses"
+      ? 8443
+      : DEFAULT_PORTS[type];
   const user = decodeURIComponent(url.username || "");
   const password = decodeURIComponent(url.password || "");
   const database = (url.pathname || "/").replace(/^\//, "");
+  // ClickHouse uses the HTTP interface: 8123 plain / 8443 TLS. `clickhouses://`
+  // implies TLS; `?ssl=true` / `?secure=true` force it on the plain scheme.
   const ssl =
-    url.searchParams.get("sslmode") === "require" || protocol === "mysql"
+    protocol === "clickhouses" ||
+    (protocol === "clickhouse" &&
+      (url.searchParams.get("ssl") === "true" || url.searchParams.get("secure") === "true")) ||
+    (url.searchParams.get("sslmode") === "require" || protocol === "mysql"
       ? url.searchParams.get("ssl") === "true"
-      : false;
+      : false);
 
   if (!user) throw new Error("Missing database user in connection URL.");
   if (!database) throw new Error("Missing database name in connection URL.");

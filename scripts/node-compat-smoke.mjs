@@ -32,8 +32,10 @@ assert.equal(sanitizeErrorMessage("boom secret", ["secret"]), "boom ****");
 // Every connector module must load under Node.
 const { MysqlConnector } = await import("../packages/connectors/mysql/dist/index.js");
 const { PostgresConnector } = await import("../packages/connectors/postgres/dist/index.js");
+const { ClickhouseConnector } = await import("../packages/connectors/clickhouse/dist/index.js");
 assert.equal(typeof MysqlConnector, "function");
 assert.equal(typeof PostgresConnector, "function");
+assert.equal(typeof ClickhouseConnector, "function");
 
 const [major, minor] = process.versions.node.split(".").map(Number);
 if (major > 22 || (major === 22 && minor >= 5)) {

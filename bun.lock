@@ -32,6 +32,14 @@
       "name": "@easysql/common",
       "version": "2.1.0",
     },
+    "packages/connectors/clickhouse": {
+      "name": "@easysql/connector-clickhouse",
+      "version": "2.1.0",
+      "dependencies": {
+        "@clickhouse/client": "^1.23.1",
+        "@easysql/common": "workspace:*",
+      },
+    },
     "packages/connectors/mysql": {
       "name": "@easysql/connector-mysql",
       "version": "2.1.0",
@@ -97,11 +105,15 @@
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.5.12", "", { "os": "win32", "cpu": "x64" }, "sha512-B1R/l+CwEpKFSuqiwePzPNRk1EiJN8kc0UhdafNz6MZN9v5OFP9HYP1irptvWzHrwVI4blVNGMbxc5zt70m3IA=="],
 
+    "@clickhouse/client": ["@clickhouse/client@1.23.1", "", {}, "sha512-vs3/Zc1dHvT171btW5nMoPsPCJ6QVJ5pp7obxzO5sjqwFx/jjz9wwCAqcFOdc2DhprugDBaVn+4dVY8hG3A9nw=="],
+
     "@colors/colors": ["@colors/colors@1.5.0", "", {}, "sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ=="],
 
     "@easysql/client": ["@easysql/client@workspace:packages/client"],
 
     "@easysql/common": ["@easysql/common@workspace:packages/common"],
+
+    "@easysql/connector-clickhouse": ["@easysql/connector-clickhouse@workspace:packages/connectors/clickhouse"],
 
     "@easysql/connector-mysql": ["@easysql/connector-mysql@workspace:packages/connectors/mysql"],
 
