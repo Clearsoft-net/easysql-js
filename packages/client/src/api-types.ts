@@ -455,7 +455,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List plans (Free/Starter/Pro/Business) */
+        /** List plans (Free/Starter/Pro/Max) */
         get: operations["get_plan_v1_billing_plan_get"];
         put?: never;
         post?: never;
@@ -472,7 +472,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Current usage vs plan limits (daily/weekly/monthly) */
+        /** Current usage as percentage per window (5h/7d) */
         get: operations["get_usage_v1_billing_usage_get"];
         put?: never;
         post?: never;
@@ -622,9 +622,9 @@ export interface components {
         ActivePlan: {
             id: string;
             name: string;
-            max_queries_daily: number;
-            max_queries_weekly: number;
-            max_queries_monthly: number;
+            credits_5h: number;
+            credits_7d: number;
+            support_tier: string;
         } | null;
         UserMeResponse: components["schemas"]["UserResponse"] & {
             active_plan: components["schemas"]["ActivePlan"];
@@ -823,10 +823,10 @@ export interface components {
             id: string;
             name: string;
             price: number;
-            max_connections: number;
-            max_queries_daily: number;
-            max_queries_weekly: number;
-            max_queries_monthly: number;
+            price_annual: number;
+            credits_5h: number;
+            credits_7d: number;
+            support_tier: string;
         };
         CheckoutResponse: {
             /** Format: uri */
@@ -836,16 +836,20 @@ export interface components {
             /** Format: uri */
             url: string;
         };
-        UsageBucket: {
-            used: number;
-            limit: number;
+        UsageWindow: {
+            /** @enum {string} */
+            kind: "5h" | "7d";
+            used_pct: number;
+            remaining_pct: number;
+            /** Format: date-time */
+            window_start: string;
+            /** Format: date-time */
+            window_end: string;
         };
         UsageResponse: {
-            daily: components["schemas"]["UsageBucket"];
-            weekly: components["schemas"]["UsageBucket"];
-            monthly: components["schemas"]["UsageBucket"];
             plan_id: string;
             plan_name: string;
+            windows: components["schemas"]["UsageWindow"][];
             /** Format: date-time */
             fetched_at: string;
         };
