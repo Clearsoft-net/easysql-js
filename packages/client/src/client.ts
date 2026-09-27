@@ -63,22 +63,14 @@ export interface EasySQLClient {
   autocomplete(body: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["parameters"]["path"] }): Promise<any>;
   /** GET /v1/queries
    * @example
-   * await client.listQueries({ page: 1, per_page: 1 }) */
+   * await client.listQueries({ limit: 1, cursor: 1 }) */
   listQueries(params: paths["/v1/queries"]["get"]["parameters"]["query"]): Promise<any>;
   /** POST /v1/queries */
   createQuery(body: paths["/v1/queries"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** GET /v1/queries/{query_id} */
   getQuery(params: paths["/v1/queries/{query_id}"]["get"]["parameters"]["path"]): Promise<any>;
-  /** POST /v1/queries/{query_id}/answer */
-  answerQuery(body: paths["/v1/queries/{query_id}/answer"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/queries/{query_id}/answer"]["post"]["parameters"]["path"] }): Promise<any>;
-  /** GET /v1/queries/{query_id}/stream */
-  streamQuery(params: paths["/v1/queries/{query_id}/stream"]["get"]["parameters"]["path"]): Promise<any>;
-  /** GET /v1/feedbacks/{query_id} */
-  getFeedback(params: paths["/v1/feedbacks/{query_id}"]["get"]["parameters"]["path"]): Promise<any>;
-  /** PUT /v1/feedbacks/{query_id} */
-  upsertFeedback(body: paths["/v1/feedbacks/{query_id}"]["put"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/feedbacks/{query_id}"]["put"]["parameters"]["path"] }): Promise<any>;
-  /** DELETE /v1/feedbacks/{query_id} */
-  deleteFeedback(params: paths["/v1/feedbacks/{query_id}"]["delete"]["parameters"]["path"]): Promise<any>;
+  /** POST /v1/feedbacks */
+  createFeedback(body: paths["/v1/feedbacks"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** GET /v1/dashboard/stats */
   dashboardStats(): Promise<any>;
   /** GET /v1/analytics/queries
@@ -244,29 +236,9 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
       return client.GET("/v1/queries/{query_id}", { params: { path: params } });
     },
 
-    /** POST /v1/queries/{query_id}/answer */
-    answerQuery(body: paths["/v1/queries/{query_id}/answer"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/queries/{query_id}/answer"]["post"]["parameters"]["path"] }) {
-      return client.POST("/v1/queries/{query_id}/answer", { body, params });
-    },
-
-    /** GET /v1/queries/{query_id}/stream */
-    streamQuery(params: paths["/v1/queries/{query_id}/stream"]["get"]["parameters"]["path"]) {
-      return client.GET("/v1/queries/{query_id}/stream", { params: { path: params } });
-    },
-
-    /** GET /v1/feedbacks/{query_id} */
-    getFeedback(params: paths["/v1/feedbacks/{query_id}"]["get"]["parameters"]["path"]) {
-      return client.GET("/v1/feedbacks/{query_id}", { params: { path: params } });
-    },
-
-    /** PUT /v1/feedbacks/{query_id} */
-    upsertFeedback(body: paths["/v1/feedbacks/{query_id}"]["put"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/feedbacks/{query_id}"]["put"]["parameters"]["path"] }) {
-      return client.PUT("/v1/feedbacks/{query_id}", { body, params });
-    },
-
-    /** DELETE /v1/feedbacks/{query_id} */
-    deleteFeedback(params: paths["/v1/feedbacks/{query_id}"]["delete"]["parameters"]["path"]) {
-      return client.DELETE("/v1/feedbacks/{query_id}", { params: { path: params } });
+    /** POST /v1/feedbacks */
+    createFeedback(body: paths["/v1/feedbacks"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/feedbacks", { body });
     },
 
     /** GET /v1/dashboard/stats */

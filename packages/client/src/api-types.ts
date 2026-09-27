@@ -305,12 +305,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Paginated query history */
+        /** Cursor-paginated query history (R2 Data Catalog) */
         get: operations["list_queries_v1_queries_get"];
         put?: never;
         /**
          * Ask question (generate SQL only — client executes)
-         * @description EZSQL-37: the API NEVER executes queries server-side. It generates + validates SQL from the connector's cached schema, persists the question, and returns `needs_local_execution: true`. A client-side runtime executes the SQL locally and POSTs the result to /v1/queries/{id}/answer. Requires API key authentication (JWT → 403) because questions are only asked by external connector runtimes, not the web app.
+         * @description EZSQL-37: the API NEVER executes queries server-side and NEVER receives customer data. It generates + validates SQL from the connector's cached schema, persists the question, and returns `needs_local_execution: true`. A client-side runtime executes the SQL locally and renders the answer/chart on its side. Requires API key authentication (JWT → 403) because questions are only asked by external connector runtimes, not the web app.
          */
         post: operations["create_query_v1_queries_post"];
         delete?: never;
@@ -328,7 +328,7 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** Get query detail (poll this to wait for status=ready) */
+        /** Get query detail */
         get: operations["get_query_v1_queries__query_id__get"];
         put?: never;
         post?: never;
@@ -338,60 +338,21 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/queries/{query_id}/answer": {
+    "/v1/feedbacks": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                query_id: string;
-            };
+            path?: never;
             cookie?: never;
         };
         get?: never;
         put?: never;
-        /** WP plugin submits locally-executed result (API key only) */
-        post: operations["answer_query_v1_queries__query_id__answer_post"];
+        /**
+         * Create feedback (append-only; no read/update/delete)
+         * @description O usuário só cria feedback (N por query, a qualquer momento). Não há endpoints de leitura/edição na API pública; feedbacks são lidos apenas no backoffice (R2 SQL).
+         */
+        post: operations["create_feedback_v1_feedbacks_post"];
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/queries/{query_id}/stream": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                query_id: string;
-            };
-            cookie?: never;
-        };
-        /** SSE stream — emits QueryResponse every 500ms until ready/failed or 60s timeout */
-        get: operations["stream_query_v1_queries__query_id__stream_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/feedbacks/{query_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                query_id: string;
-            };
-            cookie?: never;
-        };
-        /** Get feedback for a query */
-        get: operations["get_feedback_v1_feedbacks__query_id__get"];
-        /** Upsert feedback for a query */
-        put: operations["upsert_feedback_v1_feedbacks__query_id__put"];
-        post?: never;
-        /** Delete feedback for a query */
-        delete: operations["delete_feedback_v1_feedbacks__query_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -719,24 +680,12 @@ export interface components {
             connector_id: string;
             question: string;
         };
-        LocalResultRequest: {
-            result_data: {
-                [key: string]: unknown;
-            }[];
-        };
         QueryResponse: {
             /** Format: uuid */
             id: string;
             question: string;
             sql_generated?: string | null;
-            answer?: string | null;
-            chart_config?: {
-                [key: string]: unknown;
-            } | null;
             error?: string | null;
-            result_data?: {
-                [key: string]: unknown;
-            }[] | null;
             needs_local_execution: boolean;
             /** @enum {string} */
             status: "processing" | "ready" | "failed";
@@ -750,21 +699,20 @@ export interface components {
             connector_id: string;
             question: string;
             sql_generated?: string | null;
-            answer?: string | null;
             error?: string | null;
             /** @enum {string} */
             status: "processing" | "ready" | "failed";
             /** Format: date-time */
             created_at: string;
         };
-        PaginatedQueries: {
+        HistoryPage: {
             items: components["schemas"]["QueryHistoryItem"][];
-            total: number;
-            page: number;
-            per_page: number;
-            total_pages: number;
+            /** @description Cursor for the next page (created_at of the last item); null when exhausted. */
+            next_cursor: string | null;
         };
         FeedbackCreate: {
+            /** Format: uuid */
+            query_id: string;
             positive: boolean;
             comment?: string | null;
         };
@@ -777,8 +725,6 @@ export interface components {
             comment?: string | null;
             /** Format: date-time */
             created_at: string;
-            /** Format: date-time */
-            updated_at: string;
         };
         DailyQueryCount: {
             /** @description YYYY-MM-DD */
@@ -1661,8 +1607,9 @@ export interface operations {
     list_queries_v1_queries_get: {
         parameters: {
             query?: {
-                page?: number;
-                per_page?: number;
+                limit?: number;
+                /** @description created_at of the last item of the previous page. */
+                cursor?: string | null;
             };
             header?: never;
             path?: never;
@@ -1676,7 +1623,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedQueries"];
+                    "application/json": components["schemas"]["HistoryPage"];
                 };
             };
             /** @description Unauthorized */
@@ -1808,155 +1755,11 @@ export interface operations {
             };
         };
     };
-    answer_query_v1_queries__query_id__answer_post: {
+    create_feedback_v1_feedbacks_post: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                query_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LocalResultRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QueryResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description API key only */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    stream_query_v1_queries__query_id__stream_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                query_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description SSE stream */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "text/event-stream": string;
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    get_feedback_v1_feedbacks__query_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                query_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FeedbackResponse"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    upsert_feedback_v1_feedbacks__query_id__put: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                query_id: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
@@ -1965,8 +1768,8 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Created */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1983,15 +1786,6 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Query not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
             /** @description Validation error */
             422: {
                 headers: {
@@ -1999,44 +1793,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    delete_feedback_v1_feedbacks__query_id__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                query_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

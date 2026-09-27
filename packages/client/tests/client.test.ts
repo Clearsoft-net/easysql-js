@@ -98,11 +98,11 @@ describe("Query parameters", () => {
     const f = mockFetch({});
     const client = createEasySQLClient({ baseUrl, fetch: f });
 
-    await client.listQueries({ page: 2, per_page: 10 });
+    await client.listQueries({ limit: 10, cursor: "abc" });
 
     const url = new URL(lastFetchArgs(f).url);
-    expect(url.searchParams.get("page")).toBe("2");
-    expect(url.searchParams.get("per_page")).toBe("10");
+    expect(url.searchParams.get("limit")).toBe("10");
+    expect(url.searchParams.get("cursor")).toBe("abc");
   });
 });
 

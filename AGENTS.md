@@ -110,7 +110,7 @@ const api = createEasySQLClient({ baseUrl: "..." });
 // or with auth:
 const api = createEasySQLClient({ baseUrl: "...", accessToken: "..." });
 
-const { data, error } = await api.login({ email: "...", password: "..." });
+const { data: tokens } = await api.refresh({ refresh_token: "..." });
 const { data: user } = await api.me();
 const { data: connectors } = await api.listConnectors();
 const { data: result } = await api.createQuery({ connector_id: "...", question: "..." });
@@ -143,11 +143,16 @@ The same contract is implemented by `MysqlConnector`, `PostgresConnector`,
 
 | Prefix | Methods | Paths |
 |---|---|---|
-| `/v1/auth` | POST, GET, PATCH, DELETE | login, register, refresh, me, change-password, oidc |
-| `/v1/billing` | GET, POST | plans, checkout, portal |
+| `/v1/auth` | GET, POST, PATCH, DELETE | refresh, me, logout, oidc/start, oidc/callback, oidc/complete |
+| `/v1/api-keys` | GET, POST, DELETE | list, create, `/{key_id}` |
+| `/v1/billing` | GET, POST | plan, usage, checkout, portal, webhook |
 | `/v1/connectors` | GET, POST, PATCH, DELETE | list, create, `/{id}`, sync, schema, suggestions, autocomplete |
-| `/v1/dashboard` | GET | stats |
-| `/v1/queries` | GET, POST | list, create, `/{id}`, answer, stream |
+| `/v1/queries` | GET, POST | list, create, `/{id}` |
+| `/v1/feedbacks` | POST | create |
+| `/v1/dashboard/stats` | GET | stats |
+| `/v1/analytics/queries` | GET | query analytics |
+| `/v1/flags` | GET | feature flags |
+| `/v1/internal/email` | GET, POST | preview, test (dev-only) |
 | `/health`, `/v1/health` | GET | health check |
 
 ## CI workflow
