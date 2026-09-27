@@ -73,7 +73,8 @@ as the bearer token.
 ### Running Natural Language Queries
 
 The API generates the SQL; a client runtime executes it locally against the
-customer database (credentials never reach the API) and posts the rows back.
+customer database (credentials never reach the API) and renders the answer and
+chart on its side — the API never receives customer data.
 
 ```typescript
 const { data: query } = await api.createQuery({
@@ -84,14 +85,10 @@ const { data: query } = await api.createQuery({
 console.log(query?.sql_generated);        // Generated SQL
 console.log(query?.needs_local_execution); // true — run it locally
 
-// Execute locally (see @easysql/connector-*), then submit the rows:
-await api.answerQuery(
-  { result_data: rows },
-  { path: { query_id: query.id } },
-);
+// Execute locally with @easysql/connector-* and render the answer/chart here.
 
-// List recent query history
-const { data: history } = await api.listQueries({ page: 1, per_page: 10 });
+// List recent query history (cursor pagination)
+const { data: history } = await api.listQueries({ limit: 10 });
 ```
 
 See [`samples/`](../../samples) for runnable, end-to-end examples.
@@ -144,10 +141,11 @@ const { data: stats } = await api.dashboardStats();
 |---|---|
 | **Auth** | `refresh`, `me`, `updateMe`, `deleteMe`, `logout`, `oidcStart`, `oidcCallback`, `oidcComplete` |
 | **API keys** | `listApiKeys`, `createApiKey`, `deleteApiKey` |
-| **Queries** | `createQuery`, `listQueries`, `getQuery`, `answerQuery`, `streamQuery` |
+| **Queries** | `createQuery`, `listQueries`, `getQuery` |
 | **Connectors** | `listConnectors`, `createConnector`, `getConnector`, `updateConnector`, `deleteConnector`, `syncConnector`, `getConnectorSchema`, `getSuggestions`, `autocomplete` |
-| **Feedback** | `getFeedback`, `upsertFeedback`, `deleteFeedback` |
+| **Feedback** | `createFeedback` |
 | **Billing** | `getPlan`, `getUsage`, `checkout`, `portal` |
+| **Analytics** | `listAnalyticsQueries`, `getFlags` |
 | **Dashboard** | `dashboardStats` |
 | **Health** | `health`, `healthHealth` |
 

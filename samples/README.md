@@ -50,7 +50,7 @@ bun run samples/09-client-list-connectors.ts
 |---|---|
 | `14-mysql-introspect.ts` | Introspect a MySQL/MariaDB database. |
 | `15-postgres-introspect.ts` | Introspect PostgreSQL and run a query. |
-| `16-full-local-execution.ts` | Full flow: introspect → ask → execute locally → answer. |
+| `16-full-local-execution.ts` | Full flow: introspect → ask → execute locally → render. |
 | `17-clickhouse-introspect.ts` | Introspect a ClickHouse database. |
 
 ## Environment
