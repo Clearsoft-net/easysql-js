@@ -809,6 +809,8 @@ export interface components {
             credits_5h: number;
             credits_7d: number;
             support_tier: string;
+            stripe_price_id_monthly: string | null;
+            stripe_price_id_annual: string | null;
         };
         CheckoutResponse: {
             /** Format: uri */
