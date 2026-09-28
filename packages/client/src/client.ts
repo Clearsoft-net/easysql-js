@@ -79,6 +79,10 @@ export interface EasySQLClient {
   listAnalyticsQueries(params: paths["/v1/analytics/queries"]["get"]["parameters"]["query"]): Promise<any>;
   /** GET /v1/flags */
   getFlags(): Promise<any>;
+  /** GET /v1/integrations */
+  listIntegrations(): Promise<any>;
+  /** GET /v1/integrations/{integration_id} */
+  getIntegration(params: paths["/v1/integrations/{integration_id}"]["get"]["parameters"]["path"]): Promise<any>;
   /** GET /v1/billing/plan */
   getPlan(): Promise<any>;
   /** GET /v1/billing/usage */
@@ -254,6 +258,16 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     /** GET /v1/flags */
     getFlags() {
       return client.GET("/v1/flags");
+    },
+
+    /** GET /v1/integrations */
+    listIntegrations() {
+      return client.GET("/v1/integrations");
+    },
+
+    /** GET /v1/integrations/{integration_id} */
+    getIntegration(params: paths["/v1/integrations/{integration_id}"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/integrations/{integration_id}", { params: { path: params } });
     },
 
     /** GET /v1/billing/plan */

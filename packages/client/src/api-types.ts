@@ -409,6 +409,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/integrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the integration catalog */
+        get: operations["list_integrations_v1_integrations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/integrations/{integration_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        /** Get one integration by id */
+        get: operations["get_integration_v1_integrations__integration_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/billing/plan": {
         parameters: {
             query?: never;
@@ -798,6 +834,34 @@ export interface components {
             windows: components["schemas"]["UsageWindow"][];
             /** Format: date-time */
             fetched_at: string;
+        };
+        Integration: {
+            id: string;
+            /** @enum {string} */
+            type: "client" | "extension" | "connector" | "provider";
+            name: string;
+            description?: {
+                en: string;
+                pt?: string;
+            };
+            logo?: string;
+            /** Format: uri */
+            docs_url?: string;
+            /** @enum {string} */
+            status: "available" | "coming_soon" | "deprecated";
+            /** @enum {string} */
+            engine?: "mysql" | "mariadb" | "postgresql" | "sqlite" | "clickhouse";
+            default_port?: number;
+            capabilities?: string[];
+            host?: string;
+            connectors?: string[];
+            /** Format: uri */
+            install_url?: string;
+            package?: string;
+            install_command?: string;
+            os?: ("linux" | "macos" | "windows")[];
+            /** @enum {string} */
+            access?: "wire_password" | "http_token" | "ssh_tunnel" | "file";
         };
         HTTPValidationError: {
             detail: {
@@ -1905,6 +1969,57 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_integrations_v1_integrations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_integration_v1_integrations__integration_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Integration"];
+                };
+            };
+            /** @description Not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
