@@ -87,12 +87,18 @@ export interface EasySQLClient {
   getPlan(): Promise<any>;
   /** GET /v1/billing/usage */
   getUsage(): Promise<any>;
+  /** GET /v1/billing/subscription */
+  getSubscription(): Promise<any>;
   /** POST /v1/billing/checkout
    * @example
    * await client.checkout({ price_id: 1 }) */
   checkout(params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"]): Promise<any>;
   /** POST /v1/billing/portal */
   portal(): Promise<any>;
+  /** POST /v1/billing/cancel */
+  cancel(): Promise<any>;
+  /** POST /v1/billing/resume */
+  resume(): Promise<any>;
   /** POST /v1/billing/webhook */
   webhook(body: paths["/v1/billing/webhook"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
   /** POST /v1/internal/email/test
@@ -280,6 +286,11 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
       return client.GET("/v1/billing/usage");
     },
 
+    /** GET /v1/billing/subscription */
+    getSubscription() {
+      return client.GET("/v1/billing/subscription");
+    },
+
     /** POST /v1/billing/checkout */
     checkout(params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"]) {
       return client.POST("/v1/billing/checkout", { params: { query: params } });
@@ -288,6 +299,16 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     /** POST /v1/billing/portal */
     portal() {
       return client.POST("/v1/billing/portal");
+    },
+
+    /** POST /v1/billing/cancel */
+    cancel() {
+      return client.POST("/v1/billing/cancel");
+    },
+
+    /** POST /v1/billing/resume */
+    resume() {
+      return client.POST("/v1/billing/resume");
     },
 
     /** POST /v1/billing/webhook */
