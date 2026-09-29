@@ -479,6 +479,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/billing/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Current subscription details (period, amount, card) */
+        get: operations["get_subscription_v1_billing_subscription_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/billing/checkout": {
         parameters: {
             query?: never;
@@ -507,6 +524,40 @@ export interface paths {
         put?: never;
         /** Create Stripe Customer Portal session */
         post: operations["portal_v1_billing_portal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/billing/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Schedule subscription cancellation at period end */
+        post: operations["cancel_v1_billing_cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/billing/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revert a scheduled cancellation */
+        post: operations["resume_v1_billing_resume_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -820,6 +871,34 @@ export interface components {
             /** Format: uri */
             url: string;
         };
+        SubscriptionStateResponse: {
+            cancel_at_period_end: boolean;
+            /** Format: date-time */
+            current_period_end?: string | null;
+        };
+        PaymentMethod: {
+            brand: string | null;
+            last4: string | null;
+            exp_month: number | null;
+            exp_year: number | null;
+        };
+        SubscriptionDetails: {
+            plan_id: string;
+            plan_name: string | null;
+            status: string;
+            /** Format: date-time */
+            current_period_start: string | null;
+            /** Format: date-time */
+            current_period_end: string | null;
+            cancel_at_period_end: boolean;
+            interval: string | null;
+            amount: number | null;
+            currency: string | null;
+            payment_method: components["schemas"]["PaymentMethod"] | null;
+        };
+        SubscriptionDetailsResponse: {
+            subscription: components["schemas"]["SubscriptionDetails"] | null;
+        };
         UsageWindow: {
             /** @enum {string} */
             kind: "5h" | "7d";
@@ -833,6 +912,9 @@ export interface components {
         UsageResponse: {
             plan_id: string;
             plan_name: string;
+            cancel_at_period_end: boolean;
+            /** Format: date-time */
+            current_period_end: string | null;
             windows: components["schemas"]["UsageWindow"][];
             /** Format: date-time */
             fetched_at: string;
@@ -2080,6 +2162,35 @@ export interface operations {
             };
         };
     };
+    get_subscription_v1_billing_subscription_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionDetailsResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     checkout_v1_billing_checkout_post: {
         parameters: {
             query: {
@@ -2136,6 +2247,82 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PortalResponse"];
+                };
+            };
+            /** @description No active subscription */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    cancel_v1_billing_cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionStateResponse"];
+                };
+            };
+            /** @description No active subscription */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    resume_v1_billing_resume_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionStateResponse"];
                 };
             };
             /** @description No active subscription */
