@@ -189,7 +189,7 @@ export interface paths {
         put?: never;
         /**
          * Create schema-only connector
-         * @description EZSQL-37: connectors store only schema metadata. No DB credentials are accepted and the API never connects to or executes against a customer database. A client-side runtime (WordPress plugin / SDK / CLI) introspects its own database and pushes the resulting schema here. The web app only lists connectors.
+         * @description EZSQL-37: connectors store only schema metadata. No DB credentials are accepted and the API never connects to or executes against a customer database. A client-side runtime (WordPress plugin / SDK / CLI) introspects its own database and pushes the resulting schema here. The web dashboard only lists connectors.
          */
         post: operations["create_connector_v1_connectors_post"];
         delete?: never;
@@ -310,7 +310,7 @@ export interface paths {
         put?: never;
         /**
          * Ask question (generate SQL only — client executes)
-         * @description EZSQL-37: the API NEVER executes queries server-side and NEVER receives customer data. It generates + validates SQL from the connector's cached schema, persists the question, and returns `needs_local_execution: true`. A client-side runtime executes the SQL locally and renders the answer/chart on its side. Requires API key authentication (JWT → 403) because questions are only asked by external connector runtimes, not the web app.
+         * @description EZSQL-37: the API NEVER executes queries server-side and NEVER receives customer data. It generates + validates SQL from the connector's cached schema, persists the question, and returns `needs_local_execution: true`. A client-side runtime executes the SQL locally and renders the answer/chart on its side. Requires API key authentication (JWT → 403) because questions are only asked by external connector runtimes, not the web dashboard.
          */
         post: operations["create_query_v1_queries_post"];
         delete?: never;
@@ -834,7 +834,7 @@ export interface components {
             fetched_at: string;
         };
         FlagsResponse: {
-            /** @description Visibilidade da tela Analytics no app web (flag analytics-screen). */
+            /** @description Visibilidade da tela Analytics no dashboard web (flag analytics-screen). */
             analytics_screen: boolean;
         };
         AnalyticsQueryEvent: {
@@ -1209,7 +1209,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Redirect to {APP_URL}/auth/complete (cookie set in this hop) */
+            /** @description Redirect to {DASHBOARD_URL}/auth/complete (cookie set in this hop) */
             302: {
                 headers: {
                     [name: string]: unknown;
@@ -1825,7 +1825,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description API key required — the web app does not ask questions */
+            /** @description API key required — the web dashboard does not ask questions */
             403: {
                 headers: {
                     [name: string]: unknown;
