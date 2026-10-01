@@ -27,20 +27,20 @@ describe("generator against the deployed spec snapshot", () => {
     expect(JSON.stringify(extractMethods(spec))).toBe(JSON.stringify(extractMethods(spec)));
   });
 
-  it("derives the connector operations the SDK documents", () => {
+  it("derives the connection operations the SDK documents", () => {
     const methods = extractMethods(spec);
     const byName = new Map(methods.map((m) => [m.name, m]));
-    expect(byName.get("listConnectors")?.httpMethod).toBe("get");
-    expect(byName.get("createConnector")?.hasBody).toBe(true);
-    expect(byName.get("getConnector")?.hasPathParams).toBe(true);
-    expect(byName.get("syncConnector")?.hasBody).toBe(true);
-    expect(byName.get("syncConnector")?.hasPathParams).toBe(true);
+    expect(byName.get("listConnections")?.httpMethod).toBe("get");
+    expect(byName.get("createConnection")?.hasBody).toBe(true);
+    expect(byName.get("getConnection")?.hasPathParams).toBe(true);
+    expect(byName.get("syncConnection")?.hasBody).toBe(true);
+    expect(byName.get("syncConnection")?.hasPathParams).toBe(true);
   });
 });
 
 describe("extractor helpers still behave on the snapshot", () => {
   it("deriveMethodName/ buildExample are exported and pure", () => {
-    expect(deriveMethodName("list_connectors_get", "get")).toBe("listConnectors");
+    expect(deriveMethodName("list_connections_get", "get")).toBe("listConnections");
     expect(buildExample({}, false, false, false)).toBe("");
   });
 });

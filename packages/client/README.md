@@ -78,7 +78,7 @@ chart on its side — the API never receives customer data.
 
 ```typescript
 const { data: query } = await api.createQuery({
-  connector_id: "conn_abc123",
+  connection_id: "conn_abc123",
   question: "How many users signed up this month?",
 });
 
@@ -93,11 +93,11 @@ const { data: history } = await api.listQueries({ limit: 10 });
 
 See [`samples/`](../../samples) for runnable, end-to-end examples.
 
-### Managing Database Connectors
+### Managing Database Connections
 
 ```typescript
-// Create a connector (schema-only: introspect locally, push only the schema)
-const { data: connector } = await api.createConnector({
+// Create a connection (schema-only: introspect locally, push only the schema)
+const { data: connection } = await api.createConnection({
   name: "Production DB",
   type: "mysql",
   schema: [
@@ -111,20 +111,20 @@ const { data: connector } = await api.createConnector({
   ],
 });
 
-// List connectors
-const { data: connectors } = await api.listConnectors();
+// List connections
+const { data: connections } = await api.listConnections();
 
-// Get connector details
-const { data: conn } = await api.getConnector({ connector_id: "abc-123" });
+// Get connection details
+const { data: conn } = await api.getConnection({ connection_id: "abc-123" });
 
-// Update a connector
-const { data: updated } = await api.updateConnector(
+// Update a connection
+const { data: updated } = await api.updateConnection(
   { name: "Staging DB" },
-  { path: { connector_id: "abc-123" } },
+  { path: { connection_id: "abc-123" } },
 );
 
-// Delete a connector
-await api.deleteConnector({ connector_id: "abc-123" });
+// Delete a connection
+await api.deleteConnection({ connection_id: "abc-123" });
 ```
 
 ### Dashboard & Analytics
@@ -142,9 +142,10 @@ const { data: stats } = await api.dashboardStats();
 | **Auth** | `refresh`, `me`, `updateMe`, `deleteMe`, `logout`, `oidcStart`, `oidcCallback`, `oidcComplete` |
 | **API keys** | `listApiKeys`, `createApiKey`, `deleteApiKey` |
 | **Queries** | `createQuery`, `listQueries`, `getQuery` |
-| **Connectors** | `listConnectors`, `createConnector`, `getConnector`, `updateConnector`, `deleteConnector`, `syncConnector`, `getConnectorSchema`, `getSuggestions`, `autocomplete` |
+| **Connections** | `listConnections`, `createConnection`, `getConnection`, `updateConnection`, `deleteConnection`, `syncConnection`, `getConnectionSchema`, `getSuggestions`, `autocomplete` |
 | **Feedback** | `createFeedback` |
-| **Billing** | `getPlan`, `getUsage`, `checkout`, `portal` |
+| **Billing** | `getPlan`, `getUsage`, `getSubscription`, `listInvoices`, `checkout`, `portal`, `cancel`, `resume` |
+| **Integrations** | `listIntegrations`, `getIntegration` |
 | **Analytics** | `listAnalyticsQueries`, `getFlags` |
 | **Dashboard** | `dashboardStats` |
 | **Health** | `health`, `healthHealth` |

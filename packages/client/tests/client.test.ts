@@ -152,13 +152,13 @@ describe("Named methods", () => {
     expect(typeof client.oidcComplete).toBe("function");
   });
 
-  it("exposes all expected connector methods", () => {
+  it("exposes all expected connection methods", () => {
     const client = createEasySQLClient({ baseUrl, fetch: f });
-    expect(typeof client.listConnectors).toBe("function");
-    expect(typeof client.createConnector).toBe("function");
-    expect(typeof client.getConnector).toBe("function");
-    expect(typeof client.updateConnector).toBe("function");
-    expect(typeof client.deleteConnector).toBe("function");
-    expect(typeof client.syncConnector).toBe("function");
+    expect(typeof client.listConnections).toBe("function");
+    expect(typeof client.createConnection).toBe("function");
+    expect(typeof client.getConnection).toBe("function");
+    expect(typeof client.updateConnection).toBe("function");
+    expect(typeof client.deleteConnection).toBe("function");
+    expect(typeof client.syncConnection).toBe("function");
   });
 });
