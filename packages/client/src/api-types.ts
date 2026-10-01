@@ -496,6 +496,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/billing/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Payment history for the user's Stripe customer */
+        get: operations["list_invoices_v1_billing_invoices_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/billing/checkout": {
         parameters: {
             query?: never;
@@ -894,10 +911,30 @@ export interface components {
             interval: string | null;
             amount: number | null;
             currency: string | null;
+            /** @description Plan the subscription switches to at scheduled_change_at */
+            scheduled_plan: string | null;
+            /** Format: date-time */
+            scheduled_change_at: string | null;
             payment_method: components["schemas"]["PaymentMethod"] | null;
         };
         SubscriptionDetailsResponse: {
             subscription: components["schemas"]["SubscriptionDetails"] | null;
+        };
+        Invoice: {
+            id: string;
+            number: string | null;
+            status: string | null;
+            amount: number;
+            currency: string;
+            /** Format: date-time */
+            created: string;
+            /** Format: uri */
+            hosted_invoice_url: string | null;
+            /** Format: uri */
+            invoice_pdf: string | null;
+        };
+        InvoiceListResponse: {
+            invoices: components["schemas"]["Invoice"][];
         };
         UsageWindow: {
             /** @enum {string} */
@@ -2178,6 +2215,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SubscriptionDetailsResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_invoices_v1_billing_invoices_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceListResponse"];
                 };
             };
             /** @description Unauthorized */

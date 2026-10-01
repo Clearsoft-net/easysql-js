@@ -89,6 +89,10 @@ export interface EasySQLClient {
   getUsage(): Promise<any>;
   /** GET /v1/billing/subscription */
   getSubscription(): Promise<any>;
+  /** GET /v1/billing/invoices
+   * @example
+   * await client.listInvoices({ limit: 1 }) */
+  listInvoices(params: paths["/v1/billing/invoices"]["get"]["parameters"]["query"]): Promise<any>;
   /** POST /v1/billing/checkout
    * @example
    * await client.checkout({ price_id: 1 }) */
@@ -291,6 +295,11 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     /** GET /v1/billing/subscription */
     getSubscription() {
       return client.GET("/v1/billing/subscription");
+    },
+
+    /** GET /v1/billing/invoices */
+    listInvoices(params: paths["/v1/billing/invoices"]["get"]["parameters"]["query"]) {
+      return client.GET("/v1/billing/invoices", { params: { query: params } });
     },
 
     /** POST /v1/billing/checkout */
