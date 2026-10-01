@@ -93,8 +93,10 @@ export interface EasySQLClient {
    * @example
    * await client.checkout({ price_id: 1 }) */
   checkout(params: paths["/v1/billing/checkout"]["post"]["parameters"]["query"]): Promise<any>;
-  /** POST /v1/billing/portal */
-  portal(): Promise<any>;
+  /** POST /v1/billing/portal
+   * @example
+   * await client.portal({ price_id: 1 }) */
+  portal(params: paths["/v1/billing/portal"]["post"]["parameters"]["query"]): Promise<any>;
   /** POST /v1/billing/cancel */
   cancel(): Promise<any>;
   /** POST /v1/billing/resume */
@@ -297,8 +299,8 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     },
 
     /** POST /v1/billing/portal */
-    portal() {
-      return client.POST("/v1/billing/portal");
+    portal(params: paths["/v1/billing/portal"]["post"]["parameters"]["query"]) {
+      return client.POST("/v1/billing/portal", { params: { query: params } });
     },
 
     /** POST /v1/billing/cancel */

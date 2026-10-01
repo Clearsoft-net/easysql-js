@@ -2233,7 +2233,10 @@ export interface operations {
     };
     portal_v1_billing_portal_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Deep-links into the plan-change flow for this price */
+                price_id?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
