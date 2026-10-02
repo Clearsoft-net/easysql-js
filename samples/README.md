@@ -13,7 +13,7 @@ Offline samples (01–06) need no configuration. Client/API samples need a token
 ```bash
 cp .env.example .env
 # edit .env: EASYSQL_ACCESS_TOKEN (or EASYSQL_REFRESH_TOKEN)
-bun run samples/09-client-list-connectors.ts
+bun run samples/09-client-list-connections.ts
 ```
 
 ## Schema normalization (`@easysql/schema-generation`)
@@ -38,8 +38,8 @@ bun run samples/09-client-list-connectors.ts
 |---|---|
 | `07-client-health.ts` | Health check (no auth). |
 | `08-client-auth-me.ts` | Auth (OIDC token / refresh) + `me()` + API keys. |
-| `09-client-list-connectors.ts` | List connectors and read a stored schema. |
-| `10-client-create-connector-from-sqlite.ts` | Introspect locally and register it. |
+| `09-client-list-connections.ts` | List connections and read a stored schema. |
+| `10-client-create-connection-from-sqlite.ts` | Introspect locally and register it. |
 | `11-client-natural-query.ts` | NL question + poll result. |
 | `12-client-api-keys.ts` | Create / list / delete an API key. |
 | `13-client-dashboard-billing.ts` | Dashboard stats + plan + usage. |
@@ -59,7 +59,7 @@ bun run samples/09-client-list-connectors.ts
 |---|---|
 | `EASYSQL_API_URL` | All API samples (defaults to `https://api.easysql.net`) |
 | `EASYSQL_ACCESS_TOKEN` / `EASYSQL_REFRESH_TOKEN` | API samples |
-| `EASYSQL_CONNECTOR_ID` | Samples 11 and 16 |
+| `EASYSQL_CONNECTION_ID` | Samples 11 and 16 |
 | `EASYSQL_SQLITE_FILE` | Sample 16 |
 | `EASYSQL_TEST_MYSQL_URL` | Sample 14 (or pass a URL as argv) |
 | `EASYSQL_TEST_POSTGRES_URL` | Sample 15 (or pass a URL as argv) |

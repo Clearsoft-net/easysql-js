@@ -43,24 +43,24 @@ export interface EasySQLClient {
    * @example
    * await client.deleteApiKey({ key_id: "..." }) */
   deleteApiKey(params: paths["/v1/api-keys/{key_id}"]["delete"]["parameters"]["path"]): Promise<any>;
-  /** GET /v1/connectors */
-  listConnectors(): Promise<any>;
-  /** POST /v1/connectors */
-  createConnector(body: paths["/v1/connectors"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
-  /** GET /v1/connectors/{connector_id} */
-  getConnector(params: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"]): Promise<any>;
-  /** PATCH /v1/connectors/{connector_id} */
-  updateConnector(body: paths["/v1/connectors/{connector_id}"]["patch"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}"]["patch"]["parameters"]["path"] }): Promise<any>;
-  /** DELETE /v1/connectors/{connector_id} */
-  deleteConnector(params: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"]): Promise<any>;
-  /** POST /v1/connectors/{connector_id}/sync */
-  syncConnector(body: paths["/v1/connectors/{connector_id}/sync"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"] }): Promise<any>;
-  /** GET /v1/connectors/{connector_id}/schema */
-  getConnectorSchema(params: paths["/v1/connectors/{connector_id}/schema"]["get"]["parameters"]["path"]): Promise<any>;
-  /** GET /v1/connectors/{connector_id}/suggestions */
-  getSuggestions(params: paths["/v1/connectors/{connector_id}/suggestions"]["get"]["parameters"]["path"]): Promise<any>;
-  /** POST /v1/connectors/{connector_id}/autocomplete */
-  autocomplete(body: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["parameters"]["path"] }): Promise<any>;
+  /** GET /v1/connections */
+  listConnections(): Promise<any>;
+  /** POST /v1/connections */
+  createConnection(body: paths["/v1/connections"]["post"]["requestBody"]["content"]["application/json"]): Promise<any>;
+  /** GET /v1/connections/{connection_id} */
+  getConnection(params: paths["/v1/connections/{connection_id}"]["get"]["parameters"]["path"]): Promise<any>;
+  /** PATCH /v1/connections/{connection_id} */
+  updateConnection(body: paths["/v1/connections/{connection_id}"]["patch"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connections/{connection_id}"]["patch"]["parameters"]["path"] }): Promise<any>;
+  /** DELETE /v1/connections/{connection_id} */
+  deleteConnection(params: paths["/v1/connections/{connection_id}"]["delete"]["parameters"]["path"]): Promise<any>;
+  /** POST /v1/connections/{connection_id}/sync */
+  syncConnection(body: paths["/v1/connections/{connection_id}/sync"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connections/{connection_id}/sync"]["post"]["parameters"]["path"] }): Promise<any>;
+  /** GET /v1/connections/{connection_id}/schema */
+  getConnectionSchema(params: paths["/v1/connections/{connection_id}/schema"]["get"]["parameters"]["path"]): Promise<any>;
+  /** GET /v1/connections/{connection_id}/suggestions */
+  getSuggestions(params: paths["/v1/connections/{connection_id}/suggestions"]["get"]["parameters"]["path"]): Promise<any>;
+  /** POST /v1/connections/{connection_id}/autocomplete */
+  autocomplete(body: paths["/v1/connections/{connection_id}/autocomplete"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connections/{connection_id}/autocomplete"]["post"]["parameters"]["path"] }): Promise<any>;
   /** GET /v1/queries
    * @example
    * await client.listQueries({ limit: 1, cursor: 1 }) */
@@ -192,49 +192,49 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
       return client.DELETE("/v1/api-keys/{key_id}", { params: { path: params } });
     },
 
-    /** GET /v1/connectors */
-    listConnectors() {
-      return client.GET("/v1/connectors");
+    /** GET /v1/connections */
+    listConnections() {
+      return client.GET("/v1/connections");
     },
 
-    /** POST /v1/connectors */
-    createConnector(body: paths["/v1/connectors"]["post"]["requestBody"]["content"]["application/json"]) {
-      return client.POST("/v1/connectors", { body });
+    /** POST /v1/connections */
+    createConnection(body: paths["/v1/connections"]["post"]["requestBody"]["content"]["application/json"]) {
+      return client.POST("/v1/connections", { body });
     },
 
-    /** GET /v1/connectors/{connector_id} */
-    getConnector(params: paths["/v1/connectors/{connector_id}"]["get"]["parameters"]["path"]) {
-      return client.GET("/v1/connectors/{connector_id}", { params: { path: params } });
+    /** GET /v1/connections/{connection_id} */
+    getConnection(params: paths["/v1/connections/{connection_id}"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/connections/{connection_id}", { params: { path: params } });
     },
 
-    /** PATCH /v1/connectors/{connector_id} */
-    updateConnector(body: paths["/v1/connectors/{connector_id}"]["patch"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}"]["patch"]["parameters"]["path"] }) {
-      return client.PATCH("/v1/connectors/{connector_id}", { body, params });
+    /** PATCH /v1/connections/{connection_id} */
+    updateConnection(body: paths["/v1/connections/{connection_id}"]["patch"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connections/{connection_id}"]["patch"]["parameters"]["path"] }) {
+      return client.PATCH("/v1/connections/{connection_id}", { body, params });
     },
 
-    /** DELETE /v1/connectors/{connector_id} */
-    deleteConnector(params: paths["/v1/connectors/{connector_id}"]["delete"]["parameters"]["path"]) {
-      return client.DELETE("/v1/connectors/{connector_id}", { params: { path: params } });
+    /** DELETE /v1/connections/{connection_id} */
+    deleteConnection(params: paths["/v1/connections/{connection_id}"]["delete"]["parameters"]["path"]) {
+      return client.DELETE("/v1/connections/{connection_id}", { params: { path: params } });
     },
 
-    /** POST /v1/connectors/{connector_id}/sync */
-    syncConnector(body: paths["/v1/connectors/{connector_id}/sync"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/sync"]["post"]["parameters"]["path"] }) {
-      return client.POST("/v1/connectors/{connector_id}/sync", { body, params });
+    /** POST /v1/connections/{connection_id}/sync */
+    syncConnection(body: paths["/v1/connections/{connection_id}/sync"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connections/{connection_id}/sync"]["post"]["parameters"]["path"] }) {
+      return client.POST("/v1/connections/{connection_id}/sync", { body, params });
     },
 
-    /** GET /v1/connectors/{connector_id}/schema */
-    getConnectorSchema(params: paths["/v1/connectors/{connector_id}/schema"]["get"]["parameters"]["path"]) {
-      return client.GET("/v1/connectors/{connector_id}/schema", { params: { path: params } });
+    /** GET /v1/connections/{connection_id}/schema */
+    getConnectionSchema(params: paths["/v1/connections/{connection_id}/schema"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/connections/{connection_id}/schema", { params: { path: params } });
     },
 
-    /** GET /v1/connectors/{connector_id}/suggestions */
-    getSuggestions(params: paths["/v1/connectors/{connector_id}/suggestions"]["get"]["parameters"]["path"]) {
-      return client.GET("/v1/connectors/{connector_id}/suggestions", { params: { path: params } });
+    /** GET /v1/connections/{connection_id}/suggestions */
+    getSuggestions(params: paths["/v1/connections/{connection_id}/suggestions"]["get"]["parameters"]["path"]) {
+      return client.GET("/v1/connections/{connection_id}/suggestions", { params: { path: params } });
     },
 
-    /** POST /v1/connectors/{connector_id}/autocomplete */
-    autocomplete(body: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connectors/{connector_id}/autocomplete"]["post"]["parameters"]["path"] }) {
-      return client.POST("/v1/connectors/{connector_id}/autocomplete", { body, params });
+    /** POST /v1/connections/{connection_id}/autocomplete */
+    autocomplete(body: paths["/v1/connections/{connection_id}/autocomplete"]["post"]["requestBody"]["content"]["application/json"], params: { path: paths["/v1/connections/{connection_id}/autocomplete"]["post"]["parameters"]["path"] }) {
+      return client.POST("/v1/connections/{connection_id}/autocomplete", { body, params });
     },
 
     /** GET /v1/queries */

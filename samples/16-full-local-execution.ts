@@ -20,33 +20,33 @@ import { authedClient, log, requireEnv } from "./_shared";
 const file = requireEnv("EASYSQL_SQLITE_FILE");
 const api = await authedClient();
 
-// 1. Introspect locally and register/refresh the connector schema.
+// 1. Introspect locally and register/refresh the connection schema.
 const connector = new SqliteConnector({ file, readonly: true });
 connector.connect();
-let connectorId = process.env.EASYSQL_CONNECTOR_ID;
+let connectionId = process.env.EASYSQL_CONNECTION_ID;
 try {
   const schema = generateSchema(connector.introspect());
-  if (connectorId) {
-    const { data, error } = await api.syncConnector(
+  if (connectionId) {
+    const { data, error } = await api.syncConnection(
       { schema },
-      { path: { connector_id: connectorId } },
+      { path: { connection_id: connectionId } },
     );
-    if (error) throw new Error(`syncConnector failed: ${JSON.stringify(error)}`);
+    if (error) throw new Error(`syncConnection failed: ${JSON.stringify(error)}`);
     log("Schema synced", data);
   } else {
-    const { data, error } = await api.createConnector({
+    const { data, error } = await api.createConnection({
       name: `Local SQLite ${file}`,
       type: "sqlite",
       schema,
     });
-    if (error) throw new Error(`createConnector failed: ${JSON.stringify(error)}`);
-    connectorId = data.id;
-    log("Connector created", data);
+    if (error) throw new Error(`createConnection failed: ${JSON.stringify(error)}`);
+    connectionId = data.id;
+    log("Connection created", data);
   }
 
   // 2. Ask a natural-language question.
   const { data: created, error: queryError } = await api.createQuery({
-    connector_id: connectorId as string,
+    connection_id: connectionId as string,
     question: "How many rows are in the products table?",
   });
   if (queryError) throw new Error(`createQuery failed: ${JSON.stringify(queryError)}`);

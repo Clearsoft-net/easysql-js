@@ -112,8 +112,8 @@ const api = createEasySQLClient({ baseUrl: "...", accessToken: "..." });
 
 const { data: tokens } = await api.refresh({ refresh_token: "..." });
 const { data: user } = await api.me();
-const { data: connectors } = await api.listConnectors();
-const { data: result } = await api.createQuery({ connector_id: "...", question: "..." });
+const { data: connections } = await api.listConnections();
+const { data: result } = await api.createQuery({ connection_id: "...", question: "..." });
 ```
 
 Schema normalization:
@@ -146,7 +146,7 @@ The same contract is implemented by `MysqlConnector`, `PostgresConnector`,
 | `/v1/auth` | GET, POST, PATCH, DELETE | refresh, me, logout, oidc/start, oidc/callback, oidc/complete |
 | `/v1/api-keys` | GET, POST, DELETE | list, create, `/{key_id}` |
 | `/v1/billing` | GET, POST | plan, usage, checkout, portal, webhook |
-| `/v1/connectors` | GET, POST, PATCH, DELETE | list, create, `/{id}`, sync, schema, suggestions, autocomplete |
+| `/v1/connections` | GET, POST, PATCH, DELETE | list, create, `/{id}`, sync, schema, suggestions, autocomplete |
 | `/v1/queries` | GET, POST | list, create, `/{id}` |
 | `/v1/feedbacks` | POST | create |
 | `/v1/dashboard/stats` | GET | stats |
@@ -199,7 +199,7 @@ reads `NODE_AUTH_TOKEN` through `~/.npmrc`. Both workflows map the same secret.
 | `EASYSQL_API_URL` | `packages/client/scripts/generate.ts`, CI | Yes |
 | `EASYSQL_ACCESS_TOKEN` | samples / live checks (OIDC token) | No |
 | `EASYSQL_REFRESH_TOKEN` | samples (rotated via `refresh()`) | No |
-| `EASYSQL_CONNECTOR_ID` | samples 11 and 16 | No |
+| `EASYSQL_CONNECTION_ID` | samples 11 and 16 | No |
 | `EASYSQL_SQLITE_FILE` | sample 16 | No |
 | `EASYSQL_TEST_MYSQL_URL` | mysql connector integration test | No |
 | `EASYSQL_TEST_POSTGRES_URL` | postgres connector integration test | No |

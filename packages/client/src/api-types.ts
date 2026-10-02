@@ -177,54 +177,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/connectors": {
+    "/v1/connections": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List connectors */
-        get: operations["list_connectors_v1_connectors_get"];
+        /** List connections */
+        get: operations["list_connections_v1_connections_get"];
         put?: never;
         /**
-         * Create schema-only connector
-         * @description EZSQL-37: connectors store only schema metadata. No DB credentials are accepted and the API never connects to or executes against a customer database. A client-side runtime (WordPress plugin / SDK / CLI) introspects its own database and pushes the resulting schema here. The web dashboard only lists connectors.
+         * Create schema-only connection
+         * @description EZSQL-37: connections store only schema metadata. No DB credentials are accepted and the API never connects to or executes against a customer database. A client-side runtime (WordPress plugin / SDK / CLI) introspects its own database and pushes the resulting schema here. The web dashboard only lists connections.
          */
-        post: operations["create_connector_v1_connectors_post"];
+        post: operations["create_connection_v1_connections_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/connectors/{connector_id}": {
+    "/v1/connections/{connection_id}": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
-        /** Get connector */
-        get: operations["get_connector_v1_connectors__connector_id__get"];
+        /** Get connection */
+        get: operations["get_connection_v1_connections__connection_id__get"];
         put?: never;
         post?: never;
-        /** Delete connector */
-        delete: operations["delete_connector_v1_connectors__connector_id__delete"];
+        /** Delete connection */
+        delete: operations["delete_connection_v1_connections__connection_id__delete"];
         options?: never;
         head?: never;
-        /** Update connector */
-        patch: operations["update_connector_v1_connectors__connector_id__patch"];
+        /** Update connection */
+        patch: operations["update_connection_v1_connections__connection_id__patch"];
         trace?: never;
     };
-    "/v1/connectors/{connector_id}/sync": {
+    "/v1/connections/{connection_id}/sync": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
@@ -234,24 +234,24 @@ export interface paths {
          * Push schema from client (refresh)
          * @description EZSQL-37: the client-side runtime introspects its own database and POSTs the fresh schema. The API does not open any database connection.
          */
-        post: operations["sync_connector_v1_connectors__connector_id__sync_post"];
+        post: operations["sync_connection_v1_connections__connection_id__sync_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/connectors/{connector_id}/schema": {
+    "/v1/connections/{connection_id}/schema": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
         /** Get cached schema */
-        get: operations["get_connector_schema_v1_connectors__connector_id__schema_get"];
+        get: operations["get_connection_schema_v1_connections__connection_id__schema_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -260,17 +260,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/connectors/{connector_id}/suggestions": {
+    "/v1/connections/{connection_id}/suggestions": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
         /** LLM-generated Portuguese business questions */
-        get: operations["get_suggestions_v1_connectors__connector_id__suggestions_get"];
+        get: operations["get_suggestions_v1_connections__connection_id__suggestions_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -279,19 +279,19 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/connectors/{connector_id}/autocomplete": {
+    "/v1/connections/{connection_id}/autocomplete": {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
         get?: never;
         put?: never;
         /** LLM autocomplete for partial question */
-        post: operations["autocomplete_v1_connectors__connector_id__autocomplete_post"];
+        post: operations["autocomplete_v1_connections__connection_id__autocomplete_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -310,7 +310,7 @@ export interface paths {
         put?: never;
         /**
          * Ask question (generate SQL only — client executes)
-         * @description EZSQL-37: the API NEVER executes queries server-side and NEVER receives customer data. It generates + validates SQL from the connector's cached schema, persists the question, and returns `needs_local_execution: true`. A client-side runtime executes the SQL locally and renders the answer/chart on its side. Requires API key authentication (JWT → 403) because questions are only asked by external connector runtimes, not the web dashboard.
+         * @description EZSQL-37: the API NEVER executes queries server-side and NEVER receives customer data. It generates + validates SQL from the connection's cached schema, persists the question, and returns `needs_local_execution: true`. A client-side runtime executes the SQL locally and renders the answer/chart on its side. Requires API key authentication (JWT → 403) because questions are only asked by external connection runtimes, not the web dashboard.
          */
         post: operations["create_query_v1_queries_post"];
         delete?: never;
@@ -365,7 +365,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Dashboard stats (connectors, queries, top usage) */
+        /** Dashboard stats (connections, queries, top usage) */
         get: operations["dashboard_stats_v1_dashboard_stats_get"];
         put?: never;
         post?: never;
@@ -738,7 +738,7 @@ export interface components {
             columns: components["schemas"]["ColumnSchema"][];
             rows_approx?: number | null;
         };
-        ConnectorCreate: {
+        ConnectionCreate: {
             /** @enum {string} */
             type: "mysql" | "mariadb" | "postgresql" | "wp" | "sqlite" | "clickhouse";
             name: string;
@@ -746,18 +746,18 @@ export interface components {
             /** @description DB engine version reported by the client runtime (e.g. 'MySQL 8.0.36', 'SQLite 3.45.1') */
             db_version?: string;
         };
-        ConnectorUpdate: {
+        ConnectionUpdate: {
             name?: string;
             schema?: components["schemas"]["TableSchema"][];
             /** @description DB engine version reported by the client runtime (e.g. 'MySQL 8.0.36', 'SQLite 3.45.1') */
             db_version?: string;
         };
-        ConnectorSyncRequest: {
+        ConnectionSyncRequest: {
             schema: components["schemas"]["TableSchema"][];
             /** @description DB engine version reported by the client runtime (e.g. 'MySQL 8.0.36', 'SQLite 3.45.1') */
             db_version?: string;
         };
-        ConnectorResponse: {
+        ConnectionResponse: {
             /** Format: uuid */
             id: string;
             /** @description "mysql" | "mariadb" | "postgresql" | "sqlite" | "clickhouse" */
@@ -769,7 +769,7 @@ export interface components {
             /** Format: date-time */
             created_at: string;
         };
-        ConnectorSchemaResponse: {
+        ConnectionSchemaResponse: {
             tables: components["schemas"]["TableSchema"][];
             db_version: string | null;
         };
@@ -781,7 +781,7 @@ export interface components {
         };
         QueryRequest: {
             /** Format: uuid */
-            connector_id: string;
+            connection_id: string;
             question: string;
         };
         QueryResponse: {
@@ -800,7 +800,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             /** Format: uuid */
-            connector_id: string;
+            connection_id: string;
             question: string;
             sql_generated?: string | null;
             error?: string | null;
@@ -835,18 +835,18 @@ export interface components {
             date: string;
             count: number;
         };
-        ConnectorUsage: {
+        ConnectionUsage: {
             /** Format: uuid */
-            connector_id: string;
-            connector_name: string;
+            connection_id: string;
+            connection_name: string;
             query_count: number;
         };
         DashboardStats: {
-            active_connectors: number;
+            active_connections: number;
             queries_used_this_month: number;
             queries_limit: number;
             queries_per_day: components["schemas"]["DailyQueryCount"][];
-            most_used_connectors: components["schemas"]["ConnectorUsage"][];
+            most_used_connections: components["schemas"]["ConnectionUsage"][];
             /** Format: date-time */
             fetched_at: string;
         };
@@ -1406,7 +1406,7 @@ export interface operations {
             };
         };
     };
-    list_connectors_v1_connectors_get: {
+    list_connections_v1_connections_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1435,7 +1435,7 @@ export interface operations {
             };
         };
     };
-    create_connector_v1_connectors_post: {
+    create_connection_v1_connections_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -1444,7 +1444,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ConnectorCreate"];
+                "application/json": components["schemas"]["ConnectionCreate"];
             };
         };
         responses: {
@@ -1454,7 +1454,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ConnectorResponse"];
+                    "application/json": components["schemas"]["ConnectionResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -1477,12 +1477,12 @@ export interface operations {
             };
         };
     };
-    get_connector_v1_connectors__connector_id__get: {
+    get_connection_v1_connections__connection_id__get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
@@ -1494,7 +1494,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ConnectorResponse"];
+                    "application/json": components["schemas"]["ConnectionResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -1517,12 +1517,12 @@ export interface operations {
             };
         };
     };
-    delete_connector_v1_connectors__connector_id__delete: {
+    delete_connection_v1_connections__connection_id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
@@ -1555,18 +1555,18 @@ export interface operations {
             };
         };
     };
-    update_connector_v1_connectors__connector_id__patch: {
+    update_connection_v1_connections__connection_id__patch: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ConnectorUpdate"];
+                "application/json": components["schemas"]["ConnectionUpdate"];
             };
         };
         responses: {
@@ -1576,7 +1576,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ConnectorResponse"];
+                    "application/json": components["schemas"]["ConnectionResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -1608,18 +1608,18 @@ export interface operations {
             };
         };
     };
-    sync_connector_v1_connectors__connector_id__sync_post: {
+    sync_connection_v1_connections__connection_id__sync_post: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ConnectorSyncRequest"];
+                "application/json": components["schemas"]["ConnectionSyncRequest"];
             };
         };
         responses: {
@@ -1665,12 +1665,12 @@ export interface operations {
             };
         };
     };
-    get_connector_schema_v1_connectors__connector_id__schema_get: {
+    get_connection_schema_v1_connections__connection_id__schema_get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
@@ -1682,7 +1682,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ConnectorSchemaResponse"];
+                    "application/json": components["schemas"]["ConnectionSchemaResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -1705,12 +1705,12 @@ export interface operations {
             };
         };
     };
-    get_suggestions_v1_connectors__connector_id__suggestions_get: {
+    get_suggestions_v1_connections__connection_id__suggestions_get: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
@@ -1745,12 +1745,12 @@ export interface operations {
             };
         };
     };
-    autocomplete_v1_connectors__connector_id__autocomplete_post: {
+    autocomplete_v1_connections__connection_id__autocomplete_post: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                connector_id: string;
+                connection_id: string;
             };
             cookie?: never;
         };
@@ -1871,7 +1871,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Connector not found */
+            /** @description Connection not found */
             404: {
                 headers: {
                     [name: string]: unknown;

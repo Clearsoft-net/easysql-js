@@ -5,17 +5,17 @@
  * runtime executes it against the local database (see sample 16 for the full
  * flow, including posting the rows back).
  *
- *   EASYSQL_ACCESS_TOKEN=... EASYSQL_CONNECTOR_ID=<uuid> \
+ *   EASYSQL_ACCESS_TOKEN=... EASYSQL_CONNECTION_ID=<uuid> \
  *     bun run samples/11-client-natural-query.ts
  */
 
 import { authedClient, log, requireEnv } from "./_shared";
 
-const connectorId = requireEnv("EASYSQL_CONNECTOR_ID");
+const connectionId = requireEnv("EASYSQL_CONNECTION_ID");
 const api = await authedClient();
 
 const { data: created, error } = await api.createQuery({
-  connector_id: connectorId,
+  connection_id: connectionId,
   question: "How many rows does the products table have?",
 });
 if (error) {

@@ -4,7 +4,7 @@
  * The database is introspected on this machine; only the schema is sent, and
  * the connection credentials never leave the process (SQLite has none).
  *
- *   EASYSQL_ACCESS_TOKEN=... bun run samples/10-client-create-connector-from-sqlite.ts
+ *   EASYSQL_ACCESS_TOKEN=... bun run samples/10-client-create-connection-from-sqlite.ts
  */
 
 import { mkdtempSync, rmSync } from "node:fs";
@@ -30,16 +30,16 @@ try {
   log("Schema to push", schema);
 
   const api = await authedClient();
-  const { data, error } = await api.createConnector({
+  const { data, error } = await api.createConnection({
     name: `Sample SQLite ${new Date().toISOString()}`,
     type: "sqlite",
     schema,
   });
   if (error) {
-    log("createConnector() failed", error);
+    log("createConnection() failed", error);
     process.exit(1);
   }
-  log("Connector created", data);
+  log("Connection created", data);
 } finally {
   rmSync(dir, { recursive: true, force: true });
 }
