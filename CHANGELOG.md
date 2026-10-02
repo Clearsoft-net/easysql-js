@@ -1,3 +1,24 @@
+# [3.0.0](https://github.com/Clearsoft-net/easysql-js/compare/v2.3.0...v3.0.0) (2026-10-02)
+
+
+* refactor(sdk)!: rename connectors to connections in the API client ([#21](https://github.com/Clearsoft-net/easysql-js/issues/21)) ([b8e9bf4](https://github.com/Clearsoft-net/easysql-js/commit/b8e9bf49f7bffe6a79e218901c9e88f63d170a1c))
+
+
+### Features
+
+* **sdk:** regenerate API types from OpenAPI spec ([#15](https://github.com/Clearsoft-net/easysql-js/issues/15)) ([48e6728](https://github.com/Clearsoft-net/easysql-js/commit/48e6728b85c44067b0196b036ced01a7a752fdc4))
+* **sdk:** regenerate API types from OpenAPI spec ([#16](https://github.com/Clearsoft-net/easysql-js/issues/16)) ([f5633d2](https://github.com/Clearsoft-net/easysql-js/commit/f5633d252c428ea36283ba34f704ad808c6c8448))
+* **sdk:** regenerate API types from OpenAPI spec ([#17](https://github.com/Clearsoft-net/easysql-js/issues/17)) ([d805191](https://github.com/Clearsoft-net/easysql-js/commit/d8051914664ca7f239529c7c0fa9dea2b7603fc0))
+* **sdk:** regenerate API types from OpenAPI spec ([#18](https://github.com/Clearsoft-net/easysql-js/issues/18)) ([d5bc2d4](https://github.com/Clearsoft-net/easysql-js/commit/d5bc2d46a6581c2f34bc37b3a5d1c4e19922f769))
+* **sdk:** regenerate API types from OpenAPI spec ([#19](https://github.com/Clearsoft-net/easysql-js/issues/19)) ([ab6c3c3](https://github.com/Clearsoft-net/easysql-js/commit/ab6c3c367a60b2b5234caac55bf36b9fe2dc6177))
+* **sdk:** regenerate API types from OpenAPI spec ([#20](https://github.com/Clearsoft-net/easysql-js/issues/20)) ([69e184b](https://github.com/Clearsoft-net/easysql-js/commit/69e184bf74096206294f9ac9642a04825fb6d17d))
+
+
+### BREAKING CHANGES
+
+* the API client method names and paths changed; consumers
+(CLI, MCP) must update to @easysql/client >= 3.
+
 # [2.3.0](https://github.com/Clearsoft-net/easysql-js/compare/v2.2.0...v2.3.0) (2026-09-27)
 
 
