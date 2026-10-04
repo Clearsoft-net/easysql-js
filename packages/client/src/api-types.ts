@@ -547,6 +547,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/billing/change-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change plan (monthly to annual) with immediate proration */
+        post: operations["change_plan_v1_billing_change_plan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/billing/cancel": {
         parameters: {
             query?: never;
@@ -887,6 +904,10 @@ export interface components {
         PortalResponse: {
             /** Format: uri */
             url: string;
+        };
+        ChangePlanResponse: {
+            plan_id: string;
+            interval: string;
         };
         SubscriptionStateResponse: {
             cancel_at_period_end: boolean;
@@ -2331,6 +2352,55 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    change_plan_v1_billing_change_plan_post: {
+        parameters: {
+            query: {
+                price_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangePlanResponse"];
+                };
+            };
+            /** @description No active subscription or unsupported change */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Payment failed — the plan was not changed */
+            402: {
                 headers: {
                     [name: string]: unknown;
                 };
