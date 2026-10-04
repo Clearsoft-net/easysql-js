@@ -101,6 +101,10 @@ export interface EasySQLClient {
    * @example
    * await client.portal({ price_id: 1 }) */
   portal(params: paths["/v1/billing/portal"]["post"]["parameters"]["query"]): Promise<any>;
+  /** POST /v1/billing/change-plan
+   * @example
+   * await client.changePlan({ price_id: 1 }) */
+  changePlan(params: paths["/v1/billing/change-plan"]["post"]["parameters"]["query"]): Promise<any>;
   /** POST /v1/billing/cancel */
   cancel(): Promise<any>;
   /** POST /v1/billing/resume */
@@ -310,6 +314,11 @@ export function createEasySQLClient(options: CreateClientOptions): EasySQLClient
     /** POST /v1/billing/portal */
     portal(params: paths["/v1/billing/portal"]["post"]["parameters"]["query"]) {
       return client.POST("/v1/billing/portal", { params: { query: params } });
+    },
+
+    /** POST /v1/billing/change-plan */
+    changePlan(params: paths["/v1/billing/change-plan"]["post"]["parameters"]["query"]) {
+      return client.POST("/v1/billing/change-plan", { params: { query: params } });
     },
 
     /** POST /v1/billing/cancel */
