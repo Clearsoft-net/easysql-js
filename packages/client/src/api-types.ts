@@ -896,6 +896,16 @@ export interface components {
             support_tier: string;
             stripe_price_id_monthly: string | null;
             stripe_price_id_annual: string | null;
+            prices?: {
+                monthly?: {
+                    brl?: number;
+                    usd?: number;
+                };
+                annual?: {
+                    brl?: number;
+                    usd?: number;
+                };
+            };
         };
         CheckoutResponse: {
             /** Format: uri */
