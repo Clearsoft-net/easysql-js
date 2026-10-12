@@ -1,3 +1,21 @@
+# [4.0.0](https://github.com/Clearsoft-net/easysql-js/compare/v3.0.0...v4.0.0) (2026-10-12)
+
+
+* refactor(connectors)!: consolidate engine connectors into @easysql/connectors ([51f0c78](https://github.com/Clearsoft-net/easysql-js/commit/51f0c78d2c49b9836a79248a2653abf66d1cd9a3))
+
+
+### Features
+
+* **sdk:** regenerate API types from OpenAPI spec ([#22](https://github.com/Clearsoft-net/easysql-js/issues/22)) ([c120083](https://github.com/Clearsoft-net/easysql-js/commit/c120083d6b197dba10a254ec6f8350ecb22bc19d))
+* **sdk:** regenerate API types from OpenAPI spec ([#23](https://github.com/Clearsoft-net/easysql-js/issues/23)) ([f648cdc](https://github.com/Clearsoft-net/easysql-js/commit/f648cdcd2be6e51976e1ffeab1b0f5a6c3648035))
+
+
+### BREAKING CHANGES
+
+* the @easysql/connector-* packages are removed. Consumers
+must install @easysql/connectors plus the optional driver for the engine
+they use, then call createConnector() or import @easysql/connectors/<engine>.
+
 # [3.0.0](https://github.com/Clearsoft-net/easysql-js/compare/v2.3.0...v3.0.0) (2026-10-02)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@easysql/sdk",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "EasySQL TypeScript SDK — multipackage workspace (private root).",
   "private": true,
   "type": "module",
