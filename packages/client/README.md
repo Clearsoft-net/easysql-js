@@ -85,7 +85,7 @@ const { data: query } = await api.createQuery({
 console.log(query?.sql_generated);        // Generated SQL
 console.log(query?.needs_local_execution); // true — run it locally
 
-// Execute locally with @easysql/connector-* and render the answer/chart here.
+// Execute locally with @easysql/connectors and render the answer/chart here.
 
 // List recent query history (cursor pagination)
 const { data: history } = await api.listQueries({ limit: 10 });

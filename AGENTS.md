@@ -48,11 +48,14 @@ release per repository; generated code is kept strictly separate from hand-writt
 │   │   ├── tests/                 # fixtures (mysql, postgres/sqlite, clickhouse) + contract test
 │   │   ├── package.json
 │   │   └── tsconfig.json / tsconfig.build.json
-│   └── connectors/                # @easysql/connector-* — hand-written, opt-in
-│       ├── mysql/                 #   information_schema introspection (mysql2)
-│       ├── postgres/              #   pg_catalog introspection (pg)
-│       ├── clickhouse/            #   system.tables/system.columns over HTTP (@clickhouse/client)
-│       └── sqlite/                #   sqlite_master/PRAGMA introspection (node:sqlite)
+│   └── connectors/                # @easysql/connectors — single package, opt-in drivers
+│       ├── src/create-connector.ts # factory with lazy engine-module loading
+│       ├── src/types.ts            # public engine IDs and discriminated options
+│       ├── src/mysql/              # MySQL/MariaDB introspection (mysql2)
+│       ├── src/postgres/           # pg_catalog introspection (pg), provider modules
+│       ├── src/clickhouse/         # system tables over HTTP (@clickhouse/client)
+│       ├── src/sqlite/             # sqlite_master/PRAGMA (node:sqlite)
+│       └── tests/                  # unit, integration, and type tests
 ├── scripts/                       # lockstep release helpers (semantic-release exec)
 ├── .github/workflows/             # ci.yml, generate-sdk.yml, release.yml
 ├── biome.json
@@ -63,11 +66,25 @@ release per repository; generated code is kept strictly separate from hand-writt
 └── package.json                   # @easysql/sdk — private workspace root (aggregator)
 ```
 
-`packages/connectors/*` currently has MySQL, PostgreSQL, ClickHouse and SQLite.
-Each one is a separate, opt-in package — `@easysql/client` never depends on a
-driver. The Neon and Cloudflare D1 connectors are not implemented yet — tracked
-separately (EZSQL-60). The root `workspaces` glob already includes
-`packages/connectors/*`.
+`packages/connectors` is one publishable package, `@easysql/connectors`. Engine
+implementations stay isolated in `src/<engine>/`; the public factory dynamically
+loads only the selected implementation. MySQL (`mysql2`), PostgreSQL (`pg`) and
+ClickHouse (`@clickhouse/client`) are optional peer dependencies; SQLite uses
+Node's built-in `node:sqlite` (Node >=22.5). Consumers install the EasySQL
+connectors package once and only the optional drivers for the engines they use.
+Direct connector classes are available via package subpaths; prefer the factory
+for lazy loading and a stable unified entry point.
+
+The currently implemented engines are MySQL/MariaDB, PostgreSQL, ClickHouse
+(HTTP interface), and SQLite (file/in-memory). `createConnector` accepts an
+engine and a typed connection value: strings represent the engine's conventional
+URL/DSN or SQLite filename; object forms support host/port, Unix `socket`, and
+SQLite `file`. Provider and transport options are explicit where needed. Neon
+HTTP/WebSocket, CockroachDB-specific behavior, SQL Server, Oracle, Firebird,
+Db2, DuckDB, libSQL/Turso, Cloudflare D1, Snowflake, BigQuery, Trino, SAP HANA,
+and Redshift are planned only; do not describe them as implemented until their
+drivers, metadata handling, tests, and transport support are added. The root
+`packages/*` workspace glob contains the consolidated package.
 
 ## Key files
 
@@ -77,7 +94,7 @@ separately (EZSQL-60). The root `workspaces` glob already includes
 | `packages/client/scripts/*` | Generation pipeline | ✅ |
 | `packages/common/src/*` | Shared contracts + helpers (e.g. redaction) | ✅ |
 | `packages/schema-generation/src/*` | Schema normalization (pure, no I/O) | ✅ |
-| `packages/connectors/*/src/*` | Engine connectors (introspect + execute) | ✅ |
+| `packages/connectors/src/*` | Engine connectors and lazy factory (introspect + execute) | ✅ |
 | `packages/*/tests/*` | Unit tests (bun test) | ✅ |
 | `packages/*/package.json` | Per-package manifest (name, exports, deps) | ✅ |
 | `packages/*/tsconfig.build.json` | Emit config (src only) | ✅ |
@@ -95,7 +112,7 @@ make build                     # compile every package to dist/
 ```
 
 Internal dependency rule: `packages/client` and `packages/common` depend on
-nothing internal; `packages/schema-generation` and `packages/connectors/*`
+nothing internal; `packages/schema-generation` and `packages/connectors`
 depend on `@easysql/common` (contracts only — type-only). Connectors produce the
 `RawSchema` that `@easysql/schema-generation` normalizes (see `generateSchema`).
 Declare internal deps as workspaces (`"@easysql/common": "workspace:*"`), never
@@ -124,20 +141,24 @@ import { generateSchema, type RawSchema } from "@easysql/schema-generation";
 const schema = generateSchema(rawConnectorOutput); // TableSchema[]
 ```
 
-Connectors (each engine exposes `connect` / `close` / `introspect` / `execute`):
+Connectors are exposed through one package and factory; only the chosen
+engine's module/driver is loaded:
 
 ```typescript
-import { SqliteConnector } from "@easysql/connector-sqlite";
+import { createConnector, ConnectorEngine } from "@easysql/connectors";
 
-const connector = new SqliteConnector({ file: "./shop.db", readonly: true });
-connector.connect();
-const raw = connector.introspect();   // RawSchema
-const result = connector.execute("SELECT 1");
-connector.close();
+const connector = await createConnector({
+  engine: ConnectorEngine.SQLite,
+  connection: { file: "./shop.db", readonly: true },
+});
+await connector.connect();
+const raw = await connector.introspect();
+const result = await connector.execute("SELECT 1");
+await connector.close();
 ```
 
-The same contract is implemented by `MysqlConnector`, `PostgresConnector`,
-`ClickhouseConnector` and `SqliteConnector` — each a separate, optional package.
+Direct engine classes remain available from explicit subpaths such as
+`@easysql/connectors/sqlite`; the factory is preferred for lazy loading.
 
 ## Endpoints
 

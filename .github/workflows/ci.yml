@@ -132,14 +132,8 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      - name: MySQL connector integration
-        run: bun run --filter './packages/connectors/mysql' test
-
-      - name: PostgreSQL connector integration
-        run: bun run --filter './packages/connectors/postgres' test
-
-      - name: ClickHouse connector integration
-        run: bun run --filter './packages/connectors/clickhouse' test
+      - name: Connector integration tests
+        run: bun run --filter './packages/connectors' test
 
   coverage:
     name: Coverage (hand-written source)

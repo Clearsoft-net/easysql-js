@@ -8,7 +8,7 @@
  */
 
 import { parseConnectionUrl } from "@easysql/common";
-import { MysqlConnector } from "@easysql/connector-mysql";
+import { MysqlConnector } from "@easysql/connectors/mysql";
 import { generateSchema } from "@easysql/schema-generation";
 import { log } from "./_shared";
 

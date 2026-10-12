@@ -24,7 +24,7 @@ bun run samples/09-client-list-connections.ts
 | `02-schema-type-mapping.ts` | MySQL/PostgreSQL/SQLite type → canonical type. |
 | `03-schema-empty-and-determinism.ts` | Empty DB + stable ordering. |
 
-## SQLite connector (`@easysql/connector-sqlite`)
+## SQLite connector (`@easysql/connectors/sqlite`)
 
 | Sample | Shows |
 |---|---|

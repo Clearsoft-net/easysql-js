@@ -4,7 +4,7 @@
  *   bun run samples/05-sqlite-execute.ts
  */
 
-import { SqliteConnector } from "@easysql/connector-sqlite";
+import { SqliteConnector } from "@easysql/connectors/sqlite";
 import { log } from "./_shared";
 
 const connector = new SqliteConnector({ file: ":memory:", readonly: false });

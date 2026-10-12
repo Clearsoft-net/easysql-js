@@ -7,7 +7,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { SqliteConnector } from "@easysql/connector-sqlite";
+import { SqliteConnector } from "@easysql/connectors/sqlite";
 import { log } from "./_shared";
 
 const dir = mkdtempSync(join(tmpdir(), "easysql-sample-"));

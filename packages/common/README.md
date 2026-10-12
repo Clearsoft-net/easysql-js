@@ -27,7 +27,7 @@ bun add @easysql/common
 ```ts
 import type { Connector, QueryResult } from "@easysql/common";
 
-// Every @easysql/connector-* class implements this interface:
+// Every engine module in @easysql/connectors implements this interface:
 interface Connector {
   connect(): void | Promise<void>;
   close(): void | Promise<void>;
@@ -49,7 +49,7 @@ function toPayload(connector: Connector): Promise<ReturnType<typeof generateSche
 }
 ```
 
-`@easysql/schema-generation` and every connector package depend on these
+`@easysql/schema-generation` and `@easysql/connectors` depend on these
 contracts; `@easysql/schema-generation` also re-exports the schema types for
 convenience.
 

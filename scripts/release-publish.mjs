@@ -26,7 +26,7 @@ const verbose = process.env.PUBLISH_VERBOSE === "1";
 
 function packageManifests(base = root) {
   const paths = [join(base, "package.json")];
-  for (const group of ["packages", "packages/connectors"]) {
+  for (const group of ["packages"]) {
     const dir = join(base, group);
     if (!existsSync(dir)) continue;
     for (const entry of readdirSync(dir, { withFileTypes: true })) {

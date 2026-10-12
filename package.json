@@ -5,13 +5,12 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "packages/*",
-    "packages/connectors/*"
+    "packages/*"
   ],
   "scripts": {
     "install:all": "bun install --frozen-lockfile",
     "generate": "bun run --filter './packages/client' generate",
-    "build": "bun run clean && bun run --filter './packages/common' build && bun run --filter './packages/schema-generation' build && bun run --filter './packages/client' build && bun run --filter './packages/connectors/*' build",
+    "build": "bun run clean && bun run --filter './packages/common' build && bun run --filter './packages/schema-generation' build && bun run --filter './packages/client' build && bun run --filter './packages/connectors' build",
     "typecheck": "bun run --filter '*' typecheck",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",

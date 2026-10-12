@@ -4,7 +4,7 @@
  *   bun run samples/04-sqlite-introspect.ts
  */
 
-import { SqliteConnector } from "@easysql/connector-sqlite";
+import { SqliteConnector } from "@easysql/connectors/sqlite";
 import { generateSchema } from "@easysql/schema-generation";
 import { log } from "./_shared";
 

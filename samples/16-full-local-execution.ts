@@ -13,7 +13,7 @@
  *     bun run samples/16-full-local-execution.ts
  */
 
-import { SqliteConnector } from "@easysql/connector-sqlite";
+import { SqliteConnector } from "@easysql/connectors/sqlite";
 import { generateSchema } from "@easysql/schema-generation";
 import { authedClient, log, requireEnv } from "./_shared";
 

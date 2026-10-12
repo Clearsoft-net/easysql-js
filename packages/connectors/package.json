@@ -1,0 +1,70 @@
+{
+  "name": "@easysql/connectors",
+  "version": "3.0.0",
+  "description": "EasySQL database connectors with optional, on-demand drivers.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./mysql": {
+      "types": "./dist/mysql/index.d.ts",
+      "import": "./dist/mysql/index.js"
+    },
+    "./postgres": {
+      "types": "./dist/postgres/index.d.ts",
+      "import": "./dist/postgres/index.js"
+    },
+    "./clickhouse": {
+      "types": "./dist/clickhouse/index.d.ts",
+      "import": "./dist/clickhouse/index.js"
+    },
+    "./sqlite": {
+      "types": "./dist/sqlite/index.d.ts",
+      "import": "./dist/sqlite/index.js"
+    }
+  },
+  "author": "Clearsoft <contact@clearsoft.net>",
+  "homepage": "https://easysql.net",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Clearsoft-net/easysql-js.git",
+    "directory": "packages/connectors"
+  },
+  "bugs": {
+    "url": "https://github.com/Clearsoft-net/easysql-js/issues"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "publishConfig": { "access": "public" },
+  "keywords": ["easysql", "clearsoft", "database", "connectors", "sql"],
+  "license": "MIT",
+  "engines": { "node": ">=18", "bun": ">=1.1.0" },
+  "peerDependencies": {
+    "@clickhouse/client": "^1.23.1",
+    "mysql2": "^3.11.5",
+    "pg": "^8.13.1"
+  },
+  "peerDependenciesMeta": {
+    "@clickhouse/client": { "optional": true },
+    "mysql2": { "optional": true },
+    "pg": { "optional": true }
+  },
+  "devDependencies": {
+    "@clickhouse/client": "^1.23.1",
+    "@types/pg": "^8.11.10",
+    "mysql2": "^3.11.5",
+    "pg": "^8.13.1"
+  },
+  "dependencies": {
+    "@easysql/common": "workspace:*"
+  }
+}

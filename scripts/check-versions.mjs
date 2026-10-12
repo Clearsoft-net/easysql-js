@@ -12,7 +12,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function manifests(base = root) {
   const paths = [{ path: join(base, "package.json"), label: "root" }];
-  for (const group of ["packages", "packages/connectors"]) {
+  for (const group of ["packages"]) {
     const dir = join(base, group);
     if (!existsSync(dir)) continue;
     for (const entry of readdirSync(dir, { withFileTypes: true })) {

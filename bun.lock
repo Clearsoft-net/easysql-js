@@ -32,39 +32,28 @@
       "name": "@easysql/common",
       "version": "3.0.0",
     },
-    "packages/connectors/clickhouse": {
-      "name": "@easysql/connector-clickhouse",
-      "version": "3.0.0",
-      "dependencies": {
-        "@clickhouse/client": "^1.23.1",
-        "@easysql/common": "workspace:*",
-      },
-    },
-    "packages/connectors/mysql": {
-      "name": "@easysql/connector-mysql",
+    "packages/connectors": {
+      "name": "@easysql/connectors",
       "version": "3.0.0",
       "dependencies": {
         "@easysql/common": "workspace:*",
-        "mysql2": "^3.11.5",
-      },
-    },
-    "packages/connectors/postgres": {
-      "name": "@easysql/connector-postgres",
-      "version": "3.0.0",
-      "dependencies": {
-        "@easysql/common": "workspace:*",
-        "pg": "^8.13.1",
       },
       "devDependencies": {
+        "@clickhouse/client": "^1.23.1",
         "@types/pg": "^8.11.10",
+        "mysql2": "^3.11.5",
+        "pg": "^8.13.1",
       },
-    },
-    "packages/connectors/sqlite": {
-      "name": "@easysql/connector-sqlite",
-      "version": "3.0.0",
-      "dependencies": {
-        "@easysql/common": "workspace:*",
+      "peerDependencies": {
+        "@clickhouse/client": "^1.23.1",
+        "mysql2": "^3.11.5",
+        "pg": "^8.13.1",
       },
+      "optionalPeers": [
+        "@clickhouse/client",
+        "mysql2",
+        "pg",
+      ],
     },
     "packages/schema-generation": {
       "name": "@easysql/schema-generation",
@@ -113,13 +102,7 @@
 
     "@easysql/common": ["@easysql/common@workspace:packages/common"],
 
-    "@easysql/connector-clickhouse": ["@easysql/connector-clickhouse@workspace:packages/connectors/clickhouse"],
-
-    "@easysql/connector-mysql": ["@easysql/connector-mysql@workspace:packages/connectors/mysql"],
-
-    "@easysql/connector-postgres": ["@easysql/connector-postgres@workspace:packages/connectors/postgres"],
-
-    "@easysql/connector-sqlite": ["@easysql/connector-sqlite@workspace:packages/connectors/sqlite"],
+    "@easysql/connectors": ["@easysql/connectors@workspace:packages/connectors"],
 
     "@easysql/schema-generation": ["@easysql/schema-generation@workspace:packages/schema-generation"],
 

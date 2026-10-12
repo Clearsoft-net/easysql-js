@@ -8,7 +8,7 @@
  */
 
 import { parseConnectionUrl } from "@easysql/common";
-import { PostgresConnector } from "@easysql/connector-postgres";
+import { PostgresConnector } from "@easysql/connectors/postgres";
 import { generateSchema } from "@easysql/schema-generation";
 import { log } from "./_shared";
 

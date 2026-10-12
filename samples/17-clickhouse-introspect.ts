@@ -8,7 +8,7 @@
  */
 
 import { parseConnectionUrl } from "@easysql/common";
-import { ClickhouseConnector } from "@easysql/connector-clickhouse";
+import { ClickhouseConnector } from "@easysql/connectors/clickhouse";
 import { generateSchema } from "@easysql/schema-generation";
 import { log } from "./_shared";
 

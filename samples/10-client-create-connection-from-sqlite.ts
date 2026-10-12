@@ -10,7 +10,7 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { SqliteConnector } from "@easysql/connector-sqlite";
+import { SqliteConnector } from "@easysql/connectors/sqlite";
 import { generateSchema } from "@easysql/schema-generation";
 import { authedClient, log } from "./_shared";
 
