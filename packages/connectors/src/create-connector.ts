@@ -1,5 +1,6 @@
 import { type Connector, parseConnectionUrl } from "@easysql/common";
 import type { ClickhouseConnectionConfig } from "./clickhouse/types.js";
+import { loadDriver } from "./driver-loading.js";
 import type { MysqlConnectionConfig } from "./mysql/types.js";
 import type { PostgresConnectionConfig } from "./postgres/types.js";
 import {
@@ -109,28 +110,4 @@ function normalizeNetwork(
     database: parsed.database,
     ssl: parsed.ssl,
   };
-}
-
-async function loadDriver<T>(name: string, load: () => Promise<T>): Promise<T> {
-  try {
-    return await load();
-  } catch (error) {
-    if (isMissingModule(error)) {
-      throw new Error(
-        `Connector dependency '${name}' is unavailable. Install the optional driver for the selected engine and ensure the runtime supports it.`,
-        { cause: error },
-      );
-    }
-    throw error;
-  }
-}
-
-function isMissingModule(error: unknown): boolean {
-  if (!(error instanceof Error)) return false;
-  const code = (error as NodeJS.ErrnoException).code;
-  return (
-    code === "ERR_MODULE_NOT_FOUND" ||
-    code === "MODULE_NOT_FOUND" ||
-    code === "ERR_UNKNOWN_BUILTIN_MODULE"
-  );
 }
