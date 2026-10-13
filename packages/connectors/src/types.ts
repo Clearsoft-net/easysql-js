@@ -1,14 +1,19 @@
-import type { Connector } from "@easysql/common";
+import type { Connector, ConnectorEngine as SchemaEngine } from "@easysql/common";
+import type { SqliteConnectionConfig } from "./sqlite/types.js";
 
 export type { Connector, QueryResult } from "@easysql/common";
 
-/** Supported engines implemented by this package. */
+/**
+ * Supported engines implemented by this package. The `satisfies` clause pins
+ * every value to `@easysql/common`'s engine vocabulary, so this list and the
+ * schema vocabulary cannot drift apart silently.
+ */
 export const ConnectorEngine = {
   MySQL: "mysql",
   PostgreSQL: "postgresql",
   ClickHouse: "clickhouse",
   SQLite: "sqlite",
-} as const;
+} as const satisfies Record<string, SchemaEngine>;
 
 export type ConnectorEngineId = (typeof ConnectorEngine)[keyof typeof ConnectorEngine];
 
@@ -35,14 +40,6 @@ export interface SocketConnectionConfig {
   file?: never;
 }
 
-export interface SqliteConnectionConfig {
-  file: string;
-  readonly?: boolean;
-  host?: never;
-  port?: never;
-  socket?: never;
-}
-
 export type NetworkConnectionConfig = string | TcpConnectionConfig | SocketConnectionConfig;
 
 export interface MysqlConnectorOptions {
@@ -67,6 +64,7 @@ export interface ClickhouseConnectorOptions {
 
 export interface SqliteConnectorOptions {
   engine: typeof ConnectorEngine.SQLite;
+  /** Filename, `":memory:"`, a `sqlite:///path/to.db` URL, or a config object. */
   connection: string | SqliteConnectionConfig;
 }
 
@@ -78,3 +76,21 @@ export type CreateConnectorOptions =
 
 /** Creates and returns a database connector. Drivers load only for the selected engine. */
 export type ConnectorFactory = (options: CreateConnectorOptions) => Promise<Connector>;
+
+/**
+ * Internal — a connection after a string/URL was normalised into explicit
+ * fields. Consumed by `create-connector.ts` only; never re-exported from the
+ * package barrel.
+ */
+export interface NormalizedConnection {
+  host?: string;
+  port?: number;
+  socket?: string;
+  file?: string;
+  user?: string;
+  password?: string;
+  database?: string;
+  ssl?: boolean;
+  connectTimeoutMs?: number;
+  readonly?: boolean;
+}

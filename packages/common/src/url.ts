@@ -13,17 +13,7 @@
  * whether it is ever persisted (it should not be).
  */
 
-import type { ConnectorEngine } from "./schema.js";
-
-export interface ParsedConnection {
-  type: ConnectorEngine;
-  host: string;
-  port: number;
-  user: string;
-  password: string;
-  database: string;
-  ssl: boolean;
-}
+import type { ConnectorEngine, ParsedConnection } from "./types.js";
 
 const DEFAULT_PORTS: Record<ConnectorEngine, number> = {
   mysql: 3306,

@@ -19,3 +19,18 @@ export interface ClickhouseConnectionConfig {
 export interface IntrospectResult extends RawSchema {
   engine: "clickhouse";
 }
+
+/** Internal — `system.tables` row returned by the driver. */
+export interface TableRow {
+  table_name: string;
+  rows_approx: string | number | null;
+}
+
+/** Internal — `system.columns` row returned by the driver. */
+export interface ColumnRow {
+  column_name: string;
+  data_type: string;
+  column_default: string | null;
+  is_primary: number | boolean;
+  ordinal: string | number;
+}

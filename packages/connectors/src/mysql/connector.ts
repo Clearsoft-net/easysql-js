@@ -10,29 +10,15 @@
 import { sanitizeErrorMessage } from "@easysql/common";
 import { type Connection, createConnection } from "mysql2/promise";
 import type {
+  ColumnRow,
   Connector,
   IntrospectResult,
   MysqlConnectionConfig,
   QueryResult,
   RawColumn,
   RawTable,
+  TableRow,
 } from "./types.js";
-
-interface ColumnRow {
-  column_name: string;
-  data_type: string;
-  is_nullable: string;
-  column_default: string | null;
-  column_key: string;
-  referenced_table_name: string | null;
-  referenced_column_name: string | null;
-  ordinal_position: number;
-}
-
-interface TableRow {
-  table_name: string;
-  table_rows: number | null;
-}
 
 export class MysqlConnector implements Connector {
   private readonly config: Required<

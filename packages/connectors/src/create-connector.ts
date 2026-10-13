@@ -9,22 +9,10 @@ import {
   type CreateConnectorOptions,
   type MysqlConnectorOptions,
   type NetworkConnectionConfig,
+  type NormalizedConnection,
   type PostgresConnectorOptions,
   type SqliteConnectorOptions,
 } from "./types.js";
-
-interface NormalizedConnection {
-  host?: string;
-  port?: number;
-  socket?: string;
-  file?: string;
-  user?: string;
-  password?: string;
-  database?: string;
-  ssl?: boolean;
-  connectTimeoutMs?: number;
-  readonly?: boolean;
-}
 
 /**
  * Create a connector for the selected database engine. The engine module (and
