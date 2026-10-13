@@ -32,6 +32,28 @@ describe("parseConnectionUrl", () => {
     expect(c).toMatchObject({ type: "sqlite", database: "/tmp/db.sqlite", host: "", port: 0 });
   });
 
+  it("parses a mariadb URL on the MySQL default port", () => {
+    const c = parseConnectionUrl("mariadb://root:secret@db.example.com/shop");
+    expect(c).toEqual({
+      type: "mariadb",
+      host: "db.example.com",
+      port: 3306,
+      user: "root",
+      password: "secret",
+      database: "shop",
+      ssl: false,
+    });
+  });
+
+  it("drops a localhost host from a sqlite URL", () => {
+    const c = parseConnectionUrl("sqlite://localhost/tmp/db.sqlite");
+    expect(c).toMatchObject({ type: "sqlite", database: "/tmp/db.sqlite" });
+  });
+
+  it("rejects a sqlite URL without a file path", () => {
+    expect(() => parseConnectionUrl("sqlite://")).toThrow(/file path/i);
+  });
+
   it("parses a clickhouse URL with the HTTP default port", () => {
     const c = parseConnectionUrl("clickhouse://default:secret@ch.local/analytics");
     expect(c).toEqual({
@@ -71,5 +93,18 @@ describe("mergeConnection", () => {
   it("throws when user or database is missing", () => {
     expect(() => mergeConnection({}, {})).toThrow(/user/i);
     expect(() => mergeConnection({ user: "u" }, {})).toThrow(/database/i);
+  });
+
+  it("merges sqlite connections and requires a file path", () => {
+    expect(mergeConnection({ type: "sqlite" }, { database: "/tmp/db.sqlite" })).toEqual({
+      type: "sqlite",
+      host: "",
+      port: 0,
+      user: "",
+      password: "",
+      database: "/tmp/db.sqlite",
+      ssl: false,
+    });
+    expect(() => mergeConnection({ type: "sqlite" }, {})).toThrow(/SQLite file path is required/);
   });
 });
