@@ -10,29 +10,15 @@
 import { sanitizeErrorMessage } from "@easysql/common";
 import pg from "pg";
 import type {
+  ColumnRow,
   Connector,
   IntrospectResult,
   PostgresConnectionConfig,
   QueryResult,
   RawColumn,
   RawTable,
+  TableRow,
 } from "./types.js";
-
-interface ColumnRow {
-  column_name: string;
-  data_type: string;
-  is_nullable: boolean;
-  column_default: string | null;
-  is_primary: boolean;
-  foreign_table: string | null;
-  foreign_column: string | null;
-  ordinal: number;
-}
-
-interface TableRow {
-  table_name: string;
-  rows_approx: string | number | null;
-}
 
 export class PostgresConnector implements Connector {
   private readonly config: Required<

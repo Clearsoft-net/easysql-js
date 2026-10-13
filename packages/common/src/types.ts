@@ -1,9 +1,11 @@
 /**
- * Schema contracts shared by connectors and schema generation.
+ * Every type declaration of `@easysql/common` — this package is the shared
+ * vocabulary of the SDK.
  *
  * `RawSchema` is what a connector produces from a local database;
  * `TableSchema`/`ColumnSchema` are what the EasySQL API accepts. The mapping
- * between them is `@easysql/schema-generation`'s job.
+ * between them is `@easysql/schema-generation`'s job. Behaviour lives next door:
+ * `url.ts` parses connection strings, `redact.ts` sanitises error messages.
  */
 
 /** A column in the schema payload accepted by the API. */
@@ -78,3 +80,40 @@ export type SchemaType =
   | "enum"
   | "uuid"
   | "unknown";
+
+/** Rows returned by {@link Connector.execute}. */
+export interface QueryResult {
+  columns: string[];
+  rows: Record<string, unknown>[];
+  rowCount: number;
+  durationMs: number;
+}
+
+/**
+ * A database connector: opens/closes a connection, reads local metadata and
+ * executes validated SQL. Credentials never leave the process.
+ */
+export interface Connector {
+  /** Opens the connection. Idempotent. */
+  connect(): void | Promise<void>;
+  /** Closes the connection. Safe to call when not connected. */
+  close(): void | Promise<void>;
+  /** Reads local metadata only — never returns rows. */
+  introspect(): RawSchema | Promise<RawSchema>;
+  /** Executes a validated SQL statement and returns typed rows. */
+  execute(sql: string): QueryResult | Promise<QueryResult>;
+}
+
+/**
+ * A connection string parsed into its parts. The password is held in memory
+ * only; callers decide whether it is ever persisted (it should not be).
+ */
+export interface ParsedConnection {
+  type: ConnectorEngine;
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+  database: string;
+  ssl: boolean;
+}

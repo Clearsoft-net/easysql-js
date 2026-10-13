@@ -21,3 +21,21 @@ export interface MysqlConnectionConfig {
 export interface IntrospectResult extends RawSchema {
   engine: "mysql" | "mariadb";
 }
+
+/** Internal — `information_schema.COLUMNS` row returned by the driver. */
+export interface ColumnRow {
+  column_name: string;
+  data_type: string;
+  is_nullable: string;
+  column_default: string | null;
+  column_key: string;
+  referenced_table_name: string | null;
+  referenced_column_name: string | null;
+  ordinal_position: number;
+}
+
+/** Internal — `information_schema.TABLES` row returned by the driver. */
+export interface TableRow {
+  table_name: string;
+  table_rows: number | null;
+}
