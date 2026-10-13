@@ -50,6 +50,7 @@ release per repository; generated code is kept strictly separate from hand-writt
 │   │   └── tsconfig.json / tsconfig.build.json
 │   └── connectors/                # @easysql/connectors — single package, opt-in drivers
 │       ├── src/create-connector.ts # factory with lazy engine-module loading
+│       ├── src/driver-loading.ts   # optional-driver import + actionable error
 │       ├── src/types.ts            # engine IDs, connection/option types, internal shapes
 │       ├── src/mysql/              # MySQL/MariaDB introspection (mysql2)
 │       ├── src/postgres/           # pg_catalog introspection (pg), provider modules
@@ -216,7 +217,9 @@ Direct engine classes remain available from explicit subpaths such as
   - `node-compat` — matrix Node 20/22/24, builds and runs
     `scripts/node-compat-smoke.mjs` (loads every package under Node).
   - `integration` — MySQL 8.4 + PostgreSQL 16 + ClickHouse 24.8 services; runs
-    the connector integration tests (`EASYSQL_TEST_*_URL`).
+    the connector integration tests (`EASYSQL_TEST_*_URL`). They create and drop
+    their own `easysql_test_*` fixtures in the target database and assert the
+    introspected metadata of those tables.
   - `coverage` — MySQL + PostgreSQL + ClickHouse services; `bun run coverage`
     enforces the line threshold (`COVERAGE_THRESHOLD`, default 80) over
     hand-written source only (generated `packages/client/src` and codegen scripts

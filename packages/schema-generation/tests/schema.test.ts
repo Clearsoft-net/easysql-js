@@ -46,6 +46,24 @@ describe("generateSchema — deterministic output", () => {
     ]);
   });
 
+  it("falls back to name order when ordinals are missing or partial", () => {
+    const partial: RawSchema = {
+      engine: "sqlite",
+      tables: [
+        {
+          name: "audit",
+          columns: [
+            { name: "zeta", dataType: "TEXT", nullable: true },
+            // Only one column carries an ordinal: the pair cannot be ordered by
+            // position, so the name order has to win for the whole table.
+            { name: "alpha", dataType: "TEXT", nullable: true, ordinal: 2 },
+          ],
+        },
+      ],
+    };
+    expect(generateSchema(partial)[0]?.columns.map((c) => c.name)).toEqual(["alpha", "zeta"]);
+  });
+
   it("never mutates its input", () => {
     const snapshot = structuredClone(mysql);
     generateSchema(mysql);
