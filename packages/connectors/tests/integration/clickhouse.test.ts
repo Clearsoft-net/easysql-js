@@ -11,6 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { createClient } from "@clickhouse/client";
 import type { ClickhouseConnectionConfig } from "../../src/clickhouse/index";
 import { ClickhouseConnector } from "../../src/clickhouse/index";
+import { failureOf } from "./failure";
 
 const url = process.env.EASYSQL_TEST_CLICKHOUSE_URL;
 const enabled = Boolean(url);
@@ -73,6 +74,13 @@ describe.skipIf(!enabled)("ClickhouseConnector integration", () => {
     const result = await connector.execute("SELECT 1 AS n");
     expect(result.rowCount).toBe(1);
     expect(result.rows[0]?.n).toBe(1);
+  });
+
+  it("surfaces the driver error without leaking the password", async () => {
+    const failure = await failureOf(connector, "SELECT * FROM easysql_test_missing_table");
+
+    expect(failure.message).toContain("easysql_test_missing_table");
+    expect(failure.message).not.toContain(configFromUrl(url as string).password);
   });
 });
 
