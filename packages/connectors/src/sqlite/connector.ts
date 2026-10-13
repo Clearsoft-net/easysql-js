@@ -10,7 +10,9 @@
 import { DatabaseSync } from "node:sqlite";
 import { sanitizeErrorMessage } from "@easysql/common";
 import type {
+  ColumnRow,
   Connector,
+  ForeignKeyRow,
   IntrospectResult,
   QueryResult,
   RawColumn,
@@ -18,25 +20,8 @@ import type {
   SqliteConnectionConfig,
 } from "./types.js";
 
-interface ColumnRow {
-  cid: number;
-  name: string;
-  type: string;
-  notnull: number;
-  dflt_value: string | null;
-  pk: number;
-}
-
-interface ForeignKeyRow {
-  id: number;
-  seq: number;
-  table: string;
-  from: string;
-  to: string;
-}
-
 export class SqliteConnector implements Connector {
-  private readonly config: Required<SqliteConnectionConfig>;
+  private readonly config: Required<Pick<SqliteConnectionConfig, "file" | "readonly">>;
   private db: DatabaseSync | null = null;
 
   constructor(config: SqliteConnectionConfig) {

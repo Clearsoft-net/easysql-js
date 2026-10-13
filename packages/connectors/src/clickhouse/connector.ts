@@ -12,25 +12,14 @@ import { type ClickHouseClient, createClient } from "@clickhouse/client";
 import { sanitizeErrorMessage } from "@easysql/common";
 import type {
   ClickhouseConnectionConfig,
+  ColumnRow,
   Connector,
   IntrospectResult,
   QueryResult,
   RawColumn,
   RawTable,
+  TableRow,
 } from "./types.js";
-
-interface TableRow {
-  table_name: string;
-  rows_approx: string | number | null;
-}
-
-interface ColumnRow {
-  column_name: string;
-  data_type: string;
-  column_default: string | null;
-  is_primary: number | boolean;
-  ordinal: string | number;
-}
 
 export class ClickhouseConnector implements Connector {
   private readonly config: Required<
