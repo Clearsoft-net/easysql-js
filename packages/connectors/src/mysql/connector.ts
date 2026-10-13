@@ -96,16 +96,24 @@ export class MysqlConnector implements Connector {
 
       const tables: RawTable[] = [];
       for (const table of tableRows as TableRow[]) {
+        // Foreign keys live in KEY_COLUMN_USAGE: information_schema.COLUMNS
+        // has no REFERENCED_* columns, so reading them from there fails on any
+        // database that has at least one table.
         const [columnRows] = await connection.query(
-          `SELECT COLUMN_NAME AS column_name, DATA_TYPE AS data_type,
-                  IS_NULLABLE AS is_nullable, COLUMN_DEFAULT AS column_default,
-                  COLUMN_KEY AS column_key,
-                  REFERENCED_TABLE_NAME AS referenced_table_name,
-                  REFERENCED_COLUMN_NAME AS referenced_column_name,
-                  ORDINAL_POSITION AS ordinal_position
-           FROM information_schema.COLUMNS
-           WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
-           ORDER BY ORDINAL_POSITION`,
+          `SELECT c.COLUMN_NAME AS column_name, c.DATA_TYPE AS data_type,
+                  c.IS_NULLABLE AS is_nullable, c.COLUMN_DEFAULT AS column_default,
+                  c.COLUMN_KEY AS column_key,
+                  k.REFERENCED_TABLE_NAME AS referenced_table_name,
+                  k.REFERENCED_COLUMN_NAME AS referenced_column_name,
+                  c.ORDINAL_POSITION AS ordinal_position
+           FROM information_schema.COLUMNS c
+           LEFT JOIN information_schema.KEY_COLUMN_USAGE k
+             ON k.TABLE_SCHEMA = c.TABLE_SCHEMA
+            AND k.TABLE_NAME = c.TABLE_NAME
+            AND k.COLUMN_NAME = c.COLUMN_NAME
+            AND k.REFERENCED_TABLE_NAME IS NOT NULL
+           WHERE c.TABLE_SCHEMA = ? AND c.TABLE_NAME = ?
+           ORDER BY c.ORDINAL_POSITION`,
           [this.config.database, table.table_name],
         );
 
