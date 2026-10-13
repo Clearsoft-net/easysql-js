@@ -9,26 +9,25 @@
  */
 
 import { type ClickHouseClient, createClient } from "@clickhouse/client";
-import { sanitizeErrorMessage } from "@easysql/common";
+import { BaseConnector } from "../base-connector.js";
 import type {
   ClickhouseConnectionConfig,
   ColumnRow,
-  Connector,
   IntrospectResult,
-  QueryResult,
   RawColumn,
+  RawQueryResult,
   RawTable,
   TableRow,
 } from "./types.js";
 
-export class ClickhouseConnector implements Connector {
+export class ClickhouseConnector extends BaseConnector<ClickHouseClient> {
   private readonly config: Required<
     Pick<ClickhouseConnectionConfig, "port" | "ssl" | "connectTimeoutMs">
   > &
     ClickhouseConnectionConfig;
-  private client: ClickHouseClient | null = null;
 
   constructor(config: ClickhouseConnectionConfig) {
+    super([config.password]);
     if (!config.host) throw new Error("ClickhouseConnector: host is required");
     if (!config.user) throw new Error("ClickhouseConnector: user is required");
     if (!config.database) throw new Error("ClickhouseConnector: database is required");
@@ -41,34 +40,35 @@ export class ClickhouseConnector implements Connector {
   }
 
   /** Opens the connection. Safe to call more than once. */
-  async connect(): Promise<void> {
-    if (this.client) return;
+  protected async openHandle(): Promise<ClickHouseClient> {
     const protocol = this.config.ssl ? "https" : "http";
     const url = `${protocol}://${this.config.host}:${this.config.port}`;
-    try {
-      this.client = createClient({
-        url,
-        username: this.config.user,
-        password: this.config.password,
-        database: this.config.database,
-        request_timeout: this.config.connectTimeoutMs,
-      });
-    } catch (error) {
-      throw this.wrap(error);
-    }
+    return createClient({
+      url,
+      username: this.config.user,
+      password: this.config.password,
+      database: this.config.database,
+      request_timeout: this.config.connectTimeoutMs,
+    });
   }
 
   /** Closes the connection and clears it. Safe to call when not connected. */
-  async close(): Promise<void> {
-    if (!this.client) return;
-    const client = this.client;
-    this.client = null;
+  protected async closeHandle(client: ClickHouseClient): Promise<void> {
     await client.close();
+  }
+
+  /** Runs `sql` and reports its columns and rows. */
+  protected async runQuery(client: ClickHouseClient, sql: string): Promise<RawQueryResult> {
+    const resultSet = await client.query({ query: sql, format: "JSON" });
+    const body = await resultSet.json<Record<string, unknown>>();
+    const columns = (body.meta ?? []).map((meta) => meta.name);
+    const rows = body.data ?? [];
+    return { columns, rows, rowCount: body.rows ?? rows.length };
   }
 
   /** Introspects the configured database and returns the raw schema. */
   async introspect(): Promise<IntrospectResult> {
-    const client = this.requireConnection();
+    const client = this.requireHandle();
     try {
       const tablesResult = await client.query({
         query: `SELECT name AS table_name, total_rows AS rows_approx
@@ -106,36 +106,6 @@ export class ClickhouseConnector implements Connector {
       throw this.wrap(error);
     }
   }
-
-  /** Executes a validated SQL statement and returns typed rows. */
-  async execute(sql: string): Promise<QueryResult> {
-    const client = this.requireConnection();
-    const started = Date.now();
-    try {
-      const resultSet = await client.query({ query: sql, format: "JSON" });
-      const body = await resultSet.json<Record<string, unknown>>();
-      const columns = (body.meta ?? []).map((meta) => meta.name);
-      const rows = body.data ?? [];
-      return {
-        columns,
-        rows: rows.map((row) => pick(row, columns)),
-        rowCount: body.rows ?? rows.length,
-        durationMs: Date.now() - started,
-      };
-    } catch (error) {
-      throw this.wrap(error);
-    }
-  }
-
-  private requireConnection(): ClickHouseClient {
-    if (!this.client) throw new Error("ClickhouseConnector: not connected — call connect() first");
-    return this.client;
-  }
-
-  private wrap(error: unknown): Error {
-    const message = error instanceof Error ? error.message : String(error);
-    return new Error(sanitizeErrorMessage(message, [this.config.password]));
-  }
 }
 
 function toRawColumn(row: ColumnRow): RawColumn {
@@ -148,10 +118,4 @@ function toRawColumn(row: ColumnRow): RawColumn {
     foreignKey: null,
     ordinal: Number(row.ordinal),
   };
-}
-
-function pick(row: Record<string, unknown>, columns: string[]): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const column of columns) out[column] = row[column];
-  return out;
 }

@@ -1,21 +1,32 @@
 # @easysql/connectors
 
-Database connectors for EasySQL, distributed as one package. Database modules
-and drivers are loaded on demand; install the optional driver package for each
-engine you use.
+Database connectors for EasySQL, distributed as one package. Engine modules and
+their drivers are loaded on demand, so installing this package never pulls in
+every database driver: install only the optional driver for the engine you use.
 
 ## Install
 
 ```sh
 npm install @easysql/connectors
-# Add only the optional driver for your engine:
+# Then add only the driver for your engine, for example:
 npm install mysql2                 # MySQL / MariaDB
-# npm install pg                   # PostgreSQL
-# npm install @clickhouse/client   # ClickHouse
+npm install pg                     # PostgreSQL, Redshift, CockroachDB, Neon (TCP)
+npm install @clickhouse/client     # ClickHouse
+npm install mssql                  # SQL Server
+npm install oracledb               # Oracle
+npm install node-firebird          # Firebird
+npm install ibm_db                 # IBM Db2
+npm install @duckdb/node-api       # DuckDB
+npm install @libsql/client         # libSQL / Turso
+npm install snowflake-sdk          # Snowflake
+npm install @google-cloud/bigquery # BigQuery
+npm install trino-client           # Trino
+npm install @sap/hana-client       # SAP HANA
+npm install @neondatabase/serverless # Neon over HTTP / WebSockets
 ```
 
-SQLite uses Node's built-in `node:sqlite` (Node >= 22.5) and does not need a
-third-party driver. Bun support depends on its implementation of `node:sqlite`.
+SQLite uses Node's built-in `node:sqlite` (Node >= 22.5) and Cloudflare D1 is
+reached over its REST API with `fetch`, so neither needs a third-party driver.
 
 ## Factory API
 
@@ -35,17 +46,18 @@ try {
 }
 ```
 
-Connections may be passed as a native URL/DSN string where supported by the
-engine driver, or as an engine-specific object. Examples:
+A string in `connection` is the engine's conventional URL/DSN (or a file path for
+SQLite/DuckDB). An object carries explicit options; `host` implies TCP and
+`socket` implies a Unix socket.
 
 ```ts
-// MySQL TCP
+// MySQL over TCP
 await createConnector({
   engine: ConnectorEngine.MySQL,
   connection: { host: "127.0.0.1", user: "reader", password: "secret", database: "shop" },
 });
 
-// MySQL Unix socket
+// MySQL over a Unix socket
 await createConnector({
   engine: ConnectorEngine.MySQL,
   connection: { socket: "/var/run/mysqld/mysqld.sock", user: "reader", password: "secret", database: "shop" },
@@ -64,17 +76,57 @@ unified setup.
 
 ## Implemented engines
 
-| Engine | Current connection support | Optional driver |
+| Engine | Connection support | Optional driver |
 |---|---|---|
-| MySQL / MariaDB | TCP or Unix socket; URL parsing in factory | `mysql2` |
-| PostgreSQL | TCP or Unix socket; URL parsing in factory | `pg` |
+| MySQL / MariaDB | TCP, Unix socket, URL | `mysql2` |
+| PostgreSQL | TCP, Unix socket, URL | `pg` |
 | ClickHouse | HTTP(S) | `@clickhouse/client` |
-| SQLite | File or `:memory:` | Node `node:sqlite` |
+| SQLite | File, `:memory:` | Node `node:sqlite` |
+| SQL Server | TCP, URL | `mssql` |
+| Oracle | TCP, Easy Connect string, URL | `oracledb` (Thin mode) |
+| Firebird | TCP, URL | `node-firebird` |
+| IBM Db2 | TCP, URL | `ibm_db` |
+| DuckDB | File, `:memory:` | `@duckdb/node-api` |
+| libSQL / Turso | `libsql://`, `https://`, `file:` | `@libsql/client` |
+| Cloudflare D1 | REST API (account + database + token) | none (`fetch`) |
+| Snowflake | Account + credentials | `snowflake-sdk` |
+| BigQuery | Project + dataset | `@google-cloud/bigquery` |
+| Trino | TCP/HTTP(S) + catalog | `trino-client` |
+| SAP HANA | TCP, URL | `@sap/hana-client` |
 
-`@easysql/connectors` currently implements these four engines. Additional engines
-and provider-specific transports (including Neon HTTP/WebSocket) are planned,
-not yet implemented. The public API will only advertise an engine/transport as
-supported after its implementation and tests are in place.
+### PostgreSQL providers and transports
+
+Redshift, CockroachDB and Neon are **providers of the PostgreSQL engine**, not
+separate engines — the SQL dialect and catalog stay PostgreSQL. Select them with
+`provider`, and the transport with `transport`:
+
+```ts
+// Neon over HTTP (one-shot queries; needs @neondatabase/serverless)
+await createConnector({
+  engine: ConnectorEngine.PostgreSQL,
+  provider: "neon",
+  transport: "http",
+  connection: process.env.DATABASE_URL!,
+});
+
+// Neon over WebSockets (sessions, interactive transactions)
+await createConnector({
+  engine: ConnectorEngine.PostgreSQL,
+  provider: "neon",
+  transport: "websocket",
+  connection: process.env.DATABASE_URL!,
+});
+
+// Amazon Redshift (provider-specific catalog queries)
+await createConnector({
+  engine: ConnectorEngine.PostgreSQL,
+  provider: "redshift",
+  connection: process.env.REDSHIFT_URL!,
+});
+```
+
+Redshift is based on PostgreSQL 8.0, so it lacks `pg_class.relispartition`; the
+connector selects a version-safe introspection query for that provider.
 
 ## Tests
 
@@ -82,5 +134,8 @@ supported after its implementation and tests are in place.
 bun test
 ```
 
-Integration tests run when the corresponding `EASYSQL_TEST_*_URL` environment
-variable is set. Unit tests do not require database servers.
+Integration tests run only when the matching `EASYSQL_TEST_*` environment
+variable is set (for example `EASYSQL_TEST_SQLSERVER_URL`). Unit tests need no
+database server. Introspection queries are written against each engine's
+documented system catalogs; they are exercised end-to-end only by the
+integration suites.

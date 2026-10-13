@@ -7,27 +7,26 @@
  * message that leaves the process.
  */
 
-import { sanitizeErrorMessage } from "@easysql/common";
 import { type Connection, createConnection } from "mysql2/promise";
+import { BaseConnector } from "../base-connector.js";
 import type {
   ColumnRow,
-  Connector,
   IntrospectResult,
   MysqlConnectionConfig,
-  QueryResult,
   RawColumn,
+  RawQueryResult,
   RawTable,
   TableRow,
 } from "./types.js";
 
-export class MysqlConnector implements Connector {
+export class MysqlConnector extends BaseConnector<Connection> {
   private readonly config: Required<
     Pick<MysqlConnectionConfig, "port" | "ssl" | "connectTimeoutMs">
   > &
     MysqlConnectionConfig;
-  private connection: Connection | null = null;
 
   constructor(config: MysqlConnectionConfig) {
+    super([config.password]);
     if (!config.host && !config.socket)
       throw new Error("MysqlConnector: host or socket is required");
     if (!config.user) throw new Error("MysqlConnector: user is required");
@@ -41,36 +40,37 @@ export class MysqlConnector implements Connector {
   }
 
   /** Opens the connection. Safe to call more than once. */
-  async connect(): Promise<void> {
-    if (this.connection) return;
-    try {
-      this.connection = await createConnection({
-        ...(this.config.socket
-          ? { socketPath: this.config.socket }
-          : { host: this.config.host, port: this.config.port }),
-        user: this.config.user,
-        password: this.config.password,
-        database: this.config.database,
-        ssl: this.config.ssl ? {} : undefined,
-        multipleStatements: false,
-        connectTimeout: this.config.connectTimeoutMs,
-      });
-    } catch (error) {
-      throw this.wrap(error);
-    }
+  protected async openHandle(): Promise<Connection> {
+    return createConnection({
+      ...(this.config.socket
+        ? { socketPath: this.config.socket }
+        : { host: this.config.host, port: this.config.port }),
+      user: this.config.user,
+      password: this.config.password,
+      database: this.config.database,
+      ssl: this.config.ssl ? {} : undefined,
+      multipleStatements: false,
+      connectTimeout: this.config.connectTimeoutMs,
+    });
   }
 
   /** Closes the connection and clears it. Safe to call when not connected. */
-  async close(): Promise<void> {
-    if (!this.connection) return;
-    const connection = this.connection;
-    this.connection = null;
+  protected async closeHandle(connection: Connection): Promise<void> {
     await connection.end();
+  }
+
+  /** Runs `sql` and reports its columns and rows. */
+  protected async runQuery(connection: Connection, sql: string): Promise<RawQueryResult> {
+    const [rows, fields] = await connection.query(sql);
+    return {
+      columns: (fields ?? []).map((field) => field.name),
+      rows: rows as Record<string, unknown>[],
+    };
   }
 
   /** Introspects the configured database and returns the raw schema. */
   async introspect(): Promise<IntrospectResult> {
-    const connection = await this.requireConnection();
+    const connection = this.requireHandle();
     try {
       const [tableRows] = await connection.query(
         `SELECT TABLE_NAME AS table_name, TABLE_ROWS AS table_rows
@@ -115,36 +115,6 @@ export class MysqlConnector implements Connector {
       throw this.wrap(error);
     }
   }
-
-  /** Executes a validated SQL statement and returns typed rows. */
-  async execute(sql: string): Promise<QueryResult> {
-    const connection = await this.requireConnection();
-    const started = Date.now();
-    try {
-      const [rows, fields] = await connection.query(sql);
-      const recordRows = rows as Record<string, unknown>[];
-      const columns = (fields ?? []).map((field) => field.name);
-      return {
-        columns,
-        rows: recordRows.map((row) => pick(row, columns)),
-        rowCount: recordRows.length,
-        durationMs: Date.now() - started,
-      };
-    } catch (error) {
-      throw this.wrap(error);
-    }
-  }
-
-  private async requireConnection(): Promise<Connection> {
-    if (!this.connection) await this.connect();
-    if (!this.connection) throw new Error("MysqlConnector: not connected");
-    return this.connection;
-  }
-
-  private wrap(error: unknown): Error {
-    const message = error instanceof Error ? error.message : String(error);
-    return new Error(sanitizeErrorMessage(message, [this.config.password]));
-  }
 }
 
 function toRawColumn(row: ColumnRow): RawColumn {
@@ -160,10 +130,4 @@ function toRawColumn(row: ColumnRow): RawColumn {
         : null,
     ordinal: row.ordinal_position,
   };
-}
-
-function pick(row: Record<string, unknown>, columns: string[]): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const column of columns) out[column] = row[column];
-  return out;
 }

@@ -1,101 +1,60 @@
-import { type Connector, parseConnectionUrl } from "@easysql/common";
-import type { ClickhouseConnectionConfig } from "./clickhouse/types.js";
+import type { Connector } from "@easysql/common";
 import { loadDriver } from "./driver-loading.js";
-import type { MysqlConnectionConfig } from "./mysql/types.js";
-import type { PostgresConnectionConfig } from "./postgres/types.js";
-import {
-  type ClickhouseConnectorOptions,
-  ConnectorEngine,
-  type CreateConnectorOptions,
-  type MysqlConnectorOptions,
-  type NetworkConnectionConfig,
-  type NormalizedConnection,
-  type PostgresConnectorOptions,
-  type SqliteConnectorOptions,
-} from "./types.js";
+import { ConnectorEngine, type CreateConnectorOptions } from "./types.js";
 
 /**
  * Create a connector for the selected database engine. The engine module (and
- * its third-party driver) is dynamically imported only when this function runs.
+ * its third-party driver) is dynamically imported only when this function runs,
+ * so installing `@easysql/connectors` never pulls in every database driver.
+ *
+ * Each engine owns its own normalisation and construction in its `create()`
+ * export, so adding an engine only adds one line to the table below.
  */
 export async function createConnector(options: CreateConnectorOptions): Promise<Connector> {
   switch (options.engine) {
     case ConnectorEngine.MySQL:
-      return createMysql(options);
+      return (await loadDriver("mysql2", () => import("./mysql/index.js"))).create(options);
     case ConnectorEngine.PostgreSQL:
-      return createPostgres(options);
+      return (await loadDriver("pg", () => import("./postgres/index.js"))).create(options);
     case ConnectorEngine.ClickHouse:
-      return createClickhouse(options);
+      return (await loadDriver("@clickhouse/client", () => import("./clickhouse/index.js"))).create(
+        options,
+      );
     case ConnectorEngine.SQLite:
-      return createSqlite(options);
+      return (await loadDriver("node:sqlite", () => import("./sqlite/index.js"))).create(options);
+    case ConnectorEngine.SqlServer:
+      return (await loadDriver("mssql", () => import("./sqlserver/index.js"))).create(options);
+    case ConnectorEngine.Oracle:
+      return (await loadDriver("oracledb", () => import("./oracle/index.js"))).create(options);
+    case ConnectorEngine.Firebird:
+      return (await loadDriver("node-firebird", () => import("./firebird/index.js"))).create(
+        options,
+      );
+    case ConnectorEngine.Db2:
+      return (await loadDriver("ibm_db", () => import("./db2/index.js"))).create(options);
+    case ConnectorEngine.DuckDB:
+      return (await loadDriver("@duckdb/node-api", () => import("./duckdb/index.js"))).create(
+        options,
+      );
+    case ConnectorEngine.LibSql:
+      return (await loadDriver("@libsql/client", () => import("./libsql/index.js"))).create(
+        options,
+      );
+    case ConnectorEngine.CloudflareD1:
+      return (await loadDriver("fetch", () => import("./d1/index.js"))).create(options);
+    case ConnectorEngine.Snowflake:
+      return (await loadDriver("snowflake-sdk", () => import("./snowflake/index.js"))).create(
+        options,
+      );
+    case ConnectorEngine.BigQuery:
+      return (
+        await loadDriver("@google-cloud/bigquery", () => import("./bigquery/index.js"))
+      ).create(options);
+    case ConnectorEngine.Trino:
+      return (await loadDriver("trino-client", () => import("./trino/index.js"))).create(options);
+    case ConnectorEngine.SapHana:
+      return (await loadDriver("@sap/hana-client", () => import("./hana/index.js"))).create(
+        options,
+      );
   }
-}
-
-async function createMysql(options: MysqlConnectorOptions): Promise<Connector> {
-  const config = normalizeNetwork(options.connection, ["mysql", "mariadb"]);
-  const { MysqlConnector } = await loadDriver("mysql2", () => import("./mysql/index.js"));
-  return new MysqlConnector({
-    ...config,
-    user: config.user ?? "",
-    password: config.password ?? "",
-    database: config.database ?? "",
-  } as MysqlConnectionConfig);
-}
-
-async function createPostgres(options: PostgresConnectorOptions): Promise<Connector> {
-  const config = normalizeNetwork(options.connection, ["postgresql"]);
-  const { PostgresConnector } = await loadDriver("pg", () => import("./postgres/index.js"));
-  return new PostgresConnector({
-    ...config,
-    user: config.user ?? "",
-    password: config.password ?? "",
-    database: config.database ?? "",
-  } as PostgresConnectionConfig);
-}
-
-async function createClickhouse(options: ClickhouseConnectorOptions): Promise<Connector> {
-  const config = normalizeNetwork(options.connection, ["clickhouse"]);
-  const { ClickhouseConnector } = await loadDriver(
-    "@clickhouse/client",
-    () => import("./clickhouse/index.js"),
-  );
-  return new ClickhouseConnector({
-    ...config,
-    host: config.host ?? "",
-    user: config.user ?? "default",
-    password: config.password ?? "",
-    database: config.database ?? "default",
-  } as ClickhouseConnectionConfig);
-}
-
-async function createSqlite(options: SqliteConnectorOptions): Promise<Connector> {
-  const { SqliteConnector } = await loadDriver("node:sqlite", () => import("./sqlite/index.js"));
-  if (typeof options.connection === "string") {
-    const file = options.connection.startsWith("sqlite:")
-      ? parseConnectionUrl(options.connection).database
-      : options.connection;
-    return new SqliteConnector({ file });
-  }
-  return new SqliteConnector(options.connection);
-}
-
-function normalizeNetwork(
-  connection: NetworkConnectionConfig,
-  allowedSchemes: string[],
-): NormalizedConnection {
-  if (typeof connection !== "string") return connection;
-  const parsed = parseConnectionUrl(connection);
-  if (!allowedSchemes.includes(parsed.type)) {
-    throw new Error(
-      `Expected a ${allowedSchemes.join("/")} connection string, received '${parsed.type}'.`,
-    );
-  }
-  return {
-    host: parsed.host,
-    port: parsed.port,
-    user: parsed.user,
-    password: parsed.password,
-    database: parsed.database,
-    ssl: parsed.ssl,
-  };
 }

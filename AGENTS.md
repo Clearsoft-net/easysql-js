@@ -49,13 +49,29 @@ release per repository; generated code is kept strictly separate from hand-writt
 │   │   ├── package.json
 │   │   └── tsconfig.json / tsconfig.build.json
 │   └── connectors/                # @easysql/connectors — single package, opt-in drivers
-│       ├── src/create-connector.ts # factory with lazy engine-module loading
-│       ├── src/driver-loading.ts   # optional-driver import + actionable error
+│       ├── src/create-connector.ts # factory: lazy-loads the engine, calls its create()
+│       ├── src/base-connector.ts   # BaseConnector (async) + SyncBaseConnector (sync) lifecycles
+│       ├── src/internal.ts         # shared QueryResult assembly + redaction helpers
+│       ├── src/normalize.ts        # connection-string → explicit-fields helpers
+│       ├── src/driver-loading.ts   # loadDriver(): missing driver → actionable error
 │       ├── src/types.ts            # engine IDs, connection/option types, internal shapes
 │       ├── src/mysql/              # MySQL/MariaDB introspection (mysql2)
-│       ├── src/postgres/           # pg_catalog introspection (pg), provider modules
+│       ├── src/postgres/           # pg_catalog introspection (pg); session.ts adds
+│       │                           #   Neon HTTP/WebSocket transports, introspection.ts
+│       │                           #   holds provider-safe catalog queries (Redshift)
 │       ├── src/clickhouse/         # system tables over HTTP (@clickhouse/client)
 │       ├── src/sqlite/             # sqlite_master/PRAGMA (node:sqlite)
+│       ├── src/sqlserver/          # sys.* catalogs (mssql)
+│       ├── src/oracle/             # ALL_*/USER_* dictionary views (oracledb, thin mode)
+│       ├── src/firebird/           # RDB$ catalogs (node-firebird)
+│       ├── src/db2/                # SYSCAT catalogs (ibm_db)
+│       ├── src/duckdb/             # duckdb_tables()/duckdb_columns() (@duckdb/node-api)
+│       ├── src/libsql/             # sqlite_master/PRAGMA over libSQL (@libsql/client)
+│       ├── src/d1/                 # sqlite_master/PRAGMA over the D1 REST API (fetch)
+│       ├── src/snowflake/          # INFORMATION_SCHEMA (snowflake-sdk)
+│       ├── src/bigquery/           # dataset/table metadata (@google-cloud/bigquery)
+│       ├── src/trino/              # information_schema (trino-client)
+│       ├── src/hana/               # SYS.TABLES/SYS.TABLE_COLUMNS (@sap/hana-client)
 │       └── tests/                  # unit, integration, and type tests
 ├── scripts/                       # lockstep release helpers (semantic-release exec)
 ├── .github/workflows/             # ci.yml, generate-sdk.yml, release.yml
@@ -69,23 +85,47 @@ release per repository; generated code is kept strictly separate from hand-writt
 
 `packages/connectors` is one publishable package, `@easysql/connectors`. Engine
 implementations stay isolated in `src/<engine>/`; the public factory dynamically
-loads only the selected implementation. MySQL (`mysql2`), PostgreSQL (`pg`) and
-ClickHouse (`@clickhouse/client`) are optional peer dependencies; SQLite uses
-Node's built-in `node:sqlite` (Node >=22.5). Consumers install the EasySQL
-connectors package once and only the optional drivers for the engines they use.
-Direct connector classes are available via package subpaths; prefer the factory
-for lazy loading and a stable unified entry point.
+loads only the selected implementation, so consumers install the EasySQL package
+once plus the optional driver for the engine they use. Every third-party driver
+is an **optional peer dependency** and a devDependency (for typecheck and tests).
+SQLite uses Node's built-in `node:sqlite` (Node >=22.5) and Cloudflare D1 uses
+`fetch`, so neither needs a driver. Direct connector classes are available via
+package subpaths; prefer the factory for lazy loading and a stable entry point.
 
-The currently implemented engines are MySQL/MariaDB, PostgreSQL, ClickHouse
-(HTTP interface), and SQLite (file/in-memory). `createConnector` accepts an
-engine and a typed connection value: strings represent the engine's conventional
-URL/DSN or SQLite filename; object forms support host/port, Unix `socket`, and
-SQLite `file`. Provider and transport options are explicit where needed. Neon
-HTTP/WebSocket, CockroachDB-specific behavior, SQL Server, Oracle, Firebird,
-Db2, DuckDB, libSQL/Turso, Cloudflare D1, Snowflake, BigQuery, Trino, SAP HANA,
-and Redshift are planned only; do not describe them as implemented until their
-drivers, metadata handling, tests, and transport support are added. The root
-`packages/*` workspace glob contains the consolidated package.
+Implemented engines: MySQL/MariaDB, PostgreSQL, ClickHouse (HTTP interface),
+SQLite, SQL Server, Oracle (thin mode), Firebird, Db2, DuckDB, libSQL/Turso,
+Cloudflare D1, Snowflake, BigQuery, Trino and SAP HANA. **Redshift, CockroachDB
+and Neon are providers of the PostgreSQL engine**, not separate engines: select
+them with `provider`, and reach Neon over HTTP or WebSockets with `transport`.
+`createConnector` accepts an engine and a typed connection value: a string is the
+engine's conventional URL/DSN (or file path for SQLite/DuckDB), while object
+forms carry explicit options (`host` implies TCP, `socket` implies a Unix socket).
+
+Every engine shares one lifecycle. `src/base-connector.ts` provides
+`BaseConnector` (async, for the network engines) and `SyncBaseConnector` (for the
+synchronous `sqlite`); both own idempotent `connect`/`close`, the `execute`
+template (timing + `QueryResult` assembly) and credential redaction, all built on
+the pure helpers in `src/internal.ts`. An engine's `connector.ts` therefore
+implements only its driver seams — `openHandle`/`closeHandle`/`runQuery` plus the
+engine-specific `introspect` — and keeps its driver-row interfaces inline;
+`src/types.ts` holds only the public engine IDs and discriminated options.
+`src/create-connector.ts` is a thin lazy-loading `switch`: each `case` loads the
+engine module and calls the `create()` that its `index.ts` exports, so adding an
+engine adds a single line there.
+
+Adding an engine means: a `src/<engine>/{types,connector,index}.ts` triple whose
+`connector.ts` extends `BaseConnector`/`SyncBaseConnector` and whose `index.ts`
+exports `create()`, a subpath export and optional peer/dev dependency in
+`package.json`, a one-line `case` in `src/create-connector.ts`, an entry in
+`src/types.ts` (engine const + options), a mapper in
+`packages/schema-generation/src/type-map.ts` (the `ENGINE_MAPPERS` record is
+exhaustive, so a missing mapper fails typecheck), the engine id in
+`packages/common/src/schema.ts` (`ConnectorEngine`) and its port plus URL scheme
+in `packages/common/src/url.ts`, unit + integration tests, and the README table.
+Introspection queries are written against each engine's documented system
+catalogs and are only exercised end-to-end by the env-gated integration suites —
+treat them as unverified until run against a live server. The root `packages/*`
+workspace glob contains the consolidated package.
 
 ## Key files
 
@@ -258,3 +298,14 @@ reads `NODE_AUTH_TOKEN` through `~/.npmrc`. Both workflows map the same secret.
 | `EASYSQL_TEST_MYSQL_URL` | mysql connector integration test | No |
 | `EASYSQL_TEST_POSTGRES_URL` | postgres connector integration test | No |
 | `EASYSQL_TEST_CLICKHOUSE_URL` | clickhouse connector integration test | No |
+| `EASYSQL_TEST_SQLSERVER_URL` | sqlserver connector integration test | No |
+| `EASYSQL_TEST_ORACLE_URL` | oracle connector integration test | No |
+| `EASYSQL_TEST_FIREBIRD_URL` | firebird connector integration test | No |
+| `EASYSQL_TEST_DB2_URL` | db2 connector integration test | No |
+| `EASYSQL_TEST_DUCKDB_FILE` | duckdb integration test | No |
+| `EASYSQL_TEST_LIBSQL_URL` / `_TOKEN` | libsql/Turso integration test | No |
+| `EASYSQL_TEST_TRINO_URL` | trino connector integration test | No |
+| `EASYSQL_TEST_HANA_URL` | SAP HANA connector integration test | No |
+| `EASYSQL_TEST_SNOWFLAKE_URL` | snowflake connector integration test | No |
+| `EASYSQL_TEST_BIGQUERY_PROJECT` / `_DATASET` | BigQuery integration test | No |
+| `EASYSQL_TEST_D1_ACCOUNT_ID` / `_DATABASE_ID` / `_API_TOKEN` | Cloudflare D1 integration test | No |
