@@ -1,3 +1,10 @@
+## [4.0.1](https://github.com/Clearsoft-net/easysql-js/compare/v4.0.0...v4.0.1) (2026-10-13)
+
+
+### Bug Fixes
+
+* **connectors:** read MySQL foreign keys from KEY_COLUMN_USAGE ([#25](https://github.com/Clearsoft-net/easysql-js/issues/25)) ([3fe35f5](https://github.com/Clearsoft-net/easysql-js/commit/3fe35f5d852c639bfd8601a93203cb43ff7a38c7))
+
 # [4.0.0](https://github.com/Clearsoft-net/easysql-js/compare/v3.0.0...v4.0.0) (2026-10-12)
 
 
