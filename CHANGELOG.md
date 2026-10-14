@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/Clearsoft-net/easysql-js/compare/v4.0.1...v4.1.0) (2026-10-14)
+
+
+### Features
+
+* **connectors:** additional engines + shared connector lifecycle ([#26](https://github.com/Clearsoft-net/easysql-js/issues/26)) ([656bee9](https://github.com/Clearsoft-net/easysql-js/commit/656bee9a5e14fe44e42baa80b327c207019a06f5))
+
 ## [4.0.1](https://github.com/Clearsoft-net/easysql-js/compare/v4.0.0...v4.0.1) (2026-10-13)
 
 

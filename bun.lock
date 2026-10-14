@@ -23,18 +23,18 @@
     },
     "packages/client": {
       "name": "@easysql/client",
-      "version": "4.0.1",
+      "version": "4.1.0",
       "dependencies": {
         "openapi-fetch": "^0.13.0",
       },
     },
     "packages/common": {
       "name": "@easysql/common",
-      "version": "4.0.1",
+      "version": "4.1.0",
     },
     "packages/connectors": {
       "name": "@easysql/connectors",
-      "version": "4.0.1",
+      "version": "4.1.0",
       "dependencies": {
         "@easysql/common": "workspace:*",
       },
@@ -91,7 +91,7 @@
     },
     "packages/schema-generation": {
       "name": "@easysql/schema-generation",
-      "version": "4.0.1",
+      "version": "4.1.0",
       "dependencies": {
         "@easysql/common": "workspace:*",
       },

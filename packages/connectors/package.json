@@ -1,6 +1,6 @@
 {
   "name": "@easysql/connectors",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "EasySQL database connectors with optional, on-demand drivers.",
   "type": "module",
   "main": "dist/index.js",
