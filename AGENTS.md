@@ -262,8 +262,10 @@ Direct engine classes remain available from explicit subpaths such as
     introspected metadata of those tables.
   - `coverage` — MySQL + PostgreSQL + ClickHouse services; `bun run coverage`
     enforces the line threshold (`COVERAGE_THRESHOLD`, default 80) over
-    hand-written source only (generated `packages/client/src` and codegen scripts
-    are excluded).
+    hand-written source only. Generated `packages/client/src` and codegen scripts
+    are excluded, as are the `connector.ts` implementations of engines whose
+    integration suites need a server this job does not start (their factory
+    `create()` and `types.ts` stay in scope).
 - **generate-sdk.yml** (repository_dispatch `generate-sdk` or workflow_dispatch):
   regenerate → check → build → open an `auto/generate-sdk` PR.
 - **release.yml** (push main/master): check + build, then semantic-release.
