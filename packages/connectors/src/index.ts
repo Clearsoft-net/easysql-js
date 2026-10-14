@@ -1,20 +1,44 @@
 export type { Connector, QueryResult } from "@easysql/common";
 export { sanitizeErrorMessage } from "@easysql/common";
-export type { ClickhouseConnectionConfig } from "./clickhouse/types.js";
 export { createConnector } from "./create-connector.js";
-export type { MysqlConnectionConfig } from "./mysql/types.js";
-export type { PostgresConnectionConfig } from "./postgres/types.js";
-export type { SqliteConnectionConfig } from "./sqlite/types.js";
 export type {
+  BigQueryConnectionConfig,
+  BigQueryConnectorOptions,
+  ClickhouseConnectionConfig,
   ClickhouseConnectorOptions,
   ConnectorEngineId,
   ConnectorFactory,
   CreateConnectorOptions,
+  D1ConnectionConfig,
+  D1ConnectorOptions,
+  Db2ConnectionConfig,
+  Db2ConnectorOptions,
+  DuckDbConnectionConfig,
+  DuckDbConnectorOptions,
+  FirebirdConnectionConfig,
+  FirebirdConnectorOptions,
+  HanaConnectionConfig,
+  LibSqlConnectionConfig,
+  LibSqlConnectorOptions,
+  MysqlConnectionConfig,
   MysqlConnectorOptions,
   NetworkConnectionConfig,
+  OracleConnectionConfig,
+  OracleConnectorOptions,
+  PostgresConnectionConfig,
   PostgresConnectorOptions,
+  PostgresProvider,
+  PostgresTransport,
+  SapHanaConnectorOptions,
+  SnowflakeConnectionConfig,
+  SnowflakeConnectorOptions,
   SocketConnectionConfig,
+  SqliteConnectionConfig,
   SqliteConnectorOptions,
+  SqlServerConnectionConfig,
+  SqlServerConnectorOptions,
   TcpConnectionConfig,
+  TrinoConnectionConfig,
+  TrinoConnectorOptions,
 } from "./types.js";
 export { ConnectorEngine } from "./types.js";

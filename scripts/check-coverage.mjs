@@ -20,14 +20,42 @@ execFileSync("bun", ["test", "--coverage", "--coverage-reporter=lcov", "--covera
 });
 
 const lcov = readFileSync(join(dir, "lcov.info"), "utf8");
+
+/**
+ * Connector engines whose driver only runs against a server this job does not
+ * start. The coverage job brings up MySQL, PostgreSQL and ClickHouse; every
+ * other engine's `connector.ts` (openHandle/runQuery/introspect) is exercised
+ * only by its env-gated integration suite, so it is out of scope for this gate.
+ * Their `index.ts` (factory `create()`) and `types.ts` stay in scope.
+ */
+const ENV_GATED_ENGINES = [
+  "bigquery",
+  "d1",
+  "db2",
+  "firebird",
+  "hana",
+  "libsql",
+  "oracle",
+  "snowflake",
+  "sqlserver",
+  "trino",
+];
+
+const isEnvGatedEngine = (file) =>
+  ENV_GATED_ENGINES.some((engine) => file.includes(`packages/connectors/src/${engine}/connector.ts`));
+
 let total = 0;
 let covered = 0;
 let scope = "";
 for (const line of lcov.split("\n")) {
   if (line.startsWith("SF:")) {
-    // Hand-written source only: skip generated code and the codegen scripts.
+    // Hand-written source only: skip generated code, the codegen scripts and
+    // the connectors whose integration suites need a server this job lacks.
     const file = line.slice(3);
-    scope = file.includes("src/") && !file.includes("packages/client/src/") ? file : "";
+    scope =
+      file.includes("src/") && !file.includes("packages/client/src/") && !isEnvGatedEngine(file)
+        ? file
+        : "";
     continue;
   }
   if (!scope || !line.startsWith("DA:")) continue;

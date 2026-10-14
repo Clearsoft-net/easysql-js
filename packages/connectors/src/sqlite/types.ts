@@ -1,6 +1,7 @@
 import type { RawSchema } from "@easysql/common";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
+export type { RawQueryResult } from "../types.js";
 
 /** Configuration for a local SQLite database. */
 export interface SqliteConnectionConfig {

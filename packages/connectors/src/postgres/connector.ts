@@ -1,118 +1,112 @@
 /**
  * PostgreSQL connector: local schema introspection and query execution.
  *
- * The connection is opened explicitly with {@link PostgresConnector.connect}
- * and released with {@link PostgresConnector.close}. Credentials are held in
- * memory for the lifetime of the connector only and are stripped from every
- * error message that leaves the process.
+ * The connection is opened explicitly with {@link PostgresConnector.connect} and
+ * released with {@link PostgresConnector.close}. Credentials are held in memory
+ * for the lifetime of the connector only and are stripped from every error
+ * message that leaves the process.
+ *
+ * The same connector serves every PostgreSQL-compatible server. The `provider`
+ * selects which catalog queries are safe (Redshift is PostgreSQL 8.0 based) and
+ * the `transport` selects how the server is reached: `pg` over TCP, or the Neon
+ * serverless driver over HTTP/WebSockets.
  */
 
-import { sanitizeErrorMessage } from "@easysql/common";
-import pg from "pg";
+import { BaseConnector } from "../base-connector.js";
+import { columnsQuery, tablesQuery } from "./introspection.js";
+import { NeonHttpSession, NeonWebSocketSession, type PgSession, TcpSession } from "./session.js";
 import type {
   ColumnRow,
-  Connector,
   IntrospectResult,
   PostgresConnectionConfig,
-  QueryResult,
+  PostgresProvider,
+  PostgresTransport,
   RawColumn,
+  RawQueryResult,
   RawTable,
   TableRow,
 } from "./types.js";
 
-export class PostgresConnector implements Connector {
-  private readonly config: Required<
-    Pick<PostgresConnectionConfig, "port" | "ssl" | "connectTimeoutMs">
-  > &
-    PostgresConnectionConfig;
-  private client: pg.Client | null = null;
+export class PostgresConnector extends BaseConnector<PgSession> {
+  private readonly config: PostgresConnectionConfig &
+    Required<
+      Pick<PostgresConnectionConfig, "port" | "ssl" | "connectTimeoutMs" | "provider" | "transport">
+    >;
 
   constructor(config: PostgresConnectionConfig) {
-    if (!config.host && !config.socket)
+    super(
+      [config.password, config.connectionString].filter(
+        (secret): secret is string => secret !== undefined && secret.length > 0,
+      ),
+    );
+    const provider: PostgresProvider = config.provider ?? "postgres";
+    const transport: PostgresTransport = config.transport ?? "tcp";
+    const remote = transport !== "tcp";
+
+    if (remote && provider !== "neon") {
+      throw new Error(
+        `PostgresConnector: transport '${transport}' is only supported for the Neon provider`,
+      );
+    }
+    if (remote) {
+      if (!config.connectionString) {
+        throw new Error(
+          `PostgresConnector: connectionString is required for the '${transport}' transport`,
+        );
+      }
+    } else if (!config.connectionString && !config.host && !config.socket) {
       throw new Error("PostgresConnector: host or socket is required");
-    if (!config.user) throw new Error("PostgresConnector: user is required");
-    if (!config.database) throw new Error("PostgresConnector: database is required");
+    }
+    if (!config.connectionString) {
+      if (!config.user) throw new Error("PostgresConnector: user is required");
+      if (!config.database) throw new Error("PostgresConnector: database is required");
+    }
+
     this.config = {
       port: 5432,
       ssl: false,
       connectTimeoutMs: 10_000,
       ...config,
+      provider,
+      transport,
     };
   }
 
   /** Opens the connection. Safe to call more than once. */
-  async connect(): Promise<void> {
-    if (this.client) return;
-    const client = new pg.Client({
-      ...(this.config.socket
-        ? { host: this.config.socket }
-        : { host: this.config.host, port: this.config.port }),
-      user: this.config.user,
-      password: this.config.password,
-      database: this.config.database,
-      ssl: this.config.ssl ? { rejectUnauthorized: false } : false,
-      connectionTimeoutMillis: this.config.connectTimeoutMs,
-    });
+  protected async openHandle(): Promise<PgSession> {
+    const session = this.createSession();
     try {
-      await client.connect();
-      this.client = client;
+      if (session instanceof TcpSession) await session.open();
+      return session;
     } catch (error) {
-      throw this.wrap(error);
+      await session.close().catch(() => {});
+      throw error;
     }
   }
 
   /** Closes the connection and clears it. Safe to call when not connected. */
-  async close(): Promise<void> {
-    if (!this.client) return;
-    const client = this.client;
-    this.client = null;
-    await client.end();
+  protected async closeHandle(session: PgSession): Promise<void> {
+    await session.close();
+  }
+
+  /** Runs `sql` and reports its columns and rows. */
+  protected async runQuery(session: PgSession, sql: string): Promise<RawQueryResult> {
+    const res = await session.query(sql);
+    return {
+      columns: res.fields.map((field) => field.name),
+      rows: res.rows as Record<string, unknown>[],
+    };
   }
 
   /** Introspects the configured database and returns the raw schema. */
   async introspect(): Promise<IntrospectResult> {
-    const client = this.requireConnection();
+    const session = this.requireHandle();
     try {
-      const tablesRes = await client.query<TableRow>(
-        `SELECT c.relname AS table_name,
-                c.reltuples::bigint AS rows_approx
-         FROM pg_class c
-         JOIN pg_namespace n ON n.oid = c.relnamespace
-         WHERE n.nspname = current_schema()
-           AND c.relkind = 'r'
-           AND NOT c.relispartition
-         ORDER BY c.relname`,
-      );
+      const tablesRes = await session.query<TableRow>(tablesQuery(this.config.provider));
 
       const tables: RawTable[] = [];
       for (const row of tablesRes.rows) {
-        const columnsRes = await client.query<ColumnRow>(
-          `SELECT a.attname AS column_name,
-                  format_type(a.atttypid, a.atttypmod) AS data_type,
-                  NOT (a.attnotnull) AS is_nullable,
-                  pg_get_expr(d.adbin, d.adrelid) AS column_default,
-                  EXISTS (
-                    SELECT 1 FROM pg_index i
-                    WHERE i.indrelid = c.oid AND a.attnum = ANY(i.indkey) AND i.indisprimary
-                  ) AS is_primary,
-                  ref.relname AS foreign_table,
-                  ref_att.attname AS foreign_column,
-                  a.attnum AS ordinal
-           FROM pg_attribute a
-           JOIN pg_class c ON c.oid = a.attrelid
-           JOIN pg_namespace n ON n.oid = c.relnamespace
-           LEFT JOIN pg_attrdef d ON d.adrelid = a.attrelid AND d.adnum = a.attnum
-           LEFT JOIN pg_constraint con ON con.conrelid = c.oid AND a.attnum = ANY(con.conkey) AND con.contype = 'f'
-           LEFT JOIN pg_class ref ON ref.oid = con.confrelid
-           LEFT JOIN pg_attribute ref_att ON ref_att.attrelid = ref.oid AND ref_att.attnum = con.confkey[1]
-           WHERE n.nspname = current_schema()
-             AND c.relname = $1
-             AND a.attnum > 0
-             AND NOT a.attisdropped
-           ORDER BY a.attnum`,
-          [row.table_name],
-        );
-
+        const columnsRes = await session.query<ColumnRow>(columnsQuery(), [row.table_name]);
         tables.push({
           name: row.table_name,
           columns: columnsRes.rows.map(toRawColumn),
@@ -126,33 +120,14 @@ export class PostgresConnector implements Connector {
     }
   }
 
-  /** Executes a validated SQL statement and returns typed rows. */
-  async execute(sql: string): Promise<QueryResult> {
-    const client = this.requireConnection();
-    const started = Date.now();
-    try {
-      const res = await client.query(sql);
-      const rows = res.rows as Record<string, unknown>[];
-      const columns = (res.fields ?? []).map((field) => field.name);
-      return {
-        columns,
-        rows: rows.map((row) => pick(row, columns)),
-        rowCount: rows.length,
-        durationMs: Date.now() - started,
-      };
-    } catch (error) {
-      throw this.wrap(error);
+  private createSession(): PgSession {
+    if (this.config.transport === "http") {
+      return new NeonHttpSession(this.config.connectionString as string);
     }
-  }
-
-  private requireConnection(): pg.Client {
-    if (!this.client) throw new Error("PostgresConnector: not connected — call connect() first");
-    return this.client;
-  }
-
-  private wrap(error: unknown): Error {
-    const message = error instanceof Error ? error.message : String(error);
-    return new Error(sanitizeErrorMessage(message, [this.config.password]));
+    if (this.config.transport === "websocket") {
+      return new NeonWebSocketSession(this.config.connectionString as string);
+    }
+    return new TcpSession(this.config);
   }
 }
 
@@ -169,10 +144,4 @@ function toRawColumn(row: ColumnRow): RawColumn {
         : null,
     ordinal: row.ordinal,
   };
-}
-
-function pick(row: Record<string, unknown>, columns: string[]): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const column of columns) out[column] = row[column];
-  return out;
 }

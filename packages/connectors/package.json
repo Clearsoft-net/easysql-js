@@ -25,6 +25,50 @@
     "./sqlite": {
       "types": "./dist/sqlite/index.d.ts",
       "import": "./dist/sqlite/index.js"
+    },
+    "./sqlserver": {
+      "types": "./dist/sqlserver/index.d.ts",
+      "import": "./dist/sqlserver/index.js"
+    },
+    "./oracle": {
+      "types": "./dist/oracle/index.d.ts",
+      "import": "./dist/oracle/index.js"
+    },
+    "./firebird": {
+      "types": "./dist/firebird/index.d.ts",
+      "import": "./dist/firebird/index.js"
+    },
+    "./db2": {
+      "types": "./dist/db2/index.d.ts",
+      "import": "./dist/db2/index.js"
+    },
+    "./duckdb": {
+      "types": "./dist/duckdb/index.d.ts",
+      "import": "./dist/duckdb/index.js"
+    },
+    "./libsql": {
+      "types": "./dist/libsql/index.d.ts",
+      "import": "./dist/libsql/index.js"
+    },
+    "./d1": {
+      "types": "./dist/d1/index.d.ts",
+      "import": "./dist/d1/index.js"
+    },
+    "./snowflake": {
+      "types": "./dist/snowflake/index.d.ts",
+      "import": "./dist/snowflake/index.js"
+    },
+    "./bigquery": {
+      "types": "./dist/bigquery/index.d.ts",
+      "import": "./dist/bigquery/index.js"
+    },
+    "./trino": {
+      "types": "./dist/trino/index.d.ts",
+      "import": "./dist/trino/index.js"
+    },
+    "./hana": {
+      "types": "./dist/hana/index.d.ts",
+      "import": "./dist/hana/index.js"
     }
   },
   "author": "Clearsoft <contact@clearsoft.net>",
@@ -65,25 +109,81 @@
   },
   "peerDependencies": {
     "@clickhouse/client": "^1.23.1",
+    "@duckdb/node-api": "^1.5.6-r.1",
+    "@google-cloud/bigquery": "^9.2.0",
+    "@libsql/client": "^0.18.0",
+    "@neondatabase/serverless": "^1.2.0",
+    "@sap/hana-client": "^2.30.27",
+    "ibm_db": "^4.0.1",
+    "mssql": "^12.7.4",
     "mysql2": "^3.11.5",
-    "pg": "^8.13.1"
+    "node-firebird": "^2.18.2",
+    "oracledb": "^26.0.0",
+    "pg": "^8.13.1",
+    "snowflake-sdk": "^3.4.0",
+    "trino-client": "^0.2.9"
   },
   "peerDependenciesMeta": {
     "@clickhouse/client": {
       "optional": true
     },
+    "@duckdb/node-api": {
+      "optional": true
+    },
+    "@google-cloud/bigquery": {
+      "optional": true
+    },
+    "@libsql/client": {
+      "optional": true
+    },
+    "@neondatabase/serverless": {
+      "optional": true
+    },
+    "@sap/hana-client": {
+      "optional": true
+    },
+    "ibm_db": {
+      "optional": true
+    },
+    "mssql": {
+      "optional": true
+    },
     "mysql2": {
       "optional": true
     },
+    "node-firebird": {
+      "optional": true
+    },
+    "oracledb": {
+      "optional": true
+    },
     "pg": {
+      "optional": true
+    },
+    "snowflake-sdk": {
+      "optional": true
+    },
+    "trino-client": {
       "optional": true
     }
   },
   "devDependencies": {
     "@clickhouse/client": "^1.23.1",
+    "@duckdb/node-api": "^1.5.6-r.1",
+    "@google-cloud/bigquery": "^9.2.0",
+    "@libsql/client": "^0.18.0",
+    "@neondatabase/serverless": "^1.2.0",
+    "@sap/hana-client": "^2.30.27",
+    "@types/mssql": "^9.1.7",
     "@types/pg": "^8.11.10",
+    "ibm_db": "^4.0.1",
+    "mssql": "^12.7.4",
     "mysql2": "^3.11.5",
-    "pg": "^8.13.1"
+    "node-firebird": "^2.18.2",
+    "oracledb": "^26.0.0",
+    "pg": "^8.13.1",
+    "snowflake-sdk": "^3.4.0",
+    "trino-client": "^0.2.9"
   },
   "dependencies": {
     "@easysql/common": "workspace:*"

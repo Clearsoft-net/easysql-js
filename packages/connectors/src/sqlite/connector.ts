@@ -8,23 +8,22 @@
  */
 
 import { DatabaseSync } from "node:sqlite";
-import { sanitizeErrorMessage } from "@easysql/common";
+import { SyncBaseConnector } from "../base-connector.js";
 import type {
   ColumnRow,
-  Connector,
   ForeignKeyRow,
   IntrospectResult,
-  QueryResult,
   RawColumn,
+  RawQueryResult,
   RawTable,
   SqliteConnectionConfig,
 } from "./types.js";
 
-export class SqliteConnector implements Connector {
+export class SqliteConnector extends SyncBaseConnector<DatabaseSync> {
   private readonly config: Required<Pick<SqliteConnectionConfig, "file" | "readonly">>;
-  private db: DatabaseSync | null = null;
 
   constructor(config: SqliteConnectionConfig) {
+    super([]);
     if (!config.file) throw new Error("SqliteConnector: file is required");
     this.config = {
       file: config.file,
@@ -33,26 +32,28 @@ export class SqliteConnector implements Connector {
   }
 
   /** Opens the database. Safe to call more than once. */
-  connect(): void {
-    if (this.db) return;
-    try {
-      this.db = new DatabaseSync(this.config.file, { readOnly: this.config.readonly });
-    } catch (error) {
-      throw this.wrap(error);
-    }
+  protected openHandle(): DatabaseSync {
+    return new DatabaseSync(this.config.file, { readOnly: this.config.readonly });
   }
 
   /** Closes the database and clears it. Safe to call when not connected. */
-  close(): void {
-    if (!this.db) return;
-    const db = this.db;
-    this.db = null;
+  protected closeHandle(db: DatabaseSync): void {
     db.close();
+  }
+
+  /** Runs `sql`, reporting the affected-row count for statements with no projection. */
+  protected runQuery(db: DatabaseSync, sql: string): RawQueryResult {
+    const statement = db.prepare(sql);
+    const columns = statement.columns().map((column) => column.name);
+    if (columns.length === 0) {
+      return { columns: [], rows: [], rowCount: Number(statement.run().changes) };
+    }
+    return { columns, rows: statement.all() as unknown as Record<string, unknown>[] };
   }
 
   /** Introspects the database and returns the raw schema. */
   introspect(): IntrospectResult {
-    const db = this.requireDatabase();
+    const db = this.requireHandle();
     try {
       const tableRows = db
         .prepare(
@@ -85,44 +86,6 @@ export class SqliteConnector implements Connector {
     } catch (error) {
       throw this.wrap(error);
     }
-  }
-
-  /** Executes a validated SQL statement and returns typed rows. */
-  execute(sql: string): QueryResult {
-    const db = this.requireDatabase();
-    const started = Date.now();
-    try {
-      const statement = db.prepare(sql);
-      const columns = statement.columns().map((column) => column.name);
-      if (columns.length === 0) {
-        const info = statement.run();
-        return {
-          columns: [],
-          rows: [],
-          rowCount: Number(info.changes),
-          durationMs: Date.now() - started,
-        };
-      }
-      const rows = statement.all() as unknown as Record<string, unknown>[];
-      return {
-        columns,
-        rows: rows.map((row) => pick(row, columns)),
-        rowCount: rows.length,
-        durationMs: Date.now() - started,
-      };
-    } catch (error) {
-      throw this.wrap(error);
-    }
-  }
-
-  private requireDatabase(): DatabaseSync {
-    if (!this.db) throw new Error("SqliteConnector: not connected — call connect() first");
-    return this.db;
-  }
-
-  private wrap(error: unknown): Error {
-    const message = error instanceof Error ? error.message : String(error);
-    return new Error(sanitizeErrorMessage(message, []));
   }
 }
 
@@ -157,10 +120,4 @@ function countRows(db: DatabaseSync, table: string): number | null {
 /** Quotes an identifier with double quotes, doubling embedded quotes. */
 function quoteIdent(name: string): string {
   return `"${name.replace(/"/g, '""')}"`;
-}
-
-function pick(row: Record<string, unknown>, columns: string[]): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  for (const column of columns) out[column] = row[column];
-  return out;
 }
