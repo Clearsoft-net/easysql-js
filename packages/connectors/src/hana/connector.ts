@@ -13,6 +13,14 @@
 
 import type { Connection } from "@sap/hana-client";
 import { BaseConnector } from "../base-connector.js";
+import { columnKey } from "../helpers.js";
+import {
+  COLUMNS_SQL,
+  FOREIGN_KEYS_SQL,
+  PRIMARY_KEYS_SQL,
+  ROW_COUNT_SOURCES,
+  TABLES_SQL,
+} from "./queries.js";
 import type {
   ColumnRow,
   ForeignKeyRow,
@@ -100,41 +108,10 @@ export class HanaConnector extends BaseConnector<Connection> {
   async introspect(): Promise<IntrospectResult> {
     this.requireHandle();
     try {
-      // Aliases are quoted because HANA folds unquoted identifiers to uppercase.
-      const tableRows =
-        (await this.exec<TableRow[]>(
-          `SELECT TABLE_NAME AS "table_name"
-           FROM SYS.TABLES
-           WHERE SCHEMA_NAME = CURRENT_SCHEMA AND IS_TEMPORARY = 'FALSE'
-           ORDER BY TABLE_NAME`,
-        )) ?? [];
-      const columnRows =
-        (await this.exec<ColumnRow[]>(
-          `SELECT TABLE_NAME AS "table_name", COLUMN_NAME AS "column_name",
-                  DATA_TYPE_NAME AS "data_type", IS_NULLABLE AS "is_nullable",
-                  DEFAULT_VALUE AS "column_default", POSITION AS "ordinal"
-           FROM SYS.TABLE_COLUMNS
-           WHERE SCHEMA_NAME = CURRENT_SCHEMA
-           ORDER BY TABLE_NAME, POSITION`,
-        )) ?? [];
-      const primaryKeyRows =
-        (await this.exec<KeyColumnRow[]>(
-          `SELECT TABLE_NAME AS "table_name", COLUMN_NAME AS "column_name"
-           FROM SYS.CONSTRAINTS
-           WHERE SCHEMA_NAME = CURRENT_SCHEMA AND IS_PRIMARY_KEY = 'TRUE'
-           ORDER BY TABLE_NAME, POSITION`,
-        )) ?? [];
-      // Foreign keys live in SYS.REFERENTIAL_CONSTRAINTS, which also carries the
-      // referenced table/column for each key column.
-      const foreignKeyRows =
-        (await this.exec<ForeignKeyRow[]>(
-          `SELECT TABLE_NAME AS "table_name", COLUMN_NAME AS "column_name",
-                  REFERENCED_TABLE_NAME AS "ref_table",
-                  REFERENCED_COLUMN_NAME AS "ref_column"
-           FROM SYS.REFERENTIAL_CONSTRAINTS
-           WHERE SCHEMA_NAME = CURRENT_SCHEMA
-           ORDER BY TABLE_NAME, POSITION`,
-        )) ?? [];
+      const tableRows = (await this.exec<TableRow[]>(TABLES_SQL)) ?? [];
+      const columnRows = (await this.exec<ColumnRow[]>(COLUMNS_SQL)) ?? [];
+      const primaryKeyRows = (await this.exec<KeyColumnRow[]>(PRIMARY_KEYS_SQL)) ?? [];
+      const foreignKeyRows = (await this.exec<ForeignKeyRow[]>(FOREIGN_KEYS_SQL)) ?? [];
       const rowCounts = await this.loadRowCounts();
 
       const columnsByTable = groupBy(columnRows, (row) => row.table_name);
@@ -163,22 +140,13 @@ export class HanaConnector extends BaseConnector<Connection> {
   }
 
   /**
-   * Best-effort row estimates. `SYS.M_TABLE_STATISTICS` carries `RECORD_COUNT`
-   * on some HANA versions; when the view or column is unavailable (or the user
-   * lacks access) the estimate falls back to `SYS.M_TABLES`, and finally to
-   * "unknown" (`null`) rather than failing introspection.
+   * Best-effort row estimates. Each source is tried in order until one works;
+   * when none is available the estimate is reported as "unknown" (`null`)
+   * rather than failing introspection.
    */
   private async loadRowCounts(): Promise<Map<string, number>> {
     const counts = new Map<string, number>();
-    const sources = [
-      `SELECT TABLE_NAME AS "table_name", RECORD_COUNT AS "record_count"
-       FROM SYS.M_TABLE_STATISTICS
-       WHERE SCHEMA_NAME = CURRENT_SCHEMA`,
-      `SELECT TABLE_NAME AS "table_name", RECORD_COUNT AS "record_count"
-       FROM SYS.M_TABLES
-       WHERE SCHEMA_NAME = CURRENT_SCHEMA`,
-    ];
-    for (const sql of sources) {
+    for (const sql of ROW_COUNT_SOURCES) {
       try {
         const rows = (await this.exec<RowCountRow[]>(sql)) ?? [];
         for (const row of rows) {
@@ -233,10 +201,6 @@ function toRawColumn(
     foreignKey: foreignKeys.get(key) ?? null,
     ordinal: row.ordinal,
   };
-}
-
-function columnKey(table: string, column: string): string {
-  return `${table}\u0000${column}`;
 }
 
 function groupBy<T>(rows: T[], key: (row: T) => string): Map<string, T[]> {

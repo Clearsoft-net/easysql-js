@@ -9,6 +9,7 @@
 
 import { type Connection, createConnection } from "mysql2/promise";
 import { BaseConnector } from "../base-connector.js";
+import { COLUMNS_SQL, TABLES_SQL } from "./queries.js";
 import type {
   ColumnRow,
   IntrospectResult,
@@ -72,36 +73,14 @@ export class MysqlConnector extends BaseConnector<Connection> {
   async introspect(): Promise<IntrospectResult> {
     const connection = this.requireHandle();
     try {
-      const [tableRows] = await connection.query(
-        `SELECT TABLE_NAME AS table_name, TABLE_ROWS AS table_rows
-         FROM information_schema.TABLES
-         WHERE TABLE_SCHEMA = ? AND TABLE_TYPE = 'BASE TABLE'
-         ORDER BY TABLE_NAME`,
-        [this.config.database],
-      );
+      const [tableRows] = await connection.query(TABLES_SQL, [this.config.database]);
 
       const tables: RawTable[] = [];
       for (const table of tableRows as TableRow[]) {
-        // Foreign keys live in KEY_COLUMN_USAGE: information_schema.COLUMNS
-        // has no REFERENCED_* columns, so reading them from there fails on any
-        // database that has at least one table.
-        const [columnRows] = await connection.query(
-          `SELECT c.COLUMN_NAME AS column_name, c.DATA_TYPE AS data_type,
-                  c.IS_NULLABLE AS is_nullable, c.COLUMN_DEFAULT AS column_default,
-                  c.COLUMN_KEY AS column_key,
-                  k.REFERENCED_TABLE_NAME AS referenced_table_name,
-                  k.REFERENCED_COLUMN_NAME AS referenced_column_name,
-                  c.ORDINAL_POSITION AS ordinal_position
-           FROM information_schema.COLUMNS c
-           LEFT JOIN information_schema.KEY_COLUMN_USAGE k
-             ON k.TABLE_SCHEMA = c.TABLE_SCHEMA
-            AND k.TABLE_NAME = c.TABLE_NAME
-            AND k.COLUMN_NAME = c.COLUMN_NAME
-            AND k.REFERENCED_TABLE_NAME IS NOT NULL
-           WHERE c.TABLE_SCHEMA = ? AND c.TABLE_NAME = ?
-           ORDER BY c.ORDINAL_POSITION`,
-          [this.config.database, table.table_name],
-        );
+        const [columnRows] = await connection.query(COLUMNS_SQL, [
+          this.config.database,
+          table.table_name,
+        ]);
 
         tables.push({
           name: table.table_name,

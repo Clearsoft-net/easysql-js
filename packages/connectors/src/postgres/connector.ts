@@ -13,7 +13,7 @@
  */
 
 import { BaseConnector } from "../base-connector.js";
-import { columnsQuery, tablesQuery } from "./introspection.js";
+import { columnsQuery, tablesQuery } from "./queries.js";
 import { NeonHttpSession, NeonWebSocketSession, type PgSession, TcpSession } from "./session.js";
 import type {
   ColumnRow,

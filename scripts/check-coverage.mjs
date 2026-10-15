@@ -24,9 +24,10 @@ const lcov = readFileSync(join(dir, "lcov.info"), "utf8");
 /**
  * Connector engines whose driver only runs against a server this job does not
  * start. The coverage job brings up MySQL, PostgreSQL and ClickHouse; every
- * other engine's `connector.ts` (openHandle/runQuery/introspect) is exercised
- * only by its env-gated integration suite, so it is out of scope for this gate.
- * Their `index.ts` (factory `create()`) and `types.ts` stay in scope.
+ * other engine's `connector.ts` (openHandle/runQuery/introspect) and
+ * `queries.ts` (its catalog SQL) are exercised only by its env-gated
+ * integration suite, so they are out of scope for this gate. Their `index.ts`
+ * (factory `create()`) and `types.ts` stay in scope.
  */
 const ENV_GATED_ENGINES = [
   "bigquery",
@@ -42,7 +43,11 @@ const ENV_GATED_ENGINES = [
 ];
 
 const isEnvGatedEngine = (file) =>
-  ENV_GATED_ENGINES.some((engine) => file.includes(`packages/connectors/src/${engine}/connector.ts`));
+  ENV_GATED_ENGINES.some(
+    (engine) =>
+      file.includes(`packages/connectors/src/${engine}/connector.ts`) ||
+      file.includes(`packages/connectors/src/${engine}/queries.ts`),
+  );
 
 let total = 0;
 let covered = 0;

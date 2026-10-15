@@ -16,6 +16,7 @@
 import type { Client } from "@libsql/client";
 import { createClient } from "@libsql/client";
 import { BaseConnector } from "../base-connector.js";
+import { foreignKeyListQuery, rowCountQuery, TABLES_SQL, tableInfoQuery } from "./queries.js";
 import type {
   ColumnRow,
   ForeignKeyRow,
@@ -65,15 +66,13 @@ export class LibSqlConnector extends BaseConnector<Client> {
   async introspect(): Promise<IntrospectResult> {
     const client = this.requireHandle();
     try {
-      const tableResult = await client.execute(
-        "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
-      );
+      const tableResult = await client.execute(TABLES_SQL);
 
       const tables: RawTable[] = [];
       for (const row of tableResult.rows) {
         const name = String(row.name);
-        const columns = await client.execute(`PRAGMA table_info(${quoteIdent(name)})`);
-        const foreignKeys = await client.execute(`PRAGMA foreign_key_list(${quoteIdent(name)})`);
+        const columns = await client.execute(tableInfoQuery(name));
+        const foreignKeys = await client.execute(foreignKeyListQuery(name));
 
         const columnRows = columns.rows as unknown as ColumnRow[];
         const foreignKeyRows = foreignKeys.rows as unknown as ForeignKeyRow[];
@@ -130,7 +129,7 @@ function toRawColumn(
 /** Best-effort exact row count; returns `null` when the table cannot be read. */
 async function countRows(client: Client, table: string): Promise<number | null> {
   try {
-    const result = await client.execute(`SELECT COUNT(*) AS c FROM ${quoteIdent(table)}`);
+    const result = await client.execute(rowCountQuery(table));
     const value = result.rows[0]?.c;
     return value === undefined || value === null ? null : Number(value);
   } catch {
@@ -141,9 +140,4 @@ async function countRows(client: Client, table: string): Promise<number | null> 
 /** True when the URL addresses a local file rather than a remote server. */
 function isFileUrl(url: string): boolean {
   return url.trim().toLowerCase().startsWith("file:");
-}
-
-/** Quotes an identifier with double quotes, doubling embedded quotes. */
-function quoteIdent(name: string): string {
-  return `"${name.replace(/"/g, '""')}"`;
 }
