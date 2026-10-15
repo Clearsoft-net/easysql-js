@@ -11,7 +11,7 @@
 import type { DuckDBConnection, DuckDBValue } from "@duckdb/node-api";
 import { DuckDBInstance } from "@duckdb/node-api";
 import { BaseConnector } from "../base-connector.js";
-import { toOrdinal } from "../internal.js";
+import { toNullableNumber, toOrdinal } from "../internal.js";
 import { columnsQuery, constraintsQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
@@ -164,12 +164,6 @@ function toRawColumn(
     foreignKey: foreignKeys.get(row.column_name) ?? null,
     ordinal: toOrdinal(row.ordinal),
   };
-}
-
-function toNullableNumber(value: string | number | bigint | null | undefined): number | null {
-  if (value === null || value === undefined) return null;
-  const numeric = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(numeric) ? numeric : null;
 }
 
 /**

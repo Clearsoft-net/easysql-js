@@ -12,6 +12,7 @@
 
 import firebird from "node-firebird";
 import { BaseConnector } from "../base-connector.js";
+import { toNullableNumber } from "../internal.js";
 import { columnsQuery, foreignKeysQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
@@ -175,12 +176,6 @@ function sanitizeDefault(value: string | null): string | null {
 /** Trims Firebird's fixed-width, space-padded catalog names. */
 function trimName(value: string | null | undefined): string {
   return (value ?? "").trim();
-}
-
-function toNullableNumber(value: number | string | bigint | null | undefined): number | null {
-  if (value === null || value === undefined) return null;
-  const numeric = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(numeric) ? numeric : null;
 }
 
 /**

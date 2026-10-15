@@ -10,19 +10,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { OracleConnectionConfig } from "../../src/oracle/index";
 import { OracleConnector } from "../../src/oracle/index";
+import { decodeTestUrl, skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_ORACLE_URL;
 const enabled = Boolean(url);
 
 function configFromUrl(raw: string): OracleConnectionConfig {
-  const parsed = new URL(raw);
-  return {
-    host: parsed.hostname,
-    port: parsed.port ? Number(parsed.port) : 1521,
-    serviceName: parsed.pathname.replace(/^\//, ""),
-    user: decodeURIComponent(parsed.username),
-    password: decodeURIComponent(parsed.password),
-  };
+  const { host, port, user, password, database } = decodeTestUrl(raw);
+  return { host, port: port ?? 1521, serviceName: database, user, password };
 }
 
 describe.skipIf(!enabled)("OracleConnector integration", () => {
@@ -53,8 +48,4 @@ describe.skipIf(!enabled)("OracleConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("OracleConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_ORACLE_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("OracleConnector", "EASYSQL_TEST_ORACLE_URL", enabled);

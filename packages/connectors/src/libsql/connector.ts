@@ -16,7 +16,7 @@
 import type { Client } from "@libsql/client";
 import { createClient } from "@libsql/client";
 import { BaseConnector } from "../base-connector.js";
-import { pragma } from "../helpers.js";
+import { PROBE_SQL, pragma } from "../helpers.js";
 import { foreignKeyListQuery, rowCountQuery, tableInfoQuery, tablesQuery } from "./queries.js";
 import type {
   IntrospectResult,
@@ -51,7 +51,7 @@ export class LibSqlConnector extends BaseConnector<Client> {
       authToken: this.config.authToken || undefined,
       ...(this.config.readonly && isFileUrl(this.config.url) ? { concurrency: 1 } : {}),
     });
-    await client.execute("SELECT 1");
+    await client.execute(PROBE_SQL);
     if (this.config.readonly && isFileUrl(this.config.url)) {
       await client.execute(pragma("query_only = ON"));
     }

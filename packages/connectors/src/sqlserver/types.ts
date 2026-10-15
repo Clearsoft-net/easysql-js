@@ -1,4 +1,4 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
 export type { RawQueryResult } from "../types.js";
@@ -19,8 +19,6 @@ export interface SqlServerConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "sqlserver";
-}
+export type IntrospectResult = EngineSchema<"sqlserver">;
 
 export type { ColumnRow, TableRow } from "../types.js";

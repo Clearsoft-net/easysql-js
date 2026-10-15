@@ -11,19 +11,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { Db2ConnectionConfig } from "../../src/db2/index";
 import { Db2Connector } from "../../src/db2/index";
+import { decodeTestUrl, skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_DB2_URL;
 const enabled = Boolean(url);
 
 function configFromUrl(raw: string): Db2ConnectionConfig {
-  const parsed = new URL(raw);
-  return {
-    host: parsed.hostname,
-    port: parsed.port ? Number(parsed.port) : 50_000,
-    user: decodeURIComponent(parsed.username),
-    password: decodeURIComponent(parsed.password),
-    database: parsed.pathname.replace(/^\//, ""),
-  };
+  const { host, port, user, password, database } = decodeTestUrl(raw);
+  return { host, port: port ?? 50_000, user, password, database };
 }
 
 describe.skipIf(!enabled)("Db2Connector integration", () => {
@@ -53,8 +48,4 @@ describe.skipIf(!enabled)("Db2Connector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("Db2Connector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_DB2_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("Db2Connector", "EASYSQL_TEST_DB2_URL", enabled);

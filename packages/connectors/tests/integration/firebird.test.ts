@@ -10,22 +10,23 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { FirebirdConnectionConfig } from "../../src/firebird/index";
 import { FirebirdConnector } from "../../src/firebird/index";
+import { decodeTestUrl, skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_FIREBIRD_URL;
 const enabled = Boolean(url);
 
 function configFromUrl(raw: string): FirebirdConnectionConfig {
-  const parsed = new URL(raw);
+  const { host, port, user, password, database, searchParams } = decodeTestUrl(raw);
+  const role = searchParams.get("role");
   // Firebird paths are absolute; `//data/x.fdb` yields `/data/x.fdb` once the
   // leading slash of the pathname is dropped.
-  const database = decodeURIComponent(parsed.pathname.replace(/^\//, ""));
   return {
-    host: parsed.hostname || "localhost",
-    port: parsed.port ? Number(parsed.port) : 3050,
-    user: decodeURIComponent(parsed.username),
-    password: decodeURIComponent(parsed.password),
-    database,
-    ...(parsed.searchParams.get("role") ? { role: parsed.searchParams.get("role") as string } : {}),
+    host: host || "localhost",
+    port: port ?? 3050,
+    user,
+    password,
+    database: decodeURIComponent(database),
+    ...(role ? { role } : {}),
   };
 }
 
@@ -85,8 +86,4 @@ describe.skipIf(!enabled)("FirebirdConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("FirebirdConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_FIREBIRD_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("FirebirdConnector", "EASYSQL_TEST_FIREBIRD_URL", enabled);

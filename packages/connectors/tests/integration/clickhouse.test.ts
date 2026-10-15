@@ -12,19 +12,19 @@ import { createClient } from "@clickhouse/client";
 import type { ClickhouseConnectionConfig } from "../../src/clickhouse/index";
 import { ClickhouseConnector } from "../../src/clickhouse/index";
 import { failureOf } from "./failure";
+import { decodeTestUrl, skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_CLICKHOUSE_URL;
 const enabled = Boolean(url);
 
 function configFromUrl(raw: string): ClickhouseConnectionConfig {
-  const parsed = new URL(raw);
-  const secure = parsed.protocol === "clickhouses:";
+  const { host, port, user, password, database, secure } = decodeTestUrl(raw);
   return {
-    host: parsed.hostname,
-    port: parsed.port ? Number(parsed.port) : secure ? 8443 : 8123,
-    user: decodeURIComponent(parsed.username) || "default",
-    password: decodeURIComponent(parsed.password),
-    database: parsed.pathname.replace(/^\//, "") || "default",
+    host,
+    port: port ?? (secure ? 8443 : 8123),
+    user: user || "default",
+    password,
+    database: database || "default",
     ssl: secure,
   };
 }
@@ -84,8 +84,4 @@ describe.skipIf(!enabled)("ClickhouseConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("ClickhouseConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_CLICKHOUSE_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("ClickhouseConnector", "EASYSQL_TEST_CLICKHOUSE_URL", enabled);

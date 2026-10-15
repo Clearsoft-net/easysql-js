@@ -1,4 +1,4 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
 export type { RawQueryResult } from "../types.js";
@@ -17,8 +17,6 @@ export interface LibSqlConnectionConfig {
   readonly?: boolean;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "libsql";
-}
+export type IntrospectResult = EngineSchema<"libsql">;
 
 export type { PragmaColumnRow, PragmaForeignKeyRow } from "../types.js";

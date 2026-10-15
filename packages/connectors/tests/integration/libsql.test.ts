@@ -11,6 +11,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { LibSqlConnectionConfig } from "../../src/libsql/index";
 import { LibSqlConnector } from "../../src/libsql/index";
+import { skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_LIBSQL_URL;
 const enabled = Boolean(url);
@@ -51,8 +52,4 @@ describe.skipIf(!enabled)("LibSqlConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("LibSqlConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_LIBSQL_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("LibSqlConnector", "EASYSQL_TEST_LIBSQL_URL", enabled);

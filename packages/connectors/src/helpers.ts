@@ -23,6 +23,12 @@ export function columnKey(table: string, column: string): string {
 }
 
 /**
+ * A cheap connectivity probe, sent once on connect so a bad endpoint or
+ * credential fails fast before any introspection runs.
+ */
+export const PROBE_SQL = "SELECT 1";
+
+/**
  * Builds a `PRAGMA name` / `PRAGMA name(arg)` statement (the SQLite family).
  * `arg` is inserted verbatim, so callers pass an already-quoted identifier.
  */

@@ -1,4 +1,4 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
 export type { RawQueryResult } from "../types.js";
@@ -23,9 +23,7 @@ export interface TrinoConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "trino";
-}
+export type IntrospectResult = EngineSchema<"trino">;
 
 /** Internal — one page of a Trino query response, as returned by the REST API. */
 export interface QueryPage {

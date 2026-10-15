@@ -19,6 +19,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { BigQueryConnectionConfig } from "../../src/bigquery/index";
 import { BigQueryConnector } from "../../src/bigquery/index";
+import { skipSuite } from "./support";
 
 const projectId = process.env.EASYSQL_TEST_BIGQUERY_PROJECT;
 const dataset = process.env.EASYSQL_TEST_BIGQUERY_DATASET;
@@ -71,8 +72,4 @@ describe.skipIf(!enabled)("BigQueryConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("BigQueryConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_BIGQUERY_PROJECT and credentials", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("BigQueryConnector", "EASYSQL_TEST_BIGQUERY_PROJECT and credentials", enabled);

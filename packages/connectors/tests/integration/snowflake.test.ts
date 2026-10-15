@@ -11,23 +11,24 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { SnowflakeConnectionConfig } from "../../src/snowflake/index";
 import { SnowflakeConnector } from "../../src/snowflake/index";
+import { decodeTestUrl, skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_SNOWFLAKE_URL;
 const enabled = Boolean(url);
 
 function configFromUrl(raw: string): SnowflakeConnectionConfig {
-  const parsed = new URL(raw);
-  const [database, schema] = parsed.pathname.replace(/^\//, "").split("/");
+  const { host, user, password, database, searchParams } = decodeTestUrl(raw);
+  const [db, schema] = database.split("/");
+  const warehouse = searchParams.get("warehouse");
+  const role = searchParams.get("role");
   return {
-    account: parsed.hostname,
-    user: decodeURIComponent(parsed.username),
-    password: decodeURIComponent(parsed.password),
-    database: database ? decodeURIComponent(database) : "",
+    account: host,
+    user,
+    password,
+    database: db ? decodeURIComponent(db) : "",
     ...(schema ? { schema: decodeURIComponent(schema) } : {}),
-    ...(parsed.searchParams.get("warehouse")
-      ? { warehouse: parsed.searchParams.get("warehouse") as string }
-      : {}),
-    ...(parsed.searchParams.get("role") ? { role: parsed.searchParams.get("role") as string } : {}),
+    ...(warehouse ? { warehouse } : {}),
+    ...(role ? { role } : {}),
   };
 }
 
@@ -73,8 +74,4 @@ describe.skipIf(!enabled)("SnowflakeConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("SnowflakeConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_SNOWFLAKE_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("SnowflakeConnector", "EASYSQL_TEST_SNOWFLAKE_URL", enabled);

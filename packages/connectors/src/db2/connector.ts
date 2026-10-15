@@ -12,8 +12,9 @@
 
 import type { ConnStr, Database, ODBCResult, SQLResults } from "ibm_db";
 import { BaseConnector } from "../base-connector.js";
+import { memoizedImport } from "../driver-loading.js";
 import { columnKey } from "../helpers.js";
-import { toOrdinal } from "../internal.js";
+import { groupBy, toOrdinal } from "../internal.js";
 import { columnsQuery, foreignKeysQuery, primaryKeysQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
@@ -29,20 +30,12 @@ import type {
   TableRow,
 } from "./types.js";
 
-let driverPromise: Promise<IbmDbModule> | null = null;
-
 /**
  * `ibm_db` is a native, optional peer dependency, so it is imported lazily when
  * a connection is actually opened. Importing the connector (and the unit tests)
  * therefore never requires the native binding to be present.
  */
-function loadDriver(): Promise<IbmDbModule> {
-  driverPromise ??= import("ibm_db").catch((error: unknown) => {
-    driverPromise = null;
-    throw error;
-  });
-  return driverPromise;
-}
+const loadDriver = memoizedImport<IbmDbModule>(() => import("ibm_db"));
 
 export class Db2Connector extends BaseConnector<Database> {
   private readonly config: Required<
@@ -216,14 +209,4 @@ function normalizeCard(value: number | string | bigint | null | undefined): numb
   if (value === null || value === undefined) return null;
   const card = Number(value);
   return Number.isFinite(card) && card >= 0 ? card : null;
-}
-
-function groupBy<T>(rows: T[], key: (row: T) => string): Map<string, T[]> {
-  const grouped = new Map<string, T[]>();
-  for (const row of rows) {
-    const group = grouped.get(key(row));
-    if (group) group.push(row);
-    else grouped.set(key(row), [row]);
-  }
-  return grouped;
 }

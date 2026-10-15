@@ -11,19 +11,19 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { TrinoConnectionConfig } from "../../src/trino/index";
 import { TrinoConnector } from "../../src/trino/index";
+import { decodeTestUrl, skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_TRINO_URL;
 const enabled = Boolean(url);
 
 function configFromUrl(raw: string): TrinoConnectionConfig {
-  const parsed = new URL(raw);
-  const ssl = parsed.protocol === "https:";
+  const { host, port, user, password, secure } = decodeTestUrl(raw);
   return {
-    host: parsed.hostname,
-    port: parsed.port ? Number(parsed.port) : ssl ? 443 : 8080,
-    user: decodeURIComponent(parsed.username) || "easysql",
-    password: parsed.password ? decodeURIComponent(parsed.password) : undefined,
-    ssl,
+    host,
+    port: port ?? (secure ? 443 : 8080),
+    user: user || "easysql",
+    password: password || undefined,
+    ssl: secure,
     catalog: process.env.EASYSQL_TEST_TRINO_CATALOG ?? "tpch",
     schema: process.env.EASYSQL_TEST_TRINO_SCHEMA ?? "tiny",
   };
@@ -71,8 +71,4 @@ describe.skipIf(!enabled)("TrinoConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("TrinoConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_TRINO_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("TrinoConnector", "EASYSQL_TEST_TRINO_URL", enabled);

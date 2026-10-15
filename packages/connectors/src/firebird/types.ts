@@ -1,4 +1,4 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
 export type { RawQueryResult } from "../types.js";
@@ -19,9 +19,7 @@ export interface FirebirdConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "firebird";
-}
+export type IntrospectResult = EngineSchema<"firebird">;
 
 /** A row of `RDB$RELATION_FIELDS` enriched with catalog joins. */
 export interface ColumnRow {

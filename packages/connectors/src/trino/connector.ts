@@ -17,6 +17,7 @@
 import type { Trino as TrinoClient } from "trino-client";
 import { BasicAuth, Trino } from "trino-client";
 import { BaseConnector } from "../base-connector.js";
+import { PROBE_SQL } from "../helpers.js";
 import { toOrdinal } from "../internal.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
@@ -61,7 +62,7 @@ export class TrinoConnector extends BaseConnector<TrinoClient> {
     });
     // Trino.create() only stores options; the first query is what actually
     // reaches the coordinator, so probe once to fail fast on a bad endpoint.
-    await collect(client, "SELECT 1");
+    await collect(client, PROBE_SQL);
     return client;
   }
 

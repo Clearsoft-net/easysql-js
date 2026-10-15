@@ -1,5 +1,5 @@
 import type { DuckDBConnection, DuckDBInstance } from "@duckdb/node-api";
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
 export type { RawQueryResult } from "../types.js";
@@ -15,9 +15,7 @@ export interface DuckDbConnectionConfig {
   readonly?: boolean;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "duckdb";
-}
+export type IntrospectResult = EngineSchema<"duckdb">;
 
 export type { ColumnRow, TableRow } from "../types.js";
 

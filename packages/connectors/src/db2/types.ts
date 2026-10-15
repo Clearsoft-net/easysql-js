@@ -1,5 +1,5 @@
-import type { RawSchema } from "@easysql/common";
 import type { ConnStr } from "ibm_db";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
 export type { RawQueryResult } from "../types.js";
@@ -19,9 +19,7 @@ export interface Db2ConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "db2";
-}
+export type IntrospectResult = EngineSchema<"db2">;
 
 /**
  * Internal — `ibm_db` accepts the documented connection-string keywords as an

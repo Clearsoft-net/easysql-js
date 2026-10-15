@@ -7,7 +7,7 @@
  * an API token.
  */
 
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
 export type { RawQueryResult } from "../types.js";
@@ -21,9 +21,7 @@ export interface D1ConnectionConfig {
   baseUrl?: string;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "d1";
-}
+export type IntrospectResult = EngineSchema<"d1">;
 
 /** Internal — error entry of a Cloudflare API response envelope. */
 export interface D1Error {

@@ -21,6 +21,7 @@
 
 import type { CompiledQuery } from "@easysql/query-builder";
 import { BaseConnector } from "../base-connector.js";
+import { PROBE_SQL } from "../helpers.js";
 import {
   foreignKeyListFallbackQuery,
   foreignKeyListQuery,
@@ -63,7 +64,7 @@ export class D1Connector extends BaseConnector<boolean> {
   /** Validates the configuration and verifies the database is reachable. */
   protected async openHandle(): Promise<boolean> {
     // A cheap round-trip proves the account, database and token all work.
-    await this.query("SELECT 1");
+    await this.query(PROBE_SQL);
     return true;
   }
 

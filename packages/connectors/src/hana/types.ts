@@ -1,4 +1,4 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
 export type { RawQueryResult } from "../types.js";
@@ -16,9 +16,7 @@ export interface HanaConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "hana";
-}
+export type IntrospectResult = EngineSchema<"hana">;
 
 export type { ColumnRow, ForeignKeyRow, KeyColumnRow, TableRow } from "../types.js";
 

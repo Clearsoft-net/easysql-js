@@ -1,4 +1,4 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
 export type { RawQueryResult } from "../types.js";
@@ -23,9 +23,7 @@ export interface OracleConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "oracle";
-}
+export type IntrospectResult = EngineSchema<"oracle">;
 
 /** Column metadata returned by `connection.execute`. */
 export interface OracleColumnMetadata {

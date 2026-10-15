@@ -1,4 +1,4 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
 export type { RawQueryResult } from "../types.js";
@@ -16,8 +16,6 @@ export interface SnowflakeConnectionConfig {
   connectTimeoutMs?: number; // default 60000 (cloud warehouses are slower to connect)
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "snowflake";
-}
+export type IntrospectResult = EngineSchema<"snowflake">;
 
 export type { ColumnRow, TableRow } from "../types.js";

@@ -16,7 +16,7 @@
 import oracledb from "oracledb";
 import { BaseConnector } from "../base-connector.js";
 import { columnKey } from "../helpers.js";
-import { toOrdinal } from "../internal.js";
+import { toNullableNumber, toOrdinal } from "../internal.js";
 import { columnsQuery, foreignKeysQuery, primaryKeysQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
@@ -111,10 +111,7 @@ export class OracleConnector extends BaseConnector<OracleConnection> {
         tables.set(row.table_name, {
           name: row.table_name,
           columns: [],
-          rowsApprox:
-            row.rows_approx === null || row.rows_approx === undefined
-              ? null
-              : Number(row.rows_approx),
+          rowsApprox: toNullableNumber(row.rows_approx),
         });
       }
 

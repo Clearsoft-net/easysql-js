@@ -1,4 +1,4 @@
-import type { Connector, ConnectorEngine as SchemaEngine } from "@easysql/common";
+import type { Connector, RawSchema, ConnectorEngine as SchemaEngine } from "@easysql/common";
 import type { BigQueryConnectionConfig } from "./bigquery/types.js";
 import type { ClickhouseConnectionConfig } from "./clickhouse/types.js";
 import type { D1ConnectionConfig } from "./d1/types.js";
@@ -21,6 +21,13 @@ import type { TrinoConnectionConfig } from "./trino/types.js";
 
 export type { Connector, QueryResult } from "@easysql/common";
 export type { PostgresProvider, PostgresTransport } from "./postgres/types.js";
+
+/**
+ * A connector's introspection result: the shared {@link RawSchema} tagged with
+ * the engine that produced it. Each engine aliases this as its public
+ * `IntrospectResult`.
+ */
+export type EngineSchema<E extends SchemaEngine> = RawSchema & { engine: E };
 
 /**
  * Engines implemented by this package. MariaDB is served by the MySQL engine,
