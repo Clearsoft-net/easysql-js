@@ -6,6 +6,7 @@
     "baseUrl": ".",
     "paths": {
       "@easysql/common": ["../packages/common/src/index.ts"],
+      "@easysql/query-builder": ["../packages/query-builder/src/index.ts"],
       "@easysql/client": ["../packages/client/src/index.ts"],
       "@easysql/schema-generation": ["../packages/schema-generation/src/index.ts"],
       "@easysql/connectors": ["../packages/connectors/src/index.ts"],

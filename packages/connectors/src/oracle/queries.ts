@@ -7,8 +7,11 @@
  * secondary (domain index) tables are excluded from the table listing.
  */
 
+import type { CompiledQuery } from "@easysql/query-builder";
+import { eq, expr, select } from "@easysql/query-builder";
+
 /** Metadata name of the schema the session is currently resolving names in. */
-const CURRENT_SCHEMA = "SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA')";
+const CURRENT_SCHEMA = expr("SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA')");
 
 /**
  * Base tables owned by the current schema. `NUM_ROWS` comes from optimizer
@@ -16,37 +19,47 @@ const CURRENT_SCHEMA = "SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA')";
  * stale afterwards. Recycle-bin, nested and secondary (domain index) tables are
  * excluded. Aliases are quoted so the object keys keep their exact case.
  */
-export const TABLES_SQL = `SELECT t.TABLE_NAME AS "table_name",
-                           t.NUM_ROWS AS "rows_approx"
-                    FROM ALL_TABLES t
-                    WHERE t.OWNER = ${CURRENT_SCHEMA}
-                      AND t.NESTED = 'NO'
-                      AND t.SECONDARY = 'NO'
-                      AND t.TABLE_NAME NOT LIKE 'BIN$%'
-                    ORDER BY t.TABLE_NAME`;
+export function tablesQuery(): CompiledQuery {
+  return select({ table_name: "t.TABLE_NAME", rows_approx: "t.NUM_ROWS" })
+    .from("ALL_TABLES t")
+    .where("t.OWNER", CURRENT_SCHEMA)
+    .where("t.NESTED", "NO")
+    .where("t.SECONDARY", "NO")
+    .where(expr("t.TABLE_NAME NOT LIKE 'BIN$%'"))
+    .orderBy("t.TABLE_NAME")
+    .compile("literal", { aliasQuote: '"' });
+}
 
 /** Every visible column of the current schema, batched (no per-table query). */
-export const COLUMNS_SQL = `SELECT c.TABLE_NAME AS "table_name",
-                            c.COLUMN_NAME AS "column_name",
-                            c.DATA_TYPE AS "data_type",
-                            c.NULLABLE AS "nullable",
-                            c.DATA_DEFAULT AS "data_default",
-                            c.COLUMN_ID AS "column_id"
-                     FROM ALL_TAB_COLUMNS c
-                     WHERE c.OWNER = ${CURRENT_SCHEMA}
-                       AND c.HIDDEN_COLUMN = 'NO'
-                     ORDER BY c.TABLE_NAME, c.COLUMN_ID`;
+export function columnsQuery(): CompiledQuery {
+  return select({
+    table_name: "c.TABLE_NAME",
+    column_name: "c.COLUMN_NAME",
+    data_type: "c.DATA_TYPE",
+    nullable: "c.NULLABLE",
+    data_default: "c.DATA_DEFAULT",
+    column_id: "c.COLUMN_ID",
+  })
+    .from("ALL_TAB_COLUMNS c")
+    .where("c.OWNER", CURRENT_SCHEMA)
+    .where("c.HIDDEN_COLUMN", "NO")
+    .orderBy("c.TABLE_NAME", "c.COLUMN_ID")
+    .compile("literal", { aliasQuote: '"' });
+}
 
 /** Primary-key columns (`CONSTRAINT_TYPE = 'P'`) for the current schema. */
-export const PRIMARY_KEYS_SQL = `SELECT cc.TABLE_NAME AS "table_name",
-                                 cc.COLUMN_NAME AS "column_name"
-                          FROM ALL_CONSTRAINTS c
-                          JOIN ALL_CONS_COLUMNS cc
-                            ON cc.OWNER = c.OWNER
-                           AND cc.CONSTRAINT_NAME = c.CONSTRAINT_NAME
-                          WHERE c.OWNER = ${CURRENT_SCHEMA}
-                            AND c.CONSTRAINT_TYPE = 'P'
-                          ORDER BY cc.TABLE_NAME, cc.POSITION`;
+export function primaryKeysQuery(): CompiledQuery {
+  return select({ table_name: "cc.TABLE_NAME", column_name: "cc.COLUMN_NAME" })
+    .from("ALL_CONSTRAINTS c")
+    .innerJoin("ALL_CONS_COLUMNS cc", [
+      eq("cc.OWNER", "c.OWNER"),
+      eq("cc.CONSTRAINT_NAME", "c.CONSTRAINT_NAME"),
+    ])
+    .where("c.OWNER", CURRENT_SCHEMA)
+    .where("c.CONSTRAINT_TYPE", "P")
+    .orderBy("cc.TABLE_NAME", "cc.POSITION")
+    .compile("literal", { aliasQuote: '"' });
+}
 
 /**
  * Foreign-key columns (`CONSTRAINT_TYPE = 'R'`). The referenced constraint is
@@ -54,21 +67,29 @@ export const PRIMARY_KEYS_SQL = `SELECT cc.TABLE_NAME AS "table_name",
  * `ALL_CONS_COLUMNS` rows by `POSITION`, which is the column's position inside
  * its constraint.
  */
-export const FOREIGN_KEYS_SQL = `SELECT cc.TABLE_NAME AS "table_name",
-                                 cc.COLUMN_NAME AS "column_name",
-                                 rc.TABLE_NAME AS "foreign_table",
-                                 rcc.COLUMN_NAME AS "foreign_column"
-                          FROM ALL_CONSTRAINTS c
-                          JOIN ALL_CONS_COLUMNS cc
-                            ON cc.OWNER = c.OWNER
-                           AND cc.CONSTRAINT_NAME = c.CONSTRAINT_NAME
-                          JOIN ALL_CONSTRAINTS rc
-                            ON rc.OWNER = c.R_OWNER
-                           AND rc.CONSTRAINT_NAME = c.R_CONSTRAINT_NAME
-                          JOIN ALL_CONS_COLUMNS rcc
-                            ON rcc.OWNER = rc.OWNER
-                           AND rcc.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
-                           AND rcc.POSITION = cc.POSITION
-                          WHERE c.OWNER = ${CURRENT_SCHEMA}
-                            AND c.CONSTRAINT_TYPE = 'R'
-                          ORDER BY cc.TABLE_NAME, cc.POSITION`;
+export function foreignKeysQuery(): CompiledQuery {
+  return select({
+    table_name: "cc.TABLE_NAME",
+    column_name: "cc.COLUMN_NAME",
+    foreign_table: "rc.TABLE_NAME",
+    foreign_column: "rcc.COLUMN_NAME",
+  })
+    .from("ALL_CONSTRAINTS c")
+    .innerJoin("ALL_CONS_COLUMNS cc", [
+      eq("cc.OWNER", "c.OWNER"),
+      eq("cc.CONSTRAINT_NAME", "c.CONSTRAINT_NAME"),
+    ])
+    .innerJoin("ALL_CONSTRAINTS rc", [
+      eq("rc.OWNER", "c.R_OWNER"),
+      eq("rc.CONSTRAINT_NAME", "c.R_CONSTRAINT_NAME"),
+    ])
+    .innerJoin("ALL_CONS_COLUMNS rcc", [
+      eq("rcc.OWNER", "rc.OWNER"),
+      eq("rcc.CONSTRAINT_NAME", "rc.CONSTRAINT_NAME"),
+      eq("rcc.POSITION", "cc.POSITION"),
+    ])
+    .where("c.OWNER", CURRENT_SCHEMA)
+    .where("c.CONSTRAINT_TYPE", "R")
+    .orderBy("cc.TABLE_NAME", "cc.POSITION")
+    .compile("literal", { aliasQuote: '"' });
+}

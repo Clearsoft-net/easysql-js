@@ -12,7 +12,7 @@
 
 import firebird from "node-firebird";
 import { BaseConnector } from "../base-connector.js";
-import { COLUMNS_SQL, FOREIGN_KEYS_SQL, TABLES_SQL } from "./queries.js";
+import { columnsQuery, foreignKeysQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   FirebirdConnectionConfig,
@@ -85,13 +85,15 @@ export class FirebirdConnector extends BaseConnector<firebird.Database> {
   /** Introspects the attached database and returns the raw schema. */
   async introspect(): Promise<IntrospectResult> {
     try {
-      const tableRows = await this.query<TableRow>(TABLES_SQL);
+      const tableRows = await this.query<TableRow>(tablesQuery().text);
 
       const tables: RawTable[] = [];
       for (const row of tableRows) {
         const name = trimName(row.table_name);
-        const columns = await this.query<ColumnRow>(COLUMNS_SQL, [name]);
-        const foreignKeys = await this.query<ForeignKeyRow>(FOREIGN_KEYS_SQL, [name]);
+        const columnsQ = columnsQuery(name);
+        const columns = await this.query<ColumnRow>(columnsQ.text, columnsQ.values);
+        const foreignKeysQ = foreignKeysQuery(name);
+        const foreignKeys = await this.query<ForeignKeyRow>(foreignKeysQ.text, foreignKeysQ.values);
 
         const fkByColumn = new Map<string, { table: string; column: string }>();
         for (const fk of foreignKeys) {

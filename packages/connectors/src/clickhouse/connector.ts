@@ -10,7 +10,7 @@
 
 import { type ClickHouseClient, createClient } from "@clickhouse/client";
 import { BaseConnector } from "../base-connector.js";
-import { COLUMNS_SQL, TABLES_SQL } from "./queries.js";
+import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
   ClickhouseConnectionConfig,
   ColumnRow,
@@ -72,7 +72,7 @@ export class ClickhouseConnector extends BaseConnector<ClickHouseClient> {
     const client = this.requireHandle();
     try {
       const tablesResult = await client.query({
-        query: TABLES_SQL,
+        query: tablesQuery().text,
         format: "JSONEachRow",
       });
       const tableRows = await tablesResult.json<TableRow>();
@@ -80,7 +80,7 @@ export class ClickhouseConnector extends BaseConnector<ClickHouseClient> {
       const tables: RawTable[] = [];
       for (const table of tableRows) {
         const columnsResult = await client.query({
-          query: COLUMNS_SQL,
+          query: columnsQuery().text,
           query_params: { table: table.table_name },
           format: "JSONEachRow",
         });

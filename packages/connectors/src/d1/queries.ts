@@ -8,10 +8,19 @@
  * reject the PRAGMA form.
  */
 
+import type { CompiledQuery } from "@easysql/query-builder";
+import { lit, select } from "@easysql/query-builder";
 import { quoteIdent } from "../helpers.js";
 
 /** Lists the user tables in the database, in name order. */
-export const TABLES_SQL = `SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name`;
+export function tablesQuery(): CompiledQuery {
+  return select({ name: "name" })
+    .from("sqlite_master")
+    .where("type", lit("table"))
+    .where("name NOT LIKE 'sqlite_%'")
+    .orderBy("name")
+    .compile("question");
+}
 
 /** Builds the documented `PRAGMA table_info` statement for `table`. */
 export function tableInfoQuery(table: string): string {

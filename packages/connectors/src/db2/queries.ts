@@ -6,45 +6,80 @@
  * because Db2 folds unquoted identifiers to uppercase.
  */
 
+import type { CompiledQuery } from "@easysql/query-builder";
+import { eq, expr, select } from "@easysql/query-builder";
+
+/** Db2's current-schema keyword is the SQL-standard `CURRENT SCHEMA` (no parens). */
+const CURRENT_SCHEMA = expr("CURRENT SCHEMA");
+
 /** Base tables in the current schema, with the optimizer's row estimate. */
-export const TABLES_SQL = `SELECT TABNAME AS "table_name", CARD AS "rows_approx"
-         FROM SYSCAT.TABLES
-         WHERE TYPE = 'T' AND TABSCHEMA = CURRENT SCHEMA
-         ORDER BY TABNAME`;
+export function tablesQuery(): CompiledQuery {
+  return select({ table_name: "TABNAME", rows_approx: "CARD" })
+    .from("SYSCAT.TABLES")
+    .where("TYPE", "T")
+    .where("TABSCHEMA", CURRENT_SCHEMA)
+    .orderBy("TABNAME")
+    .compile("literal", { aliasQuote: '"' });
+}
 
 /** Every column of the current schema. */
-export const COLUMNS_SQL = `SELECT TABNAME AS "table_name", COLNAME AS "column_name", TYPENAME AS "data_type",
-                "NULLS" AS "nulls", "DEFAULT" AS "column_default", COLNO AS "ordinal"
-         FROM SYSCAT.COLUMNS
-         WHERE TABSCHEMA = CURRENT SCHEMA
-         ORDER BY TABNAME, COLNO`;
+export function columnsQuery(): CompiledQuery {
+  return select({
+    table_name: "TABNAME",
+    column_name: "COLNAME",
+    data_type: "TYPENAME",
+    nulls: expr('"NULLS"'),
+    column_default: expr('"DEFAULT"'),
+    ordinal: "COLNO",
+  })
+    .from("SYSCAT.COLUMNS")
+    .where("TABSCHEMA", CURRENT_SCHEMA)
+    .orderBy("TABNAME", "COLNO")
+    .compile("literal", { aliasQuote: '"' });
+}
 
 /** Primary-key columns of the current schema. */
-export const PRIMARY_KEYS_SQL = `SELECT k.TABNAME AS "table_name", k.COLNAME AS "column_name"
-         FROM SYSCAT.KEYCOLUSE k
-         JOIN SYSCAT.TABCONST c
-           ON c.CONSTNAME = k.CONSTNAME
-          AND c.TABSCHEMA = k.TABSCHEMA
-          AND c.TABNAME = k.TABNAME
-         WHERE c.TYPE = 'P' AND k.TABSCHEMA = CURRENT SCHEMA
-         ORDER BY k.TABNAME, k.COLNAME`;
+export function primaryKeysQuery(): CompiledQuery {
+  return select({ table_name: "k.TABNAME", column_name: "k.COLNAME" })
+    .from("SYSCAT.KEYCOLUSE k")
+    .innerJoin("SYSCAT.TABCONST c", [
+      eq("c.CONSTNAME", "k.CONSTNAME"),
+      eq("c.TABSCHEMA", "k.TABSCHEMA"),
+      eq("c.TABNAME", "k.TABNAME"),
+    ])
+    .where("c.TYPE", "P")
+    .where("k.TABSCHEMA", CURRENT_SCHEMA)
+    .orderBy("k.TABNAME", "k.COLNAME")
+    .compile("literal", { aliasQuote: '"' });
+}
 
 /** Foreign-key columns of the current schema. */
-export const FOREIGN_KEYS_SQL = `SELECT k.TABNAME AS "table_name", k.COLNAME AS "column_name",
-                r.REFTABNAME AS "ref_table", rk.COLNAME AS "ref_column"
-         FROM SYSCAT.KEYCOLUSE k
-         JOIN SYSCAT.TABCONST c
-           ON c.CONSTNAME = k.CONSTNAME
-          AND c.TABSCHEMA = k.TABSCHEMA
-          AND c.TABNAME = k.TABNAME
-         JOIN SYSCAT.REFERENCES r
-           ON r.CONSTNAME = c.CONSTNAME
-          AND r.TABSCHEMA = c.TABSCHEMA
-          AND r.TABNAME = c.TABNAME
-         JOIN SYSCAT.KEYCOLUSE rk
-           ON rk.CONSTNAME = r.REFKEYNAME
-          AND rk.TABSCHEMA = r.REFTABSCHEMA
-          AND rk.TABNAME = r.REFTABNAME
-          AND rk.COLSEQ = k.COLSEQ
-         WHERE c.TYPE = 'F' AND k.TABSCHEMA = CURRENT SCHEMA
-         ORDER BY k.TABNAME, k.COLNAME`;
+export function foreignKeysQuery(): CompiledQuery {
+  return select({
+    table_name: "k.TABNAME",
+    column_name: "k.COLNAME",
+    ref_table: "r.REFTABNAME",
+    ref_column: "rk.COLNAME",
+  })
+    .from("SYSCAT.KEYCOLUSE k")
+    .innerJoin("SYSCAT.TABCONST c", [
+      eq("c.CONSTNAME", "k.CONSTNAME"),
+      eq("c.TABSCHEMA", "k.TABSCHEMA"),
+      eq("c.TABNAME", "k.TABNAME"),
+    ])
+    .innerJoin("SYSCAT.REFERENCES r", [
+      eq("r.CONSTNAME", "c.CONSTNAME"),
+      eq("r.TABSCHEMA", "c.TABSCHEMA"),
+      eq("r.TABNAME", "c.TABNAME"),
+    ])
+    .innerJoin("SYSCAT.KEYCOLUSE rk", [
+      eq("rk.CONSTNAME", "r.REFKEYNAME"),
+      eq("rk.TABSCHEMA", "r.REFTABSCHEMA"),
+      eq("rk.TABNAME", "r.REFTABNAME"),
+      eq("rk.COLSEQ", "k.COLSEQ"),
+    ])
+    .where("c.TYPE", "F")
+    .where("k.TABSCHEMA", CURRENT_SCHEMA)
+    .orderBy("k.TABNAME", "k.COLNAME")
+    .compile("literal", { aliasQuote: '"' });
+}

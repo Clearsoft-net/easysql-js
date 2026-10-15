@@ -13,7 +13,7 @@
 import type { ConnStr, Database, ODBCResult, SQLResults } from "ibm_db";
 import { BaseConnector } from "../base-connector.js";
 import { columnKey } from "../helpers.js";
-import { COLUMNS_SQL, FOREIGN_KEYS_SQL, PRIMARY_KEYS_SQL, TABLES_SQL } from "./queries.js";
+import { columnsQuery, foreignKeysQuery, primaryKeysQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   Db2ConnectionConfig,
@@ -102,10 +102,10 @@ export class Db2Connector extends BaseConnector<Database> {
     const database = this.requireHandle();
     try {
       // Four batched queries: one per metadata concern, never one per table.
-      const tableRows = await this.query<TableRow>(database, TABLES_SQL);
-      const columnRows = await this.query<ColumnRow>(database, COLUMNS_SQL);
-      const primaryKeyRows = await this.query<KeyColumnRow>(database, PRIMARY_KEYS_SQL);
-      const foreignKeyRows = await this.query<ForeignKeyRow>(database, FOREIGN_KEYS_SQL);
+      const tableRows = await this.query<TableRow>(database, tablesQuery().text);
+      const columnRows = await this.query<ColumnRow>(database, columnsQuery().text);
+      const primaryKeyRows = await this.query<KeyColumnRow>(database, primaryKeysQuery().text);
+      const foreignKeyRows = await this.query<ForeignKeyRow>(database, foreignKeysQuery().text);
 
       const columnsByTable = groupBy(columnRows, (row) => row.table_name);
       const primaryKeys = new Set(

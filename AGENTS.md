@@ -41,6 +41,12 @@ release per repository; generated code is kept strictly separate from hand-writt
 │   │   ├── src/url.ts             # parseConnectionUrl() + mergeConnection()
 │   │   ├── src/redact.ts          # sanitizeErrorMessage()
 │   │   └── src/index.ts
+│   ├── query-builder/             # @easysql/query-builder — SQL-first query builder
+│   │   ├── src/types.ts           # Operand/Node/SelectSpec/CompiledQuery + styles
+│   │   ├── src/build.ts           # select() builder, markers, conditions, compiler
+│   │   ├── src/index.ts           # barrel
+│   │   ├── tests/dsl.test.ts
+│   │   └── package.json / tsconfig.json / tsconfig.build.json
 │   ├── schema-generation/         # @easysql/schema-generation — hand-written, pure
 │   │   ├── src/types.ts           # re-exports the shared schema contracts
 │   │   ├── src/type-map.ts        # engine-native → SchemaType maps
@@ -117,6 +123,19 @@ discriminated options, and `src/helpers.ts` holds the shared SQL helpers
 engine module and calls the `create()` that its `index.ts` exports, so adding an
 engine adds a single line there.
 
+`packages/query-builder` is `@easysql/query-builder`, a small, SQL-first builder
+shared by every engine's `queries.ts`. It models only what the catalog queries
+need — `select`, `from`, joins, `where`, `groupBy`, `orderBy` — over raw SQL
+fragments, and binds parameters by position (a bare string is a raw fragment in
+an expression, a bound value on the right of a `where` comparison and a
+reference in a join `ON`; `ref`/`lit`/`expr`/`fn`/`idx` force the intent).
+`compile(style, options?)` returns a `CompiledQuery` (`{ text, values }`): the
+style is `question` (`?`), `dollar` (`$1…`) or `literal` (values inlined, for
+drivers that cannot bind), and `aliasQuote` wraps SELECT aliases for engines that
+fold unquoted identifiers to uppercase (Oracle, Db2, HANA). Each `queries.ts`
+exports functions returning `CompiledQuery`; the connector passes `.text` (and
+`.values`, where the driver binds) to its driver.
+
 Adding an engine means: a `src/<engine>/{types,connector,index}.ts` triple (plus
 `queries.ts` when it reads a system catalog) whose `connector.ts` extends
 `BaseConnector`/`SyncBaseConnector` and whose `index.ts`
@@ -140,6 +159,7 @@ workspace glob contains the consolidated package.
 | `packages/client/scripts/*` | Generation pipeline | ✅ |
 | `packages/*/src/types.ts` | Every type declaration of its directory (see Type placement) | ✅ |
 | `packages/common/src/*` | Shared contracts + helpers (e.g. redaction) | ✅ |
+| `packages/query-builder/src/*` | SQL-first query builder for catalog queries | ✅ |
 | `packages/schema-generation/src/*` | Schema normalization (pure, no I/O) | ✅ |
 | `packages/connectors/src/*` | Engine connectors and lazy factory (introspect + execute) | ✅ |
 | `packages/*/tests/*` | Unit tests (bun test) | ✅ |
@@ -156,6 +176,7 @@ Every hand-written source directory declares its types in that directory's
 | `types.ts` | Holds |
 |---|---|
 | `packages/common/src/` | every contract: `RawSchema`, `TableSchema`/`ColumnSchema`, `SchemaType`, `Connector`, `QueryResult`, `ParsedConnection` |
+| `packages/query-builder/src/` | the builder's node model: `Operand`, `Node`, `SelectSpec`, `CompiledQuery`, `PlaceholderStyle`, `CompileOptions` |
 | `packages/connectors/src/` | engine IDs, connection and factory option types, `NormalizedConnection` |
 | `packages/connectors/src/<engine>/` | engine config (`MysqlConnectionConfig`), `IntrospectResult`, and the driver row shapes of that engine's queries |
 
@@ -187,12 +208,14 @@ make check                     # lint + typecheck + tests, every package
 make build                     # compile every package to dist/
 ```
 
-Internal dependency rule: `packages/client` and `packages/common` depend on
-nothing internal; `packages/schema-generation` and `packages/connectors`
-depend on `@easysql/common` (contracts only — type-only). Connectors produce the
-`RawSchema` that `@easysql/schema-generation` normalizes (see `generateSchema`).
-Declare internal deps as workspaces (`"@easysql/common": "workspace:*"`), never
-relative-path hacks.
+Internal dependency rule: `packages/client`, `packages/common` and
+`packages/query-builder` depend on nothing internal; `packages/schema-generation`
+and `packages/connectors` depend on `@easysql/common` (contracts only —
+type-only). `packages/connectors` also depends on `@easysql/query-builder` (its
+engines build catalog SQL with it). Connectors produce the `RawSchema` that
+`@easysql/schema-generation` normalizes (see `generateSchema`). Declare internal
+deps as workspaces (`"@easysql/common": "workspace:*"`), never relative-path
+hacks.
 
 ## Public API
 

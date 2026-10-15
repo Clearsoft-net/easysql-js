@@ -6,36 +6,64 @@
  * Aliases are quoted because HANA folds unquoted identifiers to uppercase.
  */
 
+import type { CompiledQuery } from "@easysql/query-builder";
+import { expr, select } from "@easysql/query-builder";
+
+/** HANA's current-schema keyword has no parentheses. */
+const CURRENT_SCHEMA = expr("CURRENT_SCHEMA");
+
 /** Base tables in the current schema. */
-export const TABLES_SQL = `SELECT TABLE_NAME AS "table_name"
-           FROM SYS.TABLES
-           WHERE SCHEMA_NAME = CURRENT_SCHEMA AND IS_TEMPORARY = 'FALSE'
-           ORDER BY TABLE_NAME`;
+export function tablesQuery(): CompiledQuery {
+  return select({ table_name: "TABLE_NAME" })
+    .from("SYS.TABLES")
+    .where("SCHEMA_NAME", CURRENT_SCHEMA)
+    .where("IS_TEMPORARY", "FALSE")
+    .orderBy("TABLE_NAME")
+    .compile("literal", { aliasQuote: '"' });
+}
 
 /** Every column of the current schema. */
-export const COLUMNS_SQL = `SELECT TABLE_NAME AS "table_name", COLUMN_NAME AS "column_name",
-                  DATA_TYPE_NAME AS "data_type", IS_NULLABLE AS "is_nullable",
-                  DEFAULT_VALUE AS "column_default", POSITION AS "ordinal"
-           FROM SYS.TABLE_COLUMNS
-           WHERE SCHEMA_NAME = CURRENT_SCHEMA
-           ORDER BY TABLE_NAME, POSITION`;
+export function columnsQuery(): CompiledQuery {
+  return select({
+    table_name: "TABLE_NAME",
+    column_name: "COLUMN_NAME",
+    data_type: "DATA_TYPE_NAME",
+    is_nullable: "IS_NULLABLE",
+    column_default: "DEFAULT_VALUE",
+    ordinal: "POSITION",
+  })
+    .from("SYS.TABLE_COLUMNS")
+    .where("SCHEMA_NAME", CURRENT_SCHEMA)
+    .orderBy("TABLE_NAME", "POSITION")
+    .compile("literal", { aliasQuote: '"' });
+}
 
 /** Primary-key columns of the current schema. */
-export const PRIMARY_KEYS_SQL = `SELECT TABLE_NAME AS "table_name", COLUMN_NAME AS "column_name"
-           FROM SYS.CONSTRAINTS
-           WHERE SCHEMA_NAME = CURRENT_SCHEMA AND IS_PRIMARY_KEY = 'TRUE'
-           ORDER BY TABLE_NAME, POSITION`;
+export function primaryKeysQuery(): CompiledQuery {
+  return select({ table_name: "TABLE_NAME", column_name: "COLUMN_NAME" })
+    .from("SYS.CONSTRAINTS")
+    .where("SCHEMA_NAME", CURRENT_SCHEMA)
+    .where("IS_PRIMARY_KEY", "TRUE")
+    .orderBy("TABLE_NAME", "POSITION")
+    .compile("literal", { aliasQuote: '"' });
+}
 
 /**
  * Foreign-key columns of the current schema. `SYS.REFERENTIAL_CONSTRAINTS`
  * carries the referenced table/column for each key column.
  */
-export const FOREIGN_KEYS_SQL = `SELECT TABLE_NAME AS "table_name", COLUMN_NAME AS "column_name",
-                  REFERENCED_TABLE_NAME AS "ref_table",
-                  REFERENCED_COLUMN_NAME AS "ref_column"
-           FROM SYS.REFERENTIAL_CONSTRAINTS
-           WHERE SCHEMA_NAME = CURRENT_SCHEMA
-           ORDER BY TABLE_NAME, POSITION`;
+export function foreignKeysQuery(): CompiledQuery {
+  return select({
+    table_name: "TABLE_NAME",
+    column_name: "COLUMN_NAME",
+    ref_table: "REFERENCED_TABLE_NAME",
+    ref_column: "REFERENCED_COLUMN_NAME",
+  })
+    .from("SYS.REFERENTIAL_CONSTRAINTS")
+    .where("SCHEMA_NAME", CURRENT_SCHEMA)
+    .orderBy("TABLE_NAME", "POSITION")
+    .compile("literal", { aliasQuote: '"' });
+}
 
 /**
  * Best-effort row-count sources, tried in order. `SYS.M_TABLE_STATISTICS`
@@ -43,11 +71,11 @@ export const FOREIGN_KEYS_SQL = `SELECT TABLE_NAME AS "table_name", COLUMN_NAME 
  * unavailable (or the user lacks access) the estimate falls back to
  * `SYS.M_TABLES`.
  */
-export const ROW_COUNT_SOURCES = [
-  `SELECT TABLE_NAME AS "table_name", RECORD_COUNT AS "record_count"
-       FROM SYS.M_TABLE_STATISTICS
-       WHERE SCHEMA_NAME = CURRENT_SCHEMA`,
-  `SELECT TABLE_NAME AS "table_name", RECORD_COUNT AS "record_count"
-       FROM SYS.M_TABLES
-       WHERE SCHEMA_NAME = CURRENT_SCHEMA`,
-];
+export function rowCountSources(): CompiledQuery[] {
+  const source = (table: string): CompiledQuery =>
+    select({ table_name: "TABLE_NAME", record_count: "RECORD_COUNT" })
+      .from(table)
+      .where("SCHEMA_NAME", CURRENT_SCHEMA)
+      .compile("literal", { aliasQuote: '"' });
+  return [source("SYS.M_TABLE_STATISTICS"), source("SYS.M_TABLES")];
+}

@@ -4,7 +4,8 @@
     "outDir": "dist",
     "types": ["bun", "node"],
     "paths": {
-      "@easysql/common": ["../common/src/index.ts"]
+      "@easysql/common": ["../common/src/index.ts"],
+      "@easysql/query-builder": ["../query-builder/src/index.ts"]
     }
   },
   "include": ["src", "tests/**/*.ts"],

@@ -15,11 +15,11 @@ import type { Connection } from "@sap/hana-client";
 import { BaseConnector } from "../base-connector.js";
 import { columnKey } from "../helpers.js";
 import {
-  COLUMNS_SQL,
-  FOREIGN_KEYS_SQL,
-  PRIMARY_KEYS_SQL,
-  ROW_COUNT_SOURCES,
-  TABLES_SQL,
+  columnsQuery,
+  foreignKeysQuery,
+  primaryKeysQuery,
+  rowCountSources,
+  tablesQuery,
 } from "./queries.js";
 import type {
   ColumnRow,
@@ -108,10 +108,10 @@ export class HanaConnector extends BaseConnector<Connection> {
   async introspect(): Promise<IntrospectResult> {
     this.requireHandle();
     try {
-      const tableRows = (await this.exec<TableRow[]>(TABLES_SQL)) ?? [];
-      const columnRows = (await this.exec<ColumnRow[]>(COLUMNS_SQL)) ?? [];
-      const primaryKeyRows = (await this.exec<KeyColumnRow[]>(PRIMARY_KEYS_SQL)) ?? [];
-      const foreignKeyRows = (await this.exec<ForeignKeyRow[]>(FOREIGN_KEYS_SQL)) ?? [];
+      const tableRows = (await this.exec<TableRow[]>(tablesQuery().text)) ?? [];
+      const columnRows = (await this.exec<ColumnRow[]>(columnsQuery().text)) ?? [];
+      const primaryKeyRows = (await this.exec<KeyColumnRow[]>(primaryKeysQuery().text)) ?? [];
+      const foreignKeyRows = (await this.exec<ForeignKeyRow[]>(foreignKeysQuery().text)) ?? [];
       const rowCounts = await this.loadRowCounts();
 
       const columnsByTable = groupBy(columnRows, (row) => row.table_name);
@@ -146,9 +146,9 @@ export class HanaConnector extends BaseConnector<Connection> {
    */
   private async loadRowCounts(): Promise<Map<string, number>> {
     const counts = new Map<string, number>();
-    for (const sql of ROW_COUNT_SOURCES) {
+    for (const source of rowCountSources()) {
       try {
-        const rows = (await this.exec<RowCountRow[]>(sql)) ?? [];
+        const rows = (await this.exec<RowCountRow[]>(source.text)) ?? [];
         for (const row of rows) {
           const count = Number(row.record_count);
           if (row.table_name && Number.isFinite(count) && count >= 0) {

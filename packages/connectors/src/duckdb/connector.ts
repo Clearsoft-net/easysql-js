@@ -8,10 +8,10 @@
  * {@link DuckDbConnector.close}. No state survives a connection.
  */
 
-import type { DuckDBConnection } from "@duckdb/node-api";
+import type { DuckDBConnection, DuckDBValue } from "@duckdb/node-api";
 import { DuckDBInstance } from "@duckdb/node-api";
 import { BaseConnector } from "../base-connector.js";
-import { COLUMNS_SQL, CONSTRAINTS_SQL, TABLES_SQL } from "./queries.js";
+import { columnsQuery, constraintsQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   ConstraintRow,
@@ -62,9 +62,15 @@ export class DuckDbConnector extends BaseConnector<DuckDbHandles> {
   async introspect(): Promise<IntrospectResult> {
     const { connection } = this.requireHandle();
     try {
-      const tableRows = await readAll<TableRow>(connection, TABLES_SQL);
+      const tablesQ = tablesQuery();
+      const tableRows = await readAll<TableRow>(connection, tablesQ.text, tablesQ.values);
 
-      const constraintRows = await readAll<ConstraintRow>(connection, CONSTRAINTS_SQL);
+      const constraintsQ = constraintsQuery();
+      const constraintRows = await readAll<ConstraintRow>(
+        connection,
+        constraintsQ.text,
+        constraintsQ.values,
+      );
 
       const primaryKeys = new Map<string, Set<string>>();
       const foreignKeys = new Map<string, Map<string, { table: string; column: string }>>();
@@ -91,7 +97,8 @@ export class DuckDbConnector extends BaseConnector<DuckDbHandles> {
 
       const tables: RawTable[] = [];
       for (const row of tableRows) {
-        const columns = await readAll<ColumnRow>(connection, COLUMNS_SQL, [row.table_name]);
+        const columnsQ = columnsQuery(row.table_name);
+        const columns = await readAll<ColumnRow>(connection, columnsQ.text, columnsQ.values);
 
         tables.push({
           name: row.table_name,
@@ -130,9 +137,12 @@ export class DuckDbConnector extends BaseConnector<DuckDbHandles> {
 async function readAll<T>(
   connection: DuckDBConnection,
   sql: string,
-  values?: (string | number)[],
+  values?: unknown[],
 ): Promise<T[]> {
-  const reader = await connection.runAndReadAll(sql, values);
+  const reader = await connection.runAndReadAll(
+    sql,
+    values ? (values as DuckDBValue[]) : undefined,
+  );
   return reader.getRowObjectsJS() as T[];
 }
 

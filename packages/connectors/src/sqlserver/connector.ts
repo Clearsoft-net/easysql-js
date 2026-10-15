@@ -15,7 +15,7 @@
 import type { ConnectionPool, IColumnMetadata, IRecordSet } from "mssql";
 import sql from "mssql";
 import { BaseConnector } from "../base-connector.js";
-import { COLUMNS_SQL, TABLES_SQL } from "./queries.js";
+import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   IntrospectResult,
@@ -89,8 +89,8 @@ export class SqlServerConnector extends BaseConnector<ConnectionPool> {
   async introspect(): Promise<IntrospectResult> {
     const pool = this.requireHandle();
     try {
-      const tablesResult = await pool.request().query<TableRow>(TABLES_SQL);
-      const columnsResult = await pool.request().query<ColumnRow>(COLUMNS_SQL);
+      const tablesResult = await pool.request().query<TableRow>(tablesQuery().text);
+      const columnsResult = await pool.request().query<ColumnRow>(columnsQuery().text);
 
       const columnsByTable = new Map<number, RawColumn[]>();
       for (const row of columnsResult.recordset) {

@@ -16,7 +16,7 @@
 import oracledb from "oracledb";
 import { BaseConnector } from "../base-connector.js";
 import { columnKey } from "../helpers.js";
-import { COLUMNS_SQL, FOREIGN_KEYS_SQL, PRIMARY_KEYS_SQL, TABLES_SQL } from "./queries.js";
+import { columnsQuery, foreignKeysQuery, primaryKeysQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   ConstraintColumnRow,
@@ -100,10 +100,13 @@ export class OracleConnector extends BaseConnector<OracleConnection> {
   async introspect(): Promise<IntrospectResult> {
     const connection = this.requireHandle();
     try {
-      const tableRows = await this.query<TableRow>(connection, TABLES_SQL);
-      const columnRows = await this.query<ColumnRow>(connection, COLUMNS_SQL);
-      const primaryKeyRows = await this.query<ConstraintColumnRow>(connection, PRIMARY_KEYS_SQL);
-      const foreignKeyRows = await this.query<ForeignKeyRow>(connection, FOREIGN_KEYS_SQL);
+      const tableRows = await this.query<TableRow>(connection, tablesQuery().text);
+      const columnRows = await this.query<ColumnRow>(connection, columnsQuery().text);
+      const primaryKeyRows = await this.query<ConstraintColumnRow>(
+        connection,
+        primaryKeysQuery().text,
+      );
+      const foreignKeyRows = await this.query<ForeignKeyRow>(connection, foreignKeysQuery().text);
 
       const tables = new Map<string, RawTable>();
       for (const row of tableRows) {

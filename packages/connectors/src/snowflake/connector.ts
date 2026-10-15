@@ -24,7 +24,7 @@
 
 import snowflake from "snowflake-sdk";
 import { BaseConnector } from "../base-connector.js";
-import { COLUMNS_SQL, TABLES_SQL } from "./queries.js";
+import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   IntrospectResult,
@@ -101,9 +101,9 @@ export class SnowflakeConnector extends BaseConnector<snowflake.Connection> {
   async introspect(): Promise<IntrospectResult> {
     const connection = this.requireHandle();
     try {
-      const tableRows = await this.run<TableRow>(connection, TABLES_SQL);
+      const tableRows = await this.run<TableRow>(connection, tablesQuery().text);
 
-      const columnRows = await this.run<ColumnRow>(connection, COLUMNS_SQL);
+      const columnRows = await this.run<ColumnRow>(connection, columnsQuery().text);
 
       const columnsByTable = new Map<string, RawColumn[]>();
       for (const row of columnRows) {
