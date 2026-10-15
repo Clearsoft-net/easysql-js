@@ -10,16 +10,9 @@
 import { type Connection, createConnection } from "mysql2/promise";
 import { BaseConnector } from "../base-connector.js";
 import { toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
-import type {
-  ColumnRow,
-  IntrospectResult,
-  MysqlConnectionConfig,
-  RawColumn,
-  RawQueryResult,
-  RawTable,
-  TableRow,
-} from "./types.js";
+import type { IntrospectResult, MysqlConnectionConfig, RawColumn, RawTable } from "./types.js";
 
 export class MysqlConnector extends BaseConnector<Connection> {
   private readonly config: Required<

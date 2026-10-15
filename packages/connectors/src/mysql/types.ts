@@ -1,7 +1,6 @@
 import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Explicit connection configuration for a MySQL/MariaDB server. */
 export interface MysqlConnectionConfig {
@@ -20,5 +19,3 @@ export interface MysqlConnectionConfig {
 }
 
 export type IntrospectResult = EngineSchema<"mysql" | "mariadb">;
-
-export type { ColumnRow, TableRow } from "../types.js";

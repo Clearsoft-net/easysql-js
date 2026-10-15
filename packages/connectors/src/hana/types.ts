@@ -1,7 +1,6 @@
 import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Explicit connection configuration for an SAP HANA server. */
 export interface HanaConnectionConfig {
@@ -17,8 +16,6 @@ export interface HanaConnectionConfig {
 }
 
 export type IntrospectResult = EngineSchema<"hana">;
-
-export type { ColumnRow, ForeignKeyRow, KeyColumnRow, TableRow } from "../types.js";
 
 export interface RowCountRow {
   table_name: string;

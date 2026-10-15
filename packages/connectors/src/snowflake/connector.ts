@@ -25,16 +25,9 @@
 import snowflake from "snowflake-sdk";
 import { BaseConnector } from "../base-connector.js";
 import { toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
-import type {
-  ColumnRow,
-  IntrospectResult,
-  RawColumn,
-  RawQueryResult,
-  RawTable,
-  SnowflakeConnectionConfig,
-  TableRow,
-} from "./types.js";
+import type { IntrospectResult, RawColumn, RawTable, SnowflakeConnectionConfig } from "./types.js";
 
 /** Default connection timeout; cloud warehouses are slower to connect. */
 const DEFAULT_CONNECT_TIMEOUT_MS = 60_000;

@@ -11,16 +11,9 @@
 import { type ClickHouseClient, createClient } from "@clickhouse/client";
 import { BaseConnector } from "../base-connector.js";
 import { toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
-import type {
-  ClickhouseConnectionConfig,
-  ColumnRow,
-  IntrospectResult,
-  RawColumn,
-  RawQueryResult,
-  RawTable,
-  TableRow,
-} from "./types.js";
+import type { ClickhouseConnectionConfig, IntrospectResult, RawColumn, RawTable } from "./types.js";
 
 export class ClickhouseConnector extends BaseConnector<ClickHouseClient> {
   private readonly config: Required<

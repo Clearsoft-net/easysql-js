@@ -16,16 +16,9 @@ import type { ConnectionPool, IColumnMetadata, IRecordSet } from "mssql";
 import sql from "mssql";
 import { BaseConnector } from "../base-connector.js";
 import { toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
-import type {
-  ColumnRow,
-  IntrospectResult,
-  RawColumn,
-  RawQueryResult,
-  RawTable,
-  SqlServerConnectionConfig,
-  TableRow,
-} from "./types.js";
+import type { IntrospectResult, RawColumn, RawTable, SqlServerConnectionConfig } from "./types.js";
 
 export class SqlServerConnector extends BaseConnector<ConnectionPool> {
   private readonly config: Required<

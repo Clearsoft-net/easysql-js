@@ -1,7 +1,6 @@
 import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Configuration for a Firebird database (remote or embedded). */
 export interface FirebirdConnectionConfig {
@@ -36,9 +35,6 @@ export interface ColumnRow {
   field_scale: number | null;
   pk: number | null;
 }
-
-/** A row of the foreign-key segment query. */
-export type { ForeignKeyRow, TableRow } from "../types.js";
 
 /**
  * The subset of the driver's column metadata that is used here. Declared

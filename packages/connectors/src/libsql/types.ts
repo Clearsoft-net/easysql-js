@@ -1,7 +1,6 @@
 import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Configuration for a local libSQL file or a remote Turso database. */
 export interface LibSqlConnectionConfig {
@@ -18,5 +17,3 @@ export interface LibSqlConnectionConfig {
 }
 
 export type IntrospectResult = EngineSchema<"libsql">;
-
-export type { PragmaColumnRow, PragmaForeignKeyRow } from "../types.js";

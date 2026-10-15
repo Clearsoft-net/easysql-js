@@ -19,14 +19,13 @@ import { BasicAuth, Trino } from "trino-client";
 import { BaseConnector } from "../base-connector.js";
 import { PROBE_SQL } from "../helpers.js";
 import { toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult } from "../types.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
   Collected,
-  ColumnRow,
   IntrospectResult,
   QueryPage,
   RawColumn,
-  RawQueryResult,
   RawTable,
   TrinoConnectionConfig,
   TrinoHttpClient,

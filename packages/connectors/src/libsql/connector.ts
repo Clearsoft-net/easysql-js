@@ -17,16 +17,9 @@ import type { Client } from "@libsql/client";
 import { createClient } from "@libsql/client";
 import { BaseConnector } from "../base-connector.js";
 import { PROBE_SQL, pragma } from "../helpers.js";
+import type { PragmaColumnRow, PragmaForeignKeyRow, RawQueryResult } from "../types.js";
 import { foreignKeyListQuery, rowCountQuery, tableInfoQuery, tablesQuery } from "./queries.js";
-import type {
-  IntrospectResult,
-  LibSqlConnectionConfig,
-  PragmaColumnRow,
-  PragmaForeignKeyRow,
-  RawColumn,
-  RawQueryResult,
-  RawTable,
-} from "./types.js";
+import type { IntrospectResult, LibSqlConnectionConfig, RawColumn, RawTable } from "./types.js";
 
 export class LibSqlConnector extends BaseConnector<Client> {
   private readonly config: Required<LibSqlConnectionConfig>;

@@ -9,16 +9,9 @@
 
 import { DatabaseSync } from "node:sqlite";
 import { SyncBaseConnector } from "../base-connector.js";
+import type { PragmaColumnRow, PragmaForeignKeyRow, RawQueryResult } from "../types.js";
 import { foreignKeyListQuery, rowCountQuery, tableInfoQuery, tablesQuery } from "./queries.js";
-import type {
-  IntrospectResult,
-  PragmaColumnRow,
-  PragmaForeignKeyRow,
-  RawColumn,
-  RawQueryResult,
-  RawTable,
-  SqliteConnectionConfig,
-} from "./types.js";
+import type { IntrospectResult, RawColumn, RawTable, SqliteConnectionConfig } from "./types.js";
 
 export class SqliteConnector extends SyncBaseConnector<DatabaseSync> {
   private readonly config: Required<Pick<SqliteConnectionConfig, "file" | "readonly">>;

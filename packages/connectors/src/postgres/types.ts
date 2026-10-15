@@ -1,7 +1,6 @@
 import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /**
  * PostgreSQL-compatible providers. The provider only changes how the server is
@@ -44,5 +43,3 @@ export interface PostgresConnectionConfig {
 }
 
 export type IntrospectResult = EngineSchema<"postgresql">;
-
-export type { ColumnRow, TableRow } from "../types.js";

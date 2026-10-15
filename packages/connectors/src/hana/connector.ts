@@ -16,6 +16,7 @@ import { BaseConnector } from "../base-connector.js";
 import { memoizedImport } from "../driver-loading.js";
 import { columnKey } from "../helpers.js";
 import { groupBy, toOrdinal } from "../internal.js";
+import type { ColumnRow, ForeignKeyRow, KeyColumnRow, RawQueryResult, TableRow } from "../types.js";
 import {
   columnsQuery,
   foreignKeysQuery,
@@ -24,17 +25,12 @@ import {
   tablesQuery,
 } from "./queries.js";
 import type {
-  ColumnRow,
-  ForeignKeyRow,
   HanaConnectionConfig,
   HanaModule,
   IntrospectResult,
-  KeyColumnRow,
   RawColumn,
-  RawQueryResult,
   RawTable,
   RowCountRow,
-  TableRow,
 } from "./types.js";
 
 /**

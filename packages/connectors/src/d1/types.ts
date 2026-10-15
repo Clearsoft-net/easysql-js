@@ -10,7 +10,6 @@
 import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Configuration for a Cloudflare D1 database reached over the REST API. */
 export interface D1ConnectionConfig {
@@ -51,5 +50,3 @@ export interface D1ResponseBody {
   result?: D1QueryResult[] | null;
   success?: boolean;
 }
-
-export type { PragmaColumnRow, PragmaForeignKeyRow } from "../types.js";

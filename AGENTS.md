@@ -185,7 +185,10 @@ Every hand-written source directory declares its types in that directory's
 Rules that make it work:
 
 - No other module declares `interface`/`type`/`enum`; they `import type` from
-  `./types.js`.
+  their directory's `./types.js`. Types that live in a parent directory's
+  `types.ts` (e.g. an engine's connector importing the shared catalog rows from
+  `../types.js`) are imported from there directly, not re-exported through the
+  engine's `types.ts`.
 - `types.ts` exports everything so sibling modules can import it. **The public API
   is the `index.ts` barrels**, not `types.ts`: internal types
   (`NormalizedConnection`, `ColumnRow`) are marked *Internal* in their doc comment

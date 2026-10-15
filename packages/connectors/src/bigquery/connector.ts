@@ -25,12 +25,12 @@
 
 import { BigQuery } from "@google-cloud/bigquery";
 import { BaseConnector } from "../base-connector.js";
+import type { RawQueryResult } from "../types.js";
 import type {
   BigQueryConnectionConfig,
   FieldMetadata,
   IntrospectResult,
   RawColumn,
-  RawQueryResult,
   RawTable,
   TableMetadata,
 } from "./types.js";

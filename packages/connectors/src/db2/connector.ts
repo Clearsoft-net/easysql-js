@@ -15,19 +15,15 @@ import { BaseConnector } from "../base-connector.js";
 import { memoizedImport } from "../driver-loading.js";
 import { columnKey } from "../helpers.js";
 import { groupBy, toOrdinal } from "../internal.js";
+import type { ColumnRow, ForeignKeyRow, KeyColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, foreignKeysQuery, primaryKeysQuery, tablesQuery } from "./queries.js";
 import type {
-  ColumnRow,
   Db2ConnectionConfig,
   Db2ConnStr,
-  ForeignKeyRow,
   IbmDbModule,
   IntrospectResult,
-  KeyColumnRow,
   RawColumn,
-  RawQueryResult,
   RawTable,
-  TableRow,
 } from "./types.js";
 
 /**

@@ -2,7 +2,6 @@ import type { DuckDBConnection, DuckDBInstance } from "@duckdb/node-api";
 import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Configuration for a local DuckDB database. */
 export interface DuckDbConnectionConfig {
@@ -16,8 +15,6 @@ export interface DuckDbConnectionConfig {
 }
 
 export type IntrospectResult = EngineSchema<"duckdb">;
-
-export type { ColumnRow, TableRow } from "../types.js";
 
 /** Internal — `duckdb_constraints()` row returned by the driver. */
 export interface ConstraintRow {

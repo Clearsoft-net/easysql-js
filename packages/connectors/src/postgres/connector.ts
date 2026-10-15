@@ -14,18 +14,16 @@
 
 import { BaseConnector } from "../base-connector.js";
 import { toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
 import { NeonHttpSession, NeonWebSocketSession, type PgSession, TcpSession } from "./session.js";
 import type {
-  ColumnRow,
   IntrospectResult,
   PostgresConnectionConfig,
   PostgresProvider,
   PostgresTransport,
   RawColumn,
-  RawQueryResult,
   RawTable,
-  TableRow,
 } from "./types.js";
 
 export class PostgresConnector extends BaseConnector<PgSession> {

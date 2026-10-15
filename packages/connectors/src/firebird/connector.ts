@@ -13,17 +13,15 @@
 import firebird from "node-firebird";
 import { BaseConnector } from "../base-connector.js";
 import { toNullableNumber } from "../internal.js";
+import type { ForeignKeyRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, foreignKeysQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   FirebirdConnectionConfig,
   FirebirdField,
-  ForeignKeyRow,
   IntrospectResult,
   RawColumn,
-  RawQueryResult,
   RawTable,
-  TableRow,
 } from "./types.js";
 
 export class FirebirdConnector extends BaseConnector<firebird.Database> {

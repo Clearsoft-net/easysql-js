@@ -1,7 +1,6 @@
 import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Explicit connection configuration for a ClickHouse server (HTTP interface). */
 export interface ClickhouseConnectionConfig {
@@ -18,5 +17,3 @@ export interface ClickhouseConnectionConfig {
 }
 
 export type IntrospectResult = EngineSchema<"clickhouse">;
-
-export type { ColumnRow, TableRow } from "../types.js";

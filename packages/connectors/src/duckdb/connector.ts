@@ -12,17 +12,15 @@ import type { DuckDBConnection, DuckDBValue } from "@duckdb/node-api";
 import { DuckDBInstance } from "@duckdb/node-api";
 import { BaseConnector } from "../base-connector.js";
 import { toNullableNumber, toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, constraintsQuery, tablesQuery } from "./queries.js";
 import type {
-  ColumnRow,
   ConstraintRow,
   DuckDbConnectionConfig,
   DuckDbHandles,
   IntrospectResult,
   RawColumn,
-  RawQueryResult,
   RawTable,
-  TableRow,
 } from "./types.js";
 
 export class DuckDbConnector extends BaseConnector<DuckDbHandles> {

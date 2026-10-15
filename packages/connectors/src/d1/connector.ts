@@ -22,6 +22,7 @@
 import type { CompiledQuery } from "@easysql/query-builder";
 import { BaseConnector } from "../base-connector.js";
 import { PROBE_SQL } from "../helpers.js";
+import type { PragmaColumnRow, PragmaForeignKeyRow, RawQueryResult } from "../types.js";
 import {
   foreignKeyListFallbackQuery,
   foreignKeyListQuery,
@@ -33,10 +34,7 @@ import type {
   D1ConnectionConfig,
   D1ResponseBody,
   IntrospectResult,
-  PragmaColumnRow,
-  PragmaForeignKeyRow,
   RawColumn,
-  RawQueryResult,
   RawTable,
 } from "./types.js";
 

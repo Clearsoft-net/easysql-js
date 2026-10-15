@@ -2,7 +2,6 @@ import type { ConnStr } from "ibm_db";
 import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Explicit connection configuration for an IBM Db2 server. */
 export interface Db2ConnectionConfig {
@@ -28,8 +27,6 @@ export type IntrospectResult = EngineSchema<"db2">;
 export interface Db2ConnStr extends ConnStr {
   SECURITY?: string;
 }
-
-export type { ColumnRow, ForeignKeyRow, KeyColumnRow, TableRow } from "../types.js";
 
 /** Internal — the lazily loaded `ibm_db` module. */
 export type IbmDbModule = typeof import("ibm_db");

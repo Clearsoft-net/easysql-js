@@ -17,19 +17,15 @@ import oracledb from "oracledb";
 import { BaseConnector } from "../base-connector.js";
 import { columnKey } from "../helpers.js";
 import { toNullableNumber, toOrdinal } from "../internal.js";
+import type { ColumnRow, ForeignKeyRow, KeyColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, foreignKeysQuery, primaryKeysQuery, tablesQuery } from "./queries.js";
 import type {
-  ColumnRow,
-  ForeignKeyRow,
   IntrospectResult,
-  KeyColumnRow,
   OracleConnection,
   OracleConnectionConfig,
   OracleDriver,
   RawColumn,
-  RawQueryResult,
   RawTable,
-  TableRow,
 } from "./types.js";
 
 const driver = oracledb as OracleDriver;

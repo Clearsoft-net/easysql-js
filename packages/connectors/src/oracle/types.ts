@@ -1,7 +1,6 @@
 import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /**
  * Explicit connection configuration for an Oracle Database server.
@@ -66,5 +65,3 @@ export interface OracleDriver {
   readonly OUT_FORMAT_OBJECT: number;
   getConnection(options: OracleGetConnectionOptions): Promise<OracleConnection>;
 }
-
-export type { ColumnRow, ForeignKeyRow, KeyColumnRow, TableRow } from "../types.js";
