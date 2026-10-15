@@ -36,11 +36,12 @@ query.values; // []
 A compiled query is `{ text, values }`: the SQL with the dialect's placeholders
 and the values to pass alongside it.
 
-Omit `columns` for `SELECT *`:
+Omit `columns` for `SELECT *`, and pass a table-valued function to `from()`
+the same way as a table name:
 
 ```ts
-select().from("pragma_table_info(?)").compile("question");
-// { text: "SELECT * FROM pragma_table_info(?)", values: [] }
+select().from(fn("pragma_table_info", value("roles"))).compile("question");
+// { text: "SELECT * FROM pragma_table_info(?)", values: ["roles"] }
 ```
 
 ## Binding rules
@@ -54,8 +55,9 @@ A bare string is interpreted by **position**:
 
 Use the markers when the context does not say it for you: `ref()` forces a
 reference, `lit()` a quoted string literal, `expr()` a raw fragment, `fn()` a
-function call and `idx()` an array subscript. None of the markers are ever
-bound.
+function call, `idx()` an array subscript and `value()` a value that is always
+bound. Only `value()` (and a bare number or boolean) binds regardless of
+context; every other marker is never bound.
 
 ```ts
 select({ is_primary: fn("EXISTS", …) })

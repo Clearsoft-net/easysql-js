@@ -9,7 +9,7 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { lit, notLike, select } from "@easysql/query-builder";
+import { fn, lit, notLike, select, value } from "@easysql/query-builder";
 import { pragma, quoteIdent } from "../helpers.js";
 
 /** Lists the user tables in the database, in name order. */
@@ -33,11 +33,15 @@ export function foreignKeyListQuery(table: string): string {
 }
 
 /** The table-valued fallback for the column pragma (the table name is bound as `?`). */
-export function tableInfoFallbackQuery(): string {
-  return select().from("pragma_table_info(?)").compile("question").text;
+export function tableInfoFallbackQuery(table: string): CompiledQuery {
+  return select()
+    .from(fn("pragma_table_info", value(table)))
+    .compile("question");
 }
 
 /** The table-valued fallback for the foreign-key pragma (the table name is bound as `?`). */
-export function foreignKeyListFallbackQuery(): string {
-  return select().from("pragma_foreign_key_list(?)").compile("question").text;
+export function foreignKeyListFallbackQuery(table: string): CompiledQuery {
+  return select()
+    .from(fn("pragma_foreign_key_list", value(table)))
+    .compile("question");
 }

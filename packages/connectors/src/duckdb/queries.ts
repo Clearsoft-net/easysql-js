@@ -12,7 +12,7 @@ import { fn, not, select } from "@easysql/query-builder";
 /** Base tables in the current database/schema, with an estimated size. */
 export function tablesQuery(): CompiledQuery {
   return select({ table_name: "table_name", estimated_size: "estimated_size" })
-    .from("duckdb_tables()")
+    .from(fn("duckdb_tables"))
     .where(not("internal"))
     .where("database_name", fn("current_database"))
     .where("schema_name", fn("current_schema"))
@@ -29,7 +29,7 @@ export function constraintsQuery(): CompiledQuery {
     referenced_table: "referenced_table",
     referenced_column_names: "referenced_column_names",
   })
-    .from("duckdb_constraints()")
+    .from(fn("duckdb_constraints"))
     .where("database_name", fn("current_database"))
     .where("schema_name", fn("current_schema"))
     .orderBy("table_name", "constraint_index")
@@ -45,7 +45,7 @@ export function columnsQuery(table: string): CompiledQuery {
     is_nullable: "is_nullable",
     column_default: "column_default",
   })
-    .from("duckdb_columns()")
+    .from(fn("duckdb_columns"))
     .where("database_name", fn("current_database"))
     .where("schema_name", fn("current_schema"))
     .where("table_name", table)

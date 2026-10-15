@@ -14,6 +14,7 @@ import {
   or,
   ref,
   select,
+  value,
 } from "../src/index.js";
 
 describe("query builder — binding by context", () => {
@@ -94,6 +95,21 @@ describe("query builder — binding by context", () => {
       values: [1],
     });
     expect(select({}).from("t").compile("question").text).toBe("SELECT * FROM t");
+  });
+
+  it("renders a table-valued function in FROM and binds a value()", () => {
+    expect(select().from(fn("duckdb_tables")).where("x", 1).compile("question")).toEqual({
+      text: "SELECT * FROM duckdb_tables() WHERE x = ?",
+      values: [1],
+    });
+    expect(
+      select()
+        .from(fn("pragma_table_info", value("roles")))
+        .compile("question"),
+    ).toEqual({
+      text: "SELECT * FROM pragma_table_info(?)",
+      values: ["roles"],
+    });
   });
 
   it("renders LIKE / NOT LIKE and CASE WHEN", () => {

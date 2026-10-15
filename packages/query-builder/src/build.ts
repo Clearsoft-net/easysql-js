@@ -22,6 +22,8 @@ import type {
 // ── markers ──────────────────────────────────────────────────────────────
 /** A column reference (never bound). */
 export const ref = (name: string): Node => ({ kind: "ref", name });
+/** A value that is always bound as a parameter (unlike a bare string). */
+export const value = (v: unknown): Node => ({ kind: "value", value: v });
 /** A quoted string literal (never bound). */
 export const lit = (value: string): Node => ({ kind: "literal", value });
 /** A raw SQL fragment (never bound). */
@@ -222,7 +224,7 @@ function compileSelect(
       ? "*"
       : entries.map(([alias, operand]) => renderColumn(alias, operand, state)).join(", ");
 
-  const parts = [`SELECT ${columns}`, `FROM ${spec.from}`];
+  const parts = [`SELECT ${columns}`, `FROM ${renderOperand(spec.from, "left", "expr", state)}`];
   for (const join of spec.joins) parts.push(renderJoin(join, state));
   parts.push(...spec.extras);
   if (spec.where.length > 0) {
@@ -252,7 +254,7 @@ export class SelectBuilder {
     };
   }
 
-  from(table: string): this {
+  from(table: Operand): this {
     this.spec.from = table;
     return this;
   }

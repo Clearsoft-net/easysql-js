@@ -32,6 +32,7 @@ export {
   ref,
   SelectBuilder,
   select,
+  value,
 } from "./build.js";
 export type {
   CompiledQuery,

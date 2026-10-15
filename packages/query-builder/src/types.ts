@@ -63,7 +63,7 @@ export interface JoinSpec {
 /** The structural description of a SELECT. */
 export interface SelectSpec {
   columns: Record<string, Operand>;
-  from: string;
+  from: Operand;
   joins: JoinSpec[];
   /** Verbatim clauses emitted after the joins (e.g. `OUTER APPLY (…) AS fk`). */
   extras: string[];
