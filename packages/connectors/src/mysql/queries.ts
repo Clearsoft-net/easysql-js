@@ -7,24 +7,40 @@
  * one table.
  */
 
+import type { CompiledQuery } from "../dsl/index.js";
+import { eq, isNotNull, select } from "../dsl/index.js";
+
 /** Lists the base tables in the configured schema. */
-export const TABLES_SQL = `SELECT TABLE_NAME AS table_name, TABLE_ROWS AS table_rows
-         FROM information_schema.TABLES
-         WHERE TABLE_SCHEMA = ? AND TABLE_TYPE = 'BASE TABLE'
-         ORDER BY TABLE_NAME`;
+export function tablesQuery(database: string): CompiledQuery {
+  return select({ table_name: "TABLE_NAME", table_rows: "TABLE_ROWS" })
+    .from("information_schema.TABLES")
+    .where("TABLE_SCHEMA", database)
+    .where("TABLE_TYPE", "BASE TABLE")
+    .orderBy("TABLE_NAME")
+    .compile("question");
+}
 
 /** Lists the columns of one table, with primary and foreign key metadata. */
-export const COLUMNS_SQL = `SELECT c.COLUMN_NAME AS column_name, c.DATA_TYPE AS data_type,
-                  c.IS_NULLABLE AS is_nullable, c.COLUMN_DEFAULT AS column_default,
-                  c.COLUMN_KEY AS column_key,
-                  k.REFERENCED_TABLE_NAME AS referenced_table_name,
-                  k.REFERENCED_COLUMN_NAME AS referenced_column_name,
-                  c.ORDINAL_POSITION AS ordinal_position
-           FROM information_schema.COLUMNS c
-           LEFT JOIN information_schema.KEY_COLUMN_USAGE k
-             ON k.TABLE_SCHEMA = c.TABLE_SCHEMA
-            AND k.TABLE_NAME = c.TABLE_NAME
-            AND k.COLUMN_NAME = c.COLUMN_NAME
-            AND k.REFERENCED_TABLE_NAME IS NOT NULL
-           WHERE c.TABLE_SCHEMA = ? AND c.TABLE_NAME = ?
-           ORDER BY c.ORDINAL_POSITION`;
+export function columnsQuery(database: string, table: string): CompiledQuery {
+  return select({
+    column_name: "c.COLUMN_NAME",
+    data_type: "c.DATA_TYPE",
+    is_nullable: "c.IS_NULLABLE",
+    column_default: "c.COLUMN_DEFAULT",
+    column_key: "c.COLUMN_KEY",
+    referenced_table_name: "k.REFERENCED_TABLE_NAME",
+    referenced_column_name: "k.REFERENCED_COLUMN_NAME",
+    ordinal_position: "c.ORDINAL_POSITION",
+  })
+    .from("information_schema.COLUMNS c")
+    .leftJoin("information_schema.KEY_COLUMN_USAGE k", [
+      eq("k.TABLE_SCHEMA", "c.TABLE_SCHEMA"),
+      eq("k.TABLE_NAME", "c.TABLE_NAME"),
+      eq("k.COLUMN_NAME", "c.COLUMN_NAME"),
+      isNotNull("k.REFERENCED_TABLE_NAME"),
+    ])
+    .where("c.TABLE_SCHEMA", database)
+    .where("c.TABLE_NAME", table)
+    .orderBy("c.ORDINAL_POSITION")
+    .compile("question");
+}

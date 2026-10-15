@@ -102,11 +102,13 @@ export class PostgresConnector extends BaseConnector<PgSession> {
   async introspect(): Promise<IntrospectResult> {
     const session = this.requireHandle();
     try {
-      const tablesRes = await session.query<TableRow>(tablesQuery(this.config.provider));
+      const tablesQ = tablesQuery(this.config.provider);
+      const tablesRes = await session.query<TableRow>(tablesQ.text, tablesQ.values);
 
       const tables: RawTable[] = [];
       for (const row of tablesRes.rows) {
-        const columnsRes = await session.query<ColumnRow>(columnsQuery(), [row.table_name]);
+        const columnsQ = columnsQuery(row.table_name);
+        const columnsRes = await session.query<ColumnRow>(columnsQ.text, columnsQ.values);
         tables.push({
           name: row.table_name,
           columns: columnsRes.rows.map(toRawColumn),

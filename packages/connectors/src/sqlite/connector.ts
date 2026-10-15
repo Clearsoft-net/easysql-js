@@ -9,7 +9,7 @@
 
 import { DatabaseSync } from "node:sqlite";
 import { SyncBaseConnector } from "../base-connector.js";
-import { foreignKeyListQuery, rowCountQuery, TABLES_SQL, tableInfoQuery } from "./queries.js";
+import { foreignKeyListQuery, rowCountQuery, tableInfoQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   ForeignKeyRow,
@@ -56,7 +56,7 @@ export class SqliteConnector extends SyncBaseConnector<DatabaseSync> {
   introspect(): IntrospectResult {
     const db = this.requireHandle();
     try {
-      const tableRows = db.prepare(TABLES_SQL).all() as { name: string }[];
+      const tableRows = db.prepare(tablesQuery().text).all() as { name: string }[];
 
       const tables: RawTable[] = [];
       for (const { name } of tableRows) {
@@ -103,7 +103,7 @@ function toRawColumn(
 
 function countRows(db: DatabaseSync, table: string): number | null {
   try {
-    const row = db.prepare(rowCountQuery(table)).get() as { c: number } | undefined;
+    const row = db.prepare(rowCountQuery(table).text).get() as { c: number } | undefined;
     return row?.c ?? null;
   } catch {
     return null;

@@ -9,7 +9,7 @@
 
 import { type Connection, createConnection } from "mysql2/promise";
 import { BaseConnector } from "../base-connector.js";
-import { COLUMNS_SQL, TABLES_SQL } from "./queries.js";
+import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   IntrospectResult,
@@ -73,14 +73,13 @@ export class MysqlConnector extends BaseConnector<Connection> {
   async introspect(): Promise<IntrospectResult> {
     const connection = this.requireHandle();
     try {
-      const [tableRows] = await connection.query(TABLES_SQL, [this.config.database]);
+      const tablesQ = tablesQuery(this.config.database);
+      const [tableRows] = await connection.query(tablesQ.text, tablesQ.values);
 
       const tables: RawTable[] = [];
       for (const table of tableRows as TableRow[]) {
-        const [columnRows] = await connection.query(COLUMNS_SQL, [
-          this.config.database,
-          table.table_name,
-        ]);
+        const columnsQ = columnsQuery(this.config.database, table.table_name);
+        const [columnRows] = await connection.query(columnsQ.text, columnsQ.values);
 
         tables.push({
           name: table.table_name,
