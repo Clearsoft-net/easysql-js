@@ -34,10 +34,10 @@ export function foreignKeyListQuery(table: string): string {
 
 /** The table-valued fallback for the column pragma (the table name is bound as `?`). */
 export function tableInfoFallbackQuery(): string {
-  return select({ "*": "*" }).from("pragma_table_info(?)").compile("question").text;
+  return select().from("pragma_table_info(?)").compile("question").text;
 }
 
 /** The table-valued fallback for the foreign-key pragma (the table name is bound as `?`). */
 export function foreignKeyListFallbackQuery(): string {
-  return select({ "*": "*" }).from("pragma_foreign_key_list(?)").compile("question").text;
+  return select().from("pragma_foreign_key_list(?)").compile("question").text;
 }

@@ -216,9 +216,11 @@ function compileSelect(
   options: CompileOptions,
 ): CompiledQuery {
   const state: RenderState = { style, values: [], options };
-  const columns = Object.entries(spec.columns)
-    .map(([alias, operand]) => renderColumn(alias, operand, state))
-    .join(", ");
+  const entries = Object.entries(spec.columns);
+  const columns =
+    entries.length === 0
+      ? "*"
+      : entries.map(([alias, operand]) => renderColumn(alias, operand, state)).join(", ");
 
   const parts = [`SELECT ${columns}`, `FROM ${spec.from}`];
   for (const join of spec.joins) parts.push(renderJoin(join, state));
@@ -238,8 +240,16 @@ function compileSelect(
 export class SelectBuilder {
   private readonly spec: SelectSpec;
 
-  constructor(columns: Record<string, Operand>) {
-    this.spec = { columns, from: "", joins: [], extras: [], where: [], groupBy: [], orderBy: [] };
+  constructor(columns?: Record<string, Operand>) {
+    this.spec = {
+      columns: columns ?? {},
+      from: "",
+      joins: [],
+      extras: [],
+      where: [],
+      groupBy: [],
+      orderBy: [],
+    };
   }
 
   from(table: string): this {
@@ -299,7 +309,10 @@ export class SelectBuilder {
   }
 }
 
-/** Starts a `SELECT`. `columns` maps an alias to its expression. */
-export function select(columns: Record<string, Operand>): SelectBuilder {
+/**
+ * Starts a `SELECT`. `columns` maps an alias to its expression; omit it (or pass
+ * none) for `SELECT *`.
+ */
+export function select(columns?: Record<string, Operand>): SelectBuilder {
   return new SelectBuilder(columns);
 }

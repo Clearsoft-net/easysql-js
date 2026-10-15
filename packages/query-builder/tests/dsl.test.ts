@@ -88,6 +88,14 @@ describe("query builder — binding by context", () => {
     expect(q.values).toEqual(["t", 0]);
   });
 
+  it("defaults to SELECT * when no columns are given", () => {
+    expect(select().from("t").where("a", 1).compile("question")).toEqual({
+      text: "SELECT * FROM t WHERE a = ?",
+      values: [1],
+    });
+    expect(select({}).from("t").compile("question").text).toBe("SELECT * FROM t");
+  });
+
   it("renders LIKE / NOT LIKE and CASE WHEN", () => {
     const q = select({ flag: caseWhen(isNull("pk.id"), 0, 1) })
       .from("t")

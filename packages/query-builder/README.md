@@ -36,6 +36,13 @@ query.values; // []
 A compiled query is `{ text, values }`: the SQL with the dialect's placeholders
 and the values to pass alongside it.
 
+Omit `columns` for `SELECT *`:
+
+```ts
+select().from("pragma_table_info(?)").compile("question");
+// { text: "SELECT * FROM pragma_table_info(?)", values: [] }
+```
+
 ## Binding rules
 
 A bare string is interpreted by **position**:
