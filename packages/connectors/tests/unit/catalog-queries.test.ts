@@ -169,7 +169,7 @@ describe("Firebird catalog queries", () => {
       text:
         `SELECT TRIM(rf.RDB$FIELD_NAME) AS "field_name", rf.RDB$FIELD_POSITION AS "field_position", rf.RDB$NULL_FLAG AS "null_flag", rf.RDB$DEFAULT_SOURCE AS "default_source", ` +
         `TRIM(ty.RDB$TYPE_NAME) AS "type_name", f.RDB$FIELD_TYPE AS "field_type", f.RDB$FIELD_SUB_TYPE AS "field_sub_type", f.RDB$CHARACTER_LENGTH AS "character_length", f.RDB$FIELD_LENGTH AS "field_length", f.RDB$FIELD_PRECISION AS "field_precision", f.RDB$FIELD_SCALE AS "field_scale", ` +
-        `(SELECT COUNT(*) FROM RDB$INDEX_SEGMENTS s JOIN RDB$RELATION_CONSTRAINTS rc ON rc.RDB$INDEX_NAME = s.RDB$INDEX_NAME WHERE rc.RDB$RELATION_NAME = rf.RDB$RELATION_NAME AND rc.RDB$CONSTRAINT_TYPE = 'PRIMARY KEY' AND s.RDB$FIELD_NAME = rf.RDB$FIELD_NAME) AS "pk" ` +
+        `(SELECT COUNT(*) AS "c" FROM RDB$INDEX_SEGMENTS s INNER JOIN RDB$RELATION_CONSTRAINTS rc ON rc.RDB$INDEX_NAME = s.RDB$INDEX_NAME WHERE rc.RDB$RELATION_NAME = rf.RDB$RELATION_NAME AND rc.RDB$CONSTRAINT_TYPE = 'PRIMARY KEY' AND s.RDB$FIELD_NAME = rf.RDB$FIELD_NAME) AS "pk" ` +
         `FROM RDB$RELATION_FIELDS rf INNER JOIN RDB$FIELDS f ON f.RDB$FIELD_NAME = rf.RDB$FIELD_SOURCE LEFT JOIN RDB$TYPES ty ON ty.RDB$FIELD_NAME = 'RDB$FIELD_TYPE' AND ty.RDB$TYPE = f.RDB$FIELD_TYPE ` +
         `WHERE rf.RDB$RELATION_NAME = ? ORDER BY rf.RDB$FIELD_POSITION`,
       values: ["T"],
@@ -200,8 +200,8 @@ describe("SQL Server catalog queries", () => {
         `CASE WHEN pk.column_id IS NULL THEN 0 ELSE 1 END AS is_primary_key, fk.referenced_table AS foreign_table, fk.referenced_column AS foreign_column, c.column_id AS ordinal ` +
         `FROM sys.tables AS t INNER JOIN sys.schemas AS s ON s.schema_id = t.schema_id INNER JOIN sys.columns AS c ON c.object_id = t.object_id INNER JOIN sys.types AS ty ON ty.user_type_id = c.user_type_id ` +
         `LEFT JOIN sys.default_constraints AS dc ON dc.parent_object_id = c.object_id AND dc.parent_column_id = c.column_id ` +
-        `LEFT JOIN (SELECT ic.object_id, ic.column_id FROM sys.indexes AS i JOIN sys.index_columns AS ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id WHERE i.is_primary_key = 1) AS pk ON pk.object_id = c.object_id AND pk.column_id = c.column_id ` +
-        `OUTER APPLY (SELECT TOP 1 ref_t.name AS referenced_table, ref_c.name AS referenced_column FROM sys.foreign_key_columns AS fkc JOIN sys.tables AS ref_t ON ref_t.object_id = fkc.referenced_object_id JOIN sys.columns AS ref_c ON ref_c.object_id = fkc.referenced_object_id AND ref_c.column_id = fkc.referenced_column_id WHERE fkc.parent_object_id = c.object_id AND fkc.parent_column_id = c.column_id ORDER BY fkc.constraint_object_id, fkc.constraint_column_id) AS fk ` +
+        `LEFT JOIN (SELECT ic.object_id AS object_id, ic.column_id AS column_id FROM sys.indexes AS i INNER JOIN sys.index_columns AS ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id WHERE i.is_primary_key = 1) AS pk ON pk.object_id = c.object_id AND pk.column_id = c.column_id ` +
+        `OUTER APPLY (SELECT TOP 1 ref_t.name AS referenced_table, ref_c.name AS referenced_column FROM sys.foreign_key_columns AS fkc INNER JOIN sys.tables AS ref_t ON ref_t.object_id = fkc.referenced_object_id INNER JOIN sys.columns AS ref_c ON ref_c.object_id = fkc.referenced_object_id AND ref_c.column_id = fkc.referenced_column_id WHERE fkc.parent_object_id = c.object_id AND fkc.parent_column_id = c.column_id ORDER BY fkc.constraint_object_id, fkc.constraint_column_id) AS fk ` +
         `WHERE t.is_ms_shipped = 0 ORDER BY s.name, t.name, t.object_id, c.column_id`,
       values: [],
     });

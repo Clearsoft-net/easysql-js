@@ -11,6 +11,7 @@ export {
   and,
   between,
   caseWhen,
+  derived,
   eq,
   exists,
   expr,
@@ -32,6 +33,7 @@ export {
   ref,
   SelectBuilder,
   select,
+  sub,
   value,
 } from "./build.js";
 export type {

@@ -4,7 +4,8 @@
  * Binding follows the "context" rule: a bare string is a raw fragment in an
  * expression position, a bound value on the right of a `where` comparison, and
  * a reference in a join `ON`. Use `ref()` to force a reference, `lit()` a
- * string literal, `fn()`/`expr()` an expression — none of which are bound.
+ * string literal, `value()` an always-bound value, `fn()`/`expr()` an
+ * expression — none of which are bound. `sub()`/`derived()` nest a `SELECT`.
  */
 
 import type {
@@ -32,6 +33,14 @@ export const expr = (sql: string): Node => ({ kind: "raw", sql });
 export const fn = (name: string, ...args: Operand[]): Node => ({ kind: "fn", name, args });
 /** An array subscript, e.g. `idx("con.confkey", 1)`. */
 export const idx = (operand: Operand, index: number): Node => ({ kind: "index", operand, index });
+/** A nested `SELECT`, rendered as `(SELECT …)` (scalar or in a predicate). */
+export const sub = (builder: SelectBuilder): Node => ({ kind: "subquery", spec: builder.toSpec() });
+/** A derived table, rendered as `(SELECT …) AS alias` (for `from`/joins). */
+export const derived = (builder: SelectBuilder, alias: string): Node => ({
+  kind: "derived",
+  spec: builder.toSpec(),
+  alias,
+});
 
 // ── conditions ───────────────────────────────────────────────────────────
 export const eq = (left: Operand, right: Operand): Node => ({
@@ -195,14 +204,21 @@ function renderNode(node: Node, context: RenderContext, state: RenderState): str
               .join(" AND ")}`
           : ""
       })`;
+    case "subquery":
+      return `(${renderSelectText(node.spec, state)})`;
+    case "derived":
+      return `(${renderSelectText(node.spec, state)}) AS ${node.alias}`;
+    case "apply":
+      return `${node.apply} APPLY (${renderSelectText(node.spec, state)}) AS ${node.alias}`;
   }
 }
 
 function renderJoin(join: JoinSpec, state: RenderState): string {
   const keyword =
     join.type === "inner" ? "INNER JOIN" : join.type === "left" ? "LEFT JOIN" : "RIGHT JOIN";
+  const table = renderOperand(join.table, "left", "expr", state);
   const on = join.on.map((cond) => renderOperand(cond, "left", "on", state)).join(" AND ");
-  return `${keyword} ${join.table} ON ${on}`;
+  return `${keyword} ${table} ON ${on}`;
 }
 
 function renderColumn(alias: string, operand: Operand, state: RenderState): string {
@@ -212,21 +228,20 @@ function renderColumn(alias: string, operand: Operand, state: RenderState): stri
   return rendered === alias ? rendered : `${rendered} AS ${alias}`;
 }
 
-function compileSelect(
-  spec: SelectSpec,
-  style: PlaceholderStyle,
-  options: CompileOptions,
-): CompiledQuery {
-  const state: RenderState = { style, values: [], options };
+function renderSelectText(spec: SelectSpec, state: RenderState): string {
   const entries = Object.entries(spec.columns);
   const columns =
     entries.length === 0
       ? "*"
       : entries.map(([alias, operand]) => renderColumn(alias, operand, state)).join(", ");
+  const head = spec.prefix.length > 0 ? `${spec.prefix.join(" ")} ` : "";
 
-  const parts = [`SELECT ${columns}`, `FROM ${renderOperand(spec.from, "left", "expr", state)}`];
+  const parts = [
+    `SELECT ${head}${columns}`,
+    `FROM ${renderOperand(spec.from, "left", "expr", state)}`,
+  ];
   for (const join of spec.joins) parts.push(renderJoin(join, state));
-  parts.push(...spec.extras);
+  for (const extra of spec.extras) parts.push(renderOperand(extra, "left", "expr", state));
   if (spec.where.length > 0) {
     parts.push(
       `WHERE ${spec.where.map((c) => renderOperand(c, "left", "where", state)).join(" AND ")}`,
@@ -234,7 +249,16 @@ function compileSelect(
   }
   if (spec.groupBy.length > 0) parts.push(`GROUP BY ${spec.groupBy.join(", ")}`);
   if (spec.orderBy.length > 0) parts.push(`ORDER BY ${spec.orderBy.join(", ")}`);
-  return { text: parts.join(" "), values: state.values };
+  return parts.join(" ");
+}
+
+function compileSelect(
+  spec: SelectSpec,
+  style: PlaceholderStyle,
+  options: CompileOptions,
+): CompiledQuery {
+  const state: RenderState = { style, values: [], options };
+  return { text: renderSelectText(spec, state), values: state.values };
 }
 
 // ── builder ──────────────────────────────────────────────────────────────
@@ -244,6 +268,7 @@ export class SelectBuilder {
 
   constructor(columns?: Record<string, Operand>) {
     this.spec = {
+      prefix: [],
       columns: columns ?? {},
       from: "",
       joins: [],
@@ -254,26 +279,43 @@ export class SelectBuilder {
     };
   }
 
+  /** The structural spec, for nesting this select inside another (`sub`/`derived`). */
+  toSpec(): SelectSpec {
+    return this.spec;
+  }
+
   from(table: Operand): this {
     this.spec.from = table;
     return this;
   }
 
-  innerJoin(table: string, on: Operand | Operand[], right?: Operand): this {
+  innerJoin(table: Operand, on: Operand | Operand[], right?: Operand): this {
     return this.addJoin("inner", table, on, right);
   }
 
-  leftJoin(table: string, on: Operand | Operand[], right?: Operand): this {
+  leftJoin(table: Operand, on: Operand | Operand[], right?: Operand): this {
     return this.addJoin("left", table, on, right);
   }
 
-  rightJoin(table: string, on: Operand | Operand[], right?: Operand): this {
+  rightJoin(table: Operand, on: Operand | Operand[], right?: Operand): this {
     return this.addJoin("right", table, on, right);
+  }
+
+  /** Emits a verbatim fragment right after `SELECT` (e.g. `TOP 1`, `DISTINCT`). */
+  prefix(fragment: string): this {
+    this.spec.prefix.push(fragment);
+    return this;
   }
 
   /** Appends a verbatim clause after the joins, before `WHERE` (e.g. `OUTER APPLY`). */
   raw(fragment: string): this {
     this.spec.extras.push(fragment);
+    return this;
+  }
+
+  /** Appends an `OUTER APPLY (SELECT …) AS alias` clause after the joins. */
+  outerApply(builder: SelectBuilder, alias: string): this {
+    this.spec.extras.push({ kind: "apply", apply: "OUTER", spec: builder.toSpec(), alias });
     return this;
   }
 
@@ -300,7 +342,7 @@ export class SelectBuilder {
 
   private addJoin(
     type: JoinSpec["type"],
-    table: string,
+    table: Operand,
     on: Operand | Operand[],
     right?: Operand,
   ): this {

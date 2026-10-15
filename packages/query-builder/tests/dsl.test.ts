@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import {
   caseWhen,
+  derived,
   eq,
   exists,
   fn,
@@ -14,6 +15,7 @@ import {
   or,
   ref,
   select,
+  sub,
   value,
 } from "../src/index.js";
 
@@ -95,6 +97,36 @@ describe("query builder — binding by context", () => {
       values: [1],
     });
     expect(select({}).from("t").compile("question").text).toBe("SELECT * FROM t");
+  });
+
+  it("nests SELECTs via sub(), derived() and outerApply()", () => {
+    const scalar = select({
+      pk: sub(
+        select({ c: fn("COUNT", "*") })
+          .from("s")
+          .where("s.a", ref("o.a")),
+      ),
+    })
+      .from("o")
+      .compile("question");
+    expect(scalar.text).toBe("SELECT (SELECT COUNT(*) AS c FROM s WHERE s.a = o.a) AS pk FROM o");
+    expect(scalar.values).toEqual([]);
+
+    const joined = select({ x: "t.x" })
+      .from("t")
+      .leftJoin(derived(select({ id: "d.id" }).from("d").where("d.ok", 1), "d"), "d.id", "t.id")
+      .compile("literal");
+    expect(joined.text).toBe(
+      "SELECT t.x AS x FROM t LEFT JOIN (SELECT d.id AS id FROM d WHERE d.ok = 1) AS d ON d.id = t.id",
+    );
+
+    const applied = select({ x: "t.x" })
+      .from("t")
+      .outerApply(select({ v: "s.v" }).prefix("TOP 1").from("s").orderBy("s.v"), "f")
+      .compile("literal");
+    expect(applied.text).toBe(
+      "SELECT t.x AS x FROM t OUTER APPLY (SELECT TOP 1 s.v AS v FROM s ORDER BY s.v) AS f",
+    );
   });
 
   it("renders a table-valued function in FROM and binds a value()", () => {

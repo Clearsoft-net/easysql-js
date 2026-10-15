@@ -44,6 +44,24 @@ select().from(fn("pragma_table_info", value("roles"))).compile("question");
 // { text: "SELECT * FROM pragma_table_info(?)", values: ["roles"] }
 ```
 
+### Nested SELECTs
+
+`sub()` nests a `SELECT` as a scalar or predicate, `derived()` puts one in
+`from`/joins, and `outerApply()` appends an `OUTER APPLY`:
+
+```ts
+select({ pk: sub(select({ c: fn("COUNT", "*") }).from("s").where("s.a", ref("o.a"))) })
+  .from("o")
+  .compile("question");
+// SELECT (SELECT COUNT(*) AS c FROM s WHERE s.a = o.a) AS pk FROM o
+
+select({ x: "t.x" })
+  .from("t")
+  .leftJoin(derived(select({ id: "d.id" }).from("d"), "d"), "d.id", "t.id")
+  .compile("question");
+// SELECT t.x AS x FROM t LEFT JOIN (SELECT d.id AS id FROM d) AS d ON d.id = t.id
+```
+
 ## Binding rules
 
 A bare string is interpreted by **position**:

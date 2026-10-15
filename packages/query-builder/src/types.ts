@@ -45,6 +45,9 @@ export type Node =
   | { kind: "inList"; operand: Operand; items: Operand[] }
   | { kind: "between"; operand: Operand; lo: Operand; hi: Operand }
   | { kind: "logical"; op: "AND" | "OR"; items: Operand[] }
+  | { kind: "subquery"; spec: SelectSpec }
+  | { kind: "derived"; spec: SelectSpec; alias: string }
+  | { kind: "apply"; apply: "OUTER" | "CROSS"; spec: SelectSpec; alias: string }
   | { kind: "exists"; query: Subquery };
 
 /** A correlated subquery used by `exists`. */
@@ -56,17 +59,19 @@ export interface Subquery {
 /** A join in a select. */
 export interface JoinSpec {
   type: "inner" | "left" | "right";
-  table: string;
+  table: Operand;
   on: Operand[];
 }
 
 /** The structural description of a SELECT. */
 export interface SelectSpec {
+  /** Verbatim fragments emitted right after `SELECT` (e.g. `TOP 1`, `DISTINCT`). */
+  prefix: string[];
   columns: Record<string, Operand>;
   from: Operand;
   joins: JoinSpec[];
   /** Verbatim clauses emitted after the joins (e.g. `OUTER APPLY (…) AS fk`). */
-  extras: string[];
+  extras: Operand[];
   where: Operand[];
   groupBy: string[];
   orderBy: string[];

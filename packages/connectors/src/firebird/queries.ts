@@ -8,7 +8,7 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { eq, expr, fn, isNull, lit, or, select } from "@easysql/query-builder";
+import { eq, fn, isNull, lit, or, ref, select, sub } from "@easysql/query-builder";
 
 /** Base user tables (system tables and views excluded). */
 export function tablesQuery(): CompiledQuery {
@@ -39,12 +39,13 @@ export function columnsQuery(table: string): CompiledQuery {
     field_length: "f.RDB$FIELD_LENGTH",
     field_precision: "f.RDB$FIELD_PRECISION",
     field_scale: "f.RDB$FIELD_SCALE",
-    pk: expr(
-      "(SELECT COUNT(*) FROM RDB$INDEX_SEGMENTS s " +
-        "JOIN RDB$RELATION_CONSTRAINTS rc ON rc.RDB$INDEX_NAME = s.RDB$INDEX_NAME " +
-        "WHERE rc.RDB$RELATION_NAME = rf.RDB$RELATION_NAME " +
-        "AND rc.RDB$CONSTRAINT_TYPE = 'PRIMARY KEY' " +
-        "AND s.RDB$FIELD_NAME = rf.RDB$FIELD_NAME)",
+    pk: sub(
+      select({ c: fn("COUNT", "*") })
+        .from("RDB$INDEX_SEGMENTS s")
+        .innerJoin("RDB$RELATION_CONSTRAINTS rc", "rc.RDB$INDEX_NAME", "s.RDB$INDEX_NAME")
+        .where("rc.RDB$RELATION_NAME", ref("rf.RDB$RELATION_NAME"))
+        .where("rc.RDB$CONSTRAINT_TYPE", lit("PRIMARY KEY"))
+        .where("s.RDB$FIELD_NAME", ref("rf.RDB$FIELD_NAME")),
     ),
   })
     .from("RDB$RELATION_FIELDS rf")
