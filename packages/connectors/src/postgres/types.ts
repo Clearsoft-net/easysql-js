@@ -59,8 +59,4 @@ export interface ColumnRow {
   ordinal: number;
 }
 
-/** Internal — table row of the `pg_class`/`pg_namespace` introspection query. */
-export interface TableRow {
-  table_name: string;
-  rows_approx: string | number | null;
-}
+export type { TableRow } from "../types.js";

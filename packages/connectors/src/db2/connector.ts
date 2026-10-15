@@ -211,7 +211,7 @@ function toRawColumn(
  * `SYSCAT.TABLES.CARD` is `-1` when statistics have not been collected; the
  * connector reports that as "unknown" rather than a bogus row count.
  */
-function normalizeCard(value: number | string | null | undefined): number | null {
+function normalizeCard(value: number | string | bigint | null | undefined): number | null {
   if (value === null || value === undefined) return null;
   const card = Number(value);
   return Number.isFinite(card) && card >= 0 ? card : null;

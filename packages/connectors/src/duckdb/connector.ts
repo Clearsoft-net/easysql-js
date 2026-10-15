@@ -109,7 +109,7 @@ export class DuckDbConnector extends BaseConnector<DuckDbHandles> {
               foreignKeys.get(row.table_name) ?? new Map(),
             ),
           ),
-          rowsApprox: toNullableNumber(row.estimated_size),
+          rowsApprox: toNullableNumber(row.rows_approx),
         });
       }
 
@@ -165,7 +165,7 @@ function toRawColumn(
   };
 }
 
-function toNullableNumber(value: number | bigint | null | undefined): number | null {
+function toNullableNumber(value: string | number | bigint | null | undefined): number | null {
   if (value === null || value === undefined) return null;
   const numeric = typeof value === "number" ? value : Number(value);
   return Number.isFinite(numeric) ? numeric : null;

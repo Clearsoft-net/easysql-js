@@ -31,11 +31,7 @@ export interface Db2ConnStr extends ConnStr {
   SECURITY?: string;
 }
 
-/** Internal — `SYSCAT.TABLES` row returned by the driver. */
-export interface TableRow {
-  table_name: string;
-  rows_approx: number | string | null;
-}
+export type { TableRow } from "../types.js";
 
 /** Internal — `SYSCAT.COLUMNS` row returned by the driver. */
 export interface ColumnRow {

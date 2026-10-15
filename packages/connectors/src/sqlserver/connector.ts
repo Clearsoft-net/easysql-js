@@ -92,7 +92,7 @@ export class SqlServerConnector extends BaseConnector<ConnectionPool> {
       const tablesResult = await pool.request().query<TableRow>(tablesQuery().text);
       const columnsResult = await pool.request().query<ColumnRow>(columnsQuery().text);
 
-      const columnsByTable = new Map<number, RawColumn[]>();
+      const columnsByTable = new Map<number | undefined, RawColumn[]>();
       for (const row of columnsResult.recordset) {
         const columns = columnsByTable.get(row.table_id);
         if (columns) columns.push(toRawColumn(row));
@@ -102,7 +102,7 @@ export class SqlServerConnector extends BaseConnector<ConnectionPool> {
       const tables: RawTable[] = tablesResult.recordset.map((row) => ({
         name: row.table_name,
         columns: columnsByTable.get(row.table_id) ?? [],
-        rowsApprox: row.rows_approx === null ? null : Number(row.rows_approx),
+        rowsApprox: row.rows_approx == null ? null : Number(row.rows_approx),
       }));
 
       return { engine: "sqlserver", tables };

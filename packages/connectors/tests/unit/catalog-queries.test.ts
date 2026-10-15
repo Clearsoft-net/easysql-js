@@ -23,7 +23,7 @@ import * as trino from "../../src/trino/queries.js";
 describe("DuckDB catalog queries", () => {
   it("lists tables, constraints and columns", () => {
     expect(duckdb.tablesQuery()).toEqual({
-      text: `SELECT table_name, estimated_size FROM duckdb_tables() WHERE NOT (internal) AND database_name = current_database() AND schema_name = current_schema() ORDER BY table_name`,
+      text: `SELECT table_name, estimated_size AS rows_approx FROM duckdb_tables() WHERE NOT (internal) AND database_name = current_database() AND schema_name = current_schema() ORDER BY table_name`,
       values: [],
     });
     expect(duckdb.constraintsQuery()).toEqual({

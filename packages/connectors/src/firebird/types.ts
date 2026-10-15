@@ -48,11 +48,7 @@ export interface ForeignKeyRow {
   segment: number | null;
 }
 
-/** A row of the table-listing query. */
-export interface TableRow {
-  table_name: string;
-  rows_approx: number | string | null;
-}
+export type { TableRow } from "../types.js";
 
 /**
  * The subset of the driver's column metadata that is used here. Declared

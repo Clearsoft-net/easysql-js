@@ -20,9 +20,7 @@ export interface IntrospectResult extends RawSchema {
   engine: "hana";
 }
 
-export interface TableRow {
-  table_name: string;
-}
+export type { TableRow } from "../types.js";
 
 export interface ColumnRow {
   table_name: string;

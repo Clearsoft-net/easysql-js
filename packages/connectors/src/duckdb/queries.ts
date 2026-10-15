@@ -11,7 +11,7 @@ import { fn, not, select } from "@easysql/query-builder";
 
 /** Base tables in the current database/schema, with an estimated size. */
 export function tablesQuery(): CompiledQuery {
-  return select({ table_name: "table_name", estimated_size: "estimated_size" })
+  return select({ table_name: "table_name", rows_approx: "estimated_size" })
     .from(fn("duckdb_tables"))
     .where(not("internal"))
     .where("database_name", fn("current_database"))

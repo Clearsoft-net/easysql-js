@@ -20,10 +20,7 @@ export interface IntrospectResult extends RawSchema {
   engine: "snowflake";
 }
 
-/** Internal — row shape of the `INFORMATION_SCHEMA.TABLES` query. */
-export interface TableRow {
-  table_name: string;
-}
+export type { TableRow } from "../types.js";
 
 /** Internal — row shape of the `INFORMATION_SCHEMA.COLUMNS` query. */
 export interface ColumnRow {

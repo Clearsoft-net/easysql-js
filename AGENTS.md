@@ -179,7 +179,7 @@ Every hand-written source directory declares its types in that directory's
 |---|---|
 | `packages/common/src/` | every contract: `RawSchema`, `TableSchema`/`ColumnSchema`, `SchemaType`, `Connector`, `QueryResult`, `ParsedConnection` |
 | `packages/query-builder/src/` | the builder's node model: `Operand`, `Node`, `SelectSpec`, `CompiledQuery`, `PlaceholderStyle`, `CompileOptions` |
-| `packages/connectors/src/` | engine IDs, connection and factory option types, `NormalizedConnection` |
+| `packages/connectors/src/` | engine IDs, connection and factory option types, `NormalizedConnection`, and the shared `TableRow` (the table-listing row every engine maps to) |
 | `packages/connectors/src/<engine>/` | engine config (`MysqlConnectionConfig`), `IntrospectResult`, and the driver row shapes of that engine's queries |
 
 Rules that make it work:

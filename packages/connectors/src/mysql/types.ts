@@ -35,8 +35,4 @@ export interface ColumnRow {
   ordinal_position: number;
 }
 
-/** Internal — `information_schema.TABLES` row returned by the driver. */
-export interface TableRow {
-  table_name: string;
-  table_rows: number | null;
-}
+export type { TableRow } from "../types.js";

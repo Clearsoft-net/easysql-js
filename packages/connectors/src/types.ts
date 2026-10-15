@@ -191,6 +191,19 @@ export interface RawQueryResult {
 }
 
 /**
+ * Internal — one row of an engine's table-listing query. `rows_approx` is absent
+ * for engines with no cheap estimate (HANA, Snowflake, …); `table_id` and
+ * `schema_name` are only set by the batched SQL Server listing, which needs the
+ * object id to group its columns.
+ */
+export interface TableRow {
+  table_name: string;
+  rows_approx?: string | number | bigint | null;
+  table_id?: number;
+  schema_name?: string;
+}
+
+/**
  * Internal — a connection after a string/URL was normalised into explicit
  * fields. Consumed by the engine `create()` factories only; never re-exported
  * from the package barrel.

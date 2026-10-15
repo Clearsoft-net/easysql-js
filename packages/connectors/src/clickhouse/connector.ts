@@ -89,7 +89,7 @@ export class ClickhouseConnector extends BaseConnector<ClickHouseClient> {
         tables.push({
           name: table.table_name,
           columns: columnRows.map(toRawColumn),
-          rowsApprox: table.rows_approx === null ? null : Number(table.rows_approx),
+          rowsApprox: table.rows_approx == null ? null : Number(table.rows_approx),
         });
       }
 

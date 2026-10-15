@@ -69,10 +69,7 @@ export interface OracleDriver {
   getConnection(options: OracleGetConnectionOptions): Promise<OracleConnection>;
 }
 
-export interface TableRow {
-  table_name: string;
-  rows_approx: number | string | null;
-}
+export type { TableRow } from "../types.js";
 
 export interface ColumnRow {
   table_name: string;

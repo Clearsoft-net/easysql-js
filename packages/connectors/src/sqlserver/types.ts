@@ -23,13 +23,7 @@ export interface IntrospectResult extends RawSchema {
   engine: "sqlserver";
 }
 
-/** Internal — row shape of the `sys.tables`/`sys.partitions` query. */
-export interface TableRow {
-  table_id: number;
-  schema_name: string;
-  table_name: string;
-  rows_approx: string | number | null;
-}
+export type { TableRow } from "../types.js";
 
 /** Internal — row shape of the `sys.columns` introspection query. */
 export interface ColumnRow {

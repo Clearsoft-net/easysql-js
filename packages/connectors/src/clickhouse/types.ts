@@ -21,11 +21,7 @@ export interface IntrospectResult extends RawSchema {
   engine: "clickhouse";
 }
 
-/** Internal — `system.tables` row returned by the driver. */
-export interface TableRow {
-  table_name: string;
-  rows_approx: string | number | null;
-}
+export type { TableRow } from "../types.js";
 
 /** Internal — `system.columns` row returned by the driver. */
 export interface ColumnRow {

@@ -84,7 +84,7 @@ export class MysqlConnector extends BaseConnector<Connection> {
         tables.push({
           name: table.table_name,
           columns: (columnRows as ColumnRow[]).map(toRawColumn),
-          rowsApprox: table.table_rows,
+          rowsApprox: table.rows_approx == null ? null : Number(table.rows_approx),
         });
       }
 

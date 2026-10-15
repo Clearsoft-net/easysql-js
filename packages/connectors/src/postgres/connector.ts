@@ -112,7 +112,7 @@ export class PostgresConnector extends BaseConnector<PgSession> {
         tables.push({
           name: row.table_name,
           columns: columnsRes.rows.map(toRawColumn),
-          rowsApprox: row.rows_approx === null ? null : Number(row.rows_approx),
+          rowsApprox: row.rows_approx == null ? null : Number(row.rows_approx),
         });
       }
 

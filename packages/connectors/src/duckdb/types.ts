@@ -28,11 +28,7 @@ export interface ColumnRow {
   column_default: string | null;
 }
 
-/** Internal — `duckdb_tables()` row returned by the driver. */
-export interface TableRow {
-  table_name: string;
-  estimated_size: number | bigint | null;
-}
+export type { TableRow } from "../types.js";
 
 /** Internal — `duckdb_constraints()` row returned by the driver. */
 export interface ConstraintRow {
