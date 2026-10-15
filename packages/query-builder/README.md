@@ -77,6 +77,13 @@ function call, `idx()` an array subscript and `value()` a value that is always
 bound. Only `value()` (and a bare number or boolean) binds regardless of
 context; every other marker is never bound.
 
+The convention the connectors follow: a **dynamic** value (a schema or table
+name) is passed bare so it binds, a fixed **constant** is wrapped in `lit()` so
+it is inlined and the query stays parameter-free, and a **column** on the right
+of a comparison is wrapped in `ref()`. `lit()` is required — not optional —
+where a bare string would be read as raw SQL: the arguments of `fn()`, the `ON`
+of a join, and the select list.
+
 ```ts
 select({ is_primary: fn("EXISTS", …) })
   .from("pg_attribute a")
