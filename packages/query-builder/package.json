@@ -1,0 +1,51 @@
+{
+  "name": "@easysql/query-builder",
+  "version": "4.1.0",
+  "description": "A thin, SQL-first query builder with context-aware parameter binding, used by the EasySQL connectors for schema introspection.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "author": "Clearsoft <contact@clearsoft.net>",
+  "homepage": "https://easysql.net",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Clearsoft-net/easysql-js.git",
+    "directory": "packages/query-builder"
+  },
+  "bugs": {
+    "url": "https://github.com/Clearsoft-net/easysql-js/issues"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "files": [
+    "dist",
+    "src",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18",
+    "bun": ">=1.1.0"
+  },
+  "keywords": [
+    "easysql",
+    "clearsoft",
+    "sql",
+    "query-builder",
+    "dsl"
+  ],
+  "license": "MIT"
+}

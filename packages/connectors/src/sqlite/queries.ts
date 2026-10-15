@@ -6,8 +6,8 @@
  * they stay as raw SQL (the DSL's escape hatch).
  */
 
-import type { CompiledQuery } from "../dsl/index.js";
-import { lit, select } from "../dsl/index.js";
+import type { CompiledQuery } from "@easysql/query-builder";
+import { lit, select } from "@easysql/query-builder";
 import { quoteIdent } from "../helpers.js";
 
 /** Lists the user tables in the database, in name order. */

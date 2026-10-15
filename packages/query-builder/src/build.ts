@@ -1,5 +1,5 @@
 /**
- * The query DSL: markers, conditions, a `select` builder and the compiler.
+ * The query builder: markers, conditions, a `select` builder and the compiler.
  *
  * Binding follows the "context" rule: a bare string is a raw fragment in an
  * expression position, a bound value on the right of a `where` comparison, and
@@ -9,6 +9,7 @@
 
 import type {
   CompiledQuery,
+  CompileOptions,
   JoinSpec,
   Node,
   Operand,
@@ -92,7 +93,15 @@ export const exists = (query: { from: string; where: Operand[] }): Node => ({
 // ── compiler ─────────────────────────────────────────────────────────────
 const quoteString = (value: string): string => `'${value.replace(/'/g, "''")}'`;
 
+function renderLiteral(value: unknown): string {
+  if (value === null || value === undefined) return "NULL";
+  if (typeof value === "number") return String(value);
+  if (typeof value === "boolean") return value ? "TRUE" : "FALSE";
+  return quoteString(String(value));
+}
+
 function bind(state: RenderState, value: unknown): string {
+  if (state.style === "literal") return renderLiteral(value);
   state.values.push(value);
   return state.style === "dollar" ? `$${state.values.length}` : "?";
 }
@@ -168,22 +177,32 @@ function renderJoin(join: JoinSpec, state: RenderState): string {
   return `${keyword} ${join.table} ON ${on}`;
 }
 
-function compileSelect(spec: SelectSpec, style: PlaceholderStyle): CompiledQuery {
-  const state: RenderState = { style, values: [] };
+function renderColumn(alias: string, operand: Operand, state: RenderState): string {
+  const rendered = renderOperand(operand, "left", "expr", state);
+  const quote = state.options.aliasQuote;
+  if (quote) return `${rendered} AS ${quote}${alias}${quote}`;
+  return rendered === alias ? rendered : `${rendered} AS ${alias}`;
+}
+
+function compileSelect(
+  spec: SelectSpec,
+  style: PlaceholderStyle,
+  options: CompileOptions,
+): CompiledQuery {
+  const state: RenderState = { style, values: [], options };
   const columns = Object.entries(spec.columns)
-    .map(([alias, operand]) => {
-      const rendered = renderOperand(operand, "left", "expr", state);
-      return rendered === alias ? alias : `${rendered} AS ${alias}`;
-    })
+    .map(([alias, operand]) => renderColumn(alias, operand, state))
     .join(", ");
 
   const parts = [`SELECT ${columns}`, `FROM ${spec.from}`];
   for (const join of spec.joins) parts.push(renderJoin(join, state));
+  parts.push(...spec.extras);
   if (spec.where.length > 0) {
     parts.push(
       `WHERE ${spec.where.map((c) => renderOperand(c, "left", "where", state)).join(" AND ")}`,
     );
   }
+  if (spec.groupBy.length > 0) parts.push(`GROUP BY ${spec.groupBy.join(", ")}`);
   if (spec.orderBy.length > 0) parts.push(`ORDER BY ${spec.orderBy.join(", ")}`);
   return { text: parts.join(" "), values: state.values };
 }
@@ -194,7 +213,7 @@ export class SelectBuilder {
   private readonly spec: SelectSpec;
 
   constructor(columns: Record<string, Operand>) {
-    this.spec = { columns, from: "", joins: [], where: [], orderBy: [] };
+    this.spec = { columns, from: "", joins: [], extras: [], where: [], groupBy: [], orderBy: [] };
   }
 
   from(table: string): this {
@@ -214,10 +233,21 @@ export class SelectBuilder {
     return this.addJoin("right", table, on, right);
   }
 
+  /** Appends a verbatim clause after the joins, before `WHERE` (e.g. `OUTER APPLY`). */
+  raw(fragment: string): this {
+    this.spec.extras.push(fragment);
+    return this;
+  }
+
   where(condition: Operand | Operand[], right?: Operand): this {
     if (right !== undefined) this.spec.where.push(eq(condition as Operand, right));
     else if (Array.isArray(condition)) this.spec.where.push(...condition);
     else this.spec.where.push(condition);
+    return this;
+  }
+
+  groupBy(...columns: string[]): this {
+    this.spec.groupBy.push(...columns);
     return this;
   }
 
@@ -226,8 +256,8 @@ export class SelectBuilder {
     return this;
   }
 
-  compile(style: PlaceholderStyle): CompiledQuery {
-    return compileSelect(this.spec, style);
+  compile(style: PlaceholderStyle, options: CompileOptions = {}): CompiledQuery {
+    return compileSelect(this.spec, style, options);
   }
 
   private addJoin(

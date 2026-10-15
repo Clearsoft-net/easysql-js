@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
-import { eq, exists, fn, gt, idx, lit, not, or, ref, select } from "../../src/dsl/index.js";
+import { eq, exists, fn, gt, idx, lit, not, or, ref, select } from "../src/index.js";
 
-describe("query DSL — binding by context", () => {
+describe("query builder — binding by context", () => {
   it("binds the right side of a where comparison", () => {
     const q = select({ table_name: "TABNAME" })
       .from("SYSCAT.TABLES")
@@ -15,6 +15,21 @@ describe("query DSL — binding by context", () => {
     const q = select({ n: "1" }).from("t").where("a", 1).where("b", 2).compile("dollar");
     expect(q.text).toBe("SELECT 1 AS n FROM t WHERE a = $1 AND b = $2");
     expect(q.values).toEqual([1, 2]);
+  });
+
+  it("inlines values for the literal style", () => {
+    const q = select({ x: "a" }).from("t").where("k", "table").where(gt("n", 3)).compile("literal");
+    expect(q.text).toBe("SELECT a AS x FROM t WHERE k = 'table' AND n > 3");
+    expect(q.values).toEqual([]);
+  });
+
+  it("quotes aliases when asked", () => {
+    const q = select({ table_name: "t.TABLE_NAME", rows_approx: "t.NUM_ROWS" })
+      .from("ALL_TABLES t")
+      .compile("literal", { aliasQuote: '"' });
+    expect(q.text).toBe(
+      'SELECT t.TABLE_NAME AS "table_name", t.NUM_ROWS AS "rows_approx" FROM ALL_TABLES t',
+    );
   });
 
   it("treats both sides of a join ON as references", () => {
@@ -66,5 +81,19 @@ describe("query DSL — binding by context", () => {
       .compile("question");
     expect(q.text).toBe("SELECT a AS x FROM t WHERE (k = ? OR k = ?) AND b > 0 AND NOT (c)");
     expect(q.values).toEqual(["table", "view"]);
+  });
+
+  it("renders GROUP BY, raw clauses and ORDER BY in order", () => {
+    const q = select({ table_name: "t.name" })
+      .from("sys.tables t")
+      .raw("OUTER APPLY (SELECT 1 AS x) AS fk")
+      .where("t.is_ms_shipped", 0)
+      .groupBy("t.name")
+      .orderBy("t.name")
+      .compile("literal");
+    expect(q.text).toBe(
+      "SELECT t.name AS table_name FROM sys.tables t OUTER APPLY (SELECT 1 AS x) AS fk " +
+        "WHERE t.is_ms_shipped = 0 GROUP BY t.name ORDER BY t.name",
+    );
   });
 });

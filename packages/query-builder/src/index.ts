@@ -1,9 +1,9 @@
 /**
- * The query DSL barrel.
+ * The query builder.
  *
  * A thin, SQL-first builder for the connectors' introspection queries:
- * structured clauses (`from`, `join`, `where`, `orderBy`) over raw SQL
- * fragments, with context-aware parameter binding. See `./build.ts` for the
+ * structured clauses (`from`, `join`, `where`, `groupBy`, `orderBy`) over raw
+ * SQL fragments, with context-aware parameter binding. See `./build.ts` for the
  * binding rules and `./types.ts` for the node model.
  */
 
@@ -32,6 +32,7 @@ export {
 } from "./build.js";
 export type {
   CompiledQuery,
+  CompileOptions,
   JoinSpec,
   Node,
   Operand,

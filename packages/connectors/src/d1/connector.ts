@@ -23,9 +23,9 @@ import { BaseConnector } from "../base-connector.js";
 import {
   foreignKeyListFallbackQuery,
   foreignKeyListQuery,
-  TABLES_SQL,
   tableInfoFallbackQuery,
   tableInfoQuery,
+  tablesQuery,
 } from "./queries.js";
 import type {
   ColumnRow,
@@ -75,7 +75,7 @@ export class D1Connector extends BaseConnector<boolean> {
   async introspect(): Promise<IntrospectResult> {
     this.requireHandle();
     try {
-      const tableRows = await this.selectRows(TABLES_SQL);
+      const tableRows = await this.selectRows(tablesQuery().text);
 
       const tables: RawTable[] = [];
       for (const row of tableRows) {

@@ -234,13 +234,13 @@ describe("TrinoConnector introspection", () => {
     const tablesQuery = requests.find((r) => /information_schema\.tables/i.test(r.sql))?.sql;
     // Trino's current_schema is a keyword-like session function without
     // parentheses, unlike the SQL-standard current_schema() form.
-    expect(tablesQuery).toContain("table_schema = current_schema\n");
+    expect(tablesQuery).toContain("table_schema = current_schema");
     expect(tablesQuery).not.toContain("current_schema()");
     expect(tablesQuery).toContain("table_type = 'BASE TABLE'");
     expect(tablesQuery).toContain("ORDER BY table_name");
 
     const columnsQuery = requests.find((r) => /information_schema\.columns/i.test(r.sql))?.sql;
-    expect(columnsQuery).toContain("table_schema = current_schema\n");
+    expect(columnsQuery).toContain("table_schema = current_schema");
     expect(columnsQuery).not.toContain("current_schema()");
     expect(columnsQuery).toContain("ORDER BY ordinal_position");
   });

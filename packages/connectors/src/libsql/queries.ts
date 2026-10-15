@@ -6,10 +6,19 @@
  * `PRAGMA foreign_key_list` pragmas for column and foreign-key metadata.
  */
 
+import type { CompiledQuery } from "@easysql/query-builder";
+import { lit, select } from "@easysql/query-builder";
 import { quoteIdent } from "../helpers.js";
 
 /** Lists the user tables in the database, in name order. */
-export const TABLES_SQL = `SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name`;
+export function tablesQuery(): CompiledQuery {
+  return select({ name: "name" })
+    .from("sqlite_master")
+    .where("type", lit("table"))
+    .where("name NOT LIKE 'sqlite_%'")
+    .orderBy("name")
+    .compile("question");
+}
 
 /** Builds the statement that reports the columns of `table`. */
 export function tableInfoQuery(table: string): string {
@@ -22,6 +31,6 @@ export function foreignKeyListQuery(table: string): string {
 }
 
 /** Builds the statement that counts the rows of `table`. */
-export function rowCountQuery(table: string): string {
-  return `SELECT COUNT(*) AS c FROM ${quoteIdent(table)}`;
+export function rowCountQuery(table: string): CompiledQuery {
+  return select({ c: "COUNT(*)" }).from(quoteIdent(table)).compile("question");
 }

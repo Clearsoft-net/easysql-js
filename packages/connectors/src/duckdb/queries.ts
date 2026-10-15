@@ -6,33 +6,49 @@
  * and schema.
  */
 
+import type { CompiledQuery } from "@easysql/query-builder";
+import { fn, not, select } from "@easysql/query-builder";
+
 /** Base tables in the current database/schema, with an estimated size. */
-export const TABLES_SQL = `SELECT table_name, estimated_size
-         FROM duckdb_tables()
-         WHERE NOT internal
-           AND database_name = current_database()
-           AND schema_name = current_schema()
-         ORDER BY table_name`;
+export function tablesQuery(): CompiledQuery {
+  return select({ table_name: "table_name", estimated_size: "estimated_size" })
+    .from("duckdb_tables()")
+    .where(not("internal"))
+    .where("database_name", fn("current_database"))
+    .where("schema_name", fn("current_schema"))
+    .orderBy("table_name")
+    .compile("question");
+}
 
 /** Primary- and foreign-key constraints of the current database/schema. */
-export const CONSTRAINTS_SQL = `SELECT table_name,
-                constraint_type,
-                constraint_column_names,
-                referenced_table,
-                referenced_column_names
-         FROM duckdb_constraints()
-         WHERE database_name = current_database()
-           AND schema_name = current_schema()
-         ORDER BY table_name, constraint_index`;
+export function constraintsQuery(): CompiledQuery {
+  return select({
+    table_name: "table_name",
+    constraint_type: "constraint_type",
+    constraint_column_names: "constraint_column_names",
+    referenced_table: "referenced_table",
+    referenced_column_names: "referenced_column_names",
+  })
+    .from("duckdb_constraints()")
+    .where("database_name", fn("current_database"))
+    .where("schema_name", fn("current_schema"))
+    .orderBy("table_name", "constraint_index")
+    .compile("question");
+}
 
 /** Columns of one table (the table name is bound as `?`). */
-export const COLUMNS_SQL = `SELECT column_name,
-                  column_index,
-                  data_type,
-                  is_nullable,
-                  column_default
-           FROM duckdb_columns()
-           WHERE database_name = current_database()
-             AND schema_name = current_schema()
-             AND table_name = ?
-           ORDER BY column_index`;
+export function columnsQuery(table: string): CompiledQuery {
+  return select({
+    column_name: "column_name",
+    column_index: "column_index",
+    data_type: "data_type",
+    is_nullable: "is_nullable",
+    column_default: "column_default",
+  })
+    .from("duckdb_columns()")
+    .where("database_name", fn("current_database"))
+    .where("schema_name", fn("current_schema"))
+    .where("table_name", table)
+    .orderBy("column_index")
+    .compile("question");
+}

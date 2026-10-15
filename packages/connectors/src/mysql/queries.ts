@@ -7,8 +7,8 @@
  * one table.
  */
 
-import type { CompiledQuery } from "../dsl/index.js";
-import { eq, isNotNull, select } from "../dsl/index.js";
+import type { CompiledQuery } from "@easysql/query-builder";
+import { eq, isNotNull, select } from "@easysql/query-builder";
 
 /** Lists the base tables in the configured schema. */
 export function tablesQuery(database: string): CompiledQuery {

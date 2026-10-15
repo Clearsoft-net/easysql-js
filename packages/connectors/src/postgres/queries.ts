@@ -7,8 +7,8 @@
  * it. The queries are therefore selected per provider instead of assumed.
  */
 
-import type { CompiledQuery } from "../dsl/index.js";
-import { eq, exists, fn, gt, idx, lit, not, ref, select } from "../dsl/index.js";
+import type { CompiledQuery } from "@easysql/query-builder";
+import { eq, exists, fn, gt, idx, lit, not, ref, select } from "@easysql/query-builder";
 import type { PostgresProvider } from "./types.js";
 
 /**

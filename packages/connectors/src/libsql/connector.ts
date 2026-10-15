@@ -16,7 +16,7 @@
 import type { Client } from "@libsql/client";
 import { createClient } from "@libsql/client";
 import { BaseConnector } from "../base-connector.js";
-import { foreignKeyListQuery, rowCountQuery, TABLES_SQL, tableInfoQuery } from "./queries.js";
+import { foreignKeyListQuery, rowCountQuery, tableInfoQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   ForeignKeyRow,
@@ -66,7 +66,7 @@ export class LibSqlConnector extends BaseConnector<Client> {
   async introspect(): Promise<IntrospectResult> {
     const client = this.requireHandle();
     try {
-      const tableResult = await client.execute(TABLES_SQL);
+      const tableResult = await client.execute(tablesQuery().text);
 
       const tables: RawTable[] = [];
       for (const row of tableResult.rows) {
@@ -129,7 +129,7 @@ function toRawColumn(
 /** Best-effort exact row count; returns `null` when the table cannot be read. */
 async function countRows(client: Client, table: string): Promise<number | null> {
   try {
-    const result = await client.execute(rowCountQuery(table));
+    const result = await client.execute(rowCountQuery(table).text);
     const value = result.rows[0]?.c;
     return value === undefined || value === null ? null : Number(value);
   } catch {

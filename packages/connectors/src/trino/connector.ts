@@ -17,7 +17,7 @@
 import type { Trino as TrinoClient } from "trino-client";
 import { BasicAuth, Trino } from "trino-client";
 import { BaseConnector } from "../base-connector.js";
-import { columnsQuery, TABLES_SQL } from "./queries.js";
+import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
   Collected,
   ColumnRow,
@@ -77,12 +77,12 @@ export class TrinoConnector extends BaseConnector<TrinoClient> {
   async introspect(): Promise<IntrospectResult> {
     const client = this.requireHandle();
     try {
-      const tablesPage = await collect(client, TABLES_SQL);
+      const tablesPage = await collect(client, tablesQuery().text);
 
       const tables: RawTable[] = [];
       for (const row of tablesPage.rows) {
         const tableName = String(row.table_name);
-        const columnsPage = await collect(client, columnsQuery(tableName));
+        const columnsPage = await collect(client, columnsQuery(tableName).text);
 
         tables.push({
           name: tableName,

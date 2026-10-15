@@ -37,6 +37,7 @@
       "version": "4.1.0",
       "dependencies": {
         "@easysql/common": "workspace:*",
+        "@easysql/query-builder": "workspace:*",
       },
       "devDependencies": {
         "@clickhouse/client": "^1.23.1",
@@ -88,6 +89,10 @@
         "snowflake-sdk",
         "trino-client",
       ],
+    },
+    "packages/query-builder": {
+      "name": "@easysql/query-builder",
+      "version": "4.1.0",
     },
     "packages/schema-generation": {
       "name": "@easysql/schema-generation",
@@ -243,6 +248,8 @@
     "@easysql/common": ["@easysql/common@workspace:packages/common"],
 
     "@easysql/connectors": ["@easysql/connectors@workspace:packages/connectors"],
+
+    "@easysql/query-builder": ["@easysql/query-builder@workspace:packages/query-builder"],
 
     "@easysql/schema-generation": ["@easysql/schema-generation@workspace:packages/schema-generation"],
 

@@ -3,7 +3,8 @@
   "compilerOptions": {
     "rootDir": "src",
     "paths": {
-      "@easysql/common": ["../common/dist/index.d.ts"]
+      "@easysql/common": ["../common/dist/index.d.ts"],
+      "@easysql/query-builder": ["../query-builder/dist/index.d.ts"]
     }
   },
   "include": ["src"]

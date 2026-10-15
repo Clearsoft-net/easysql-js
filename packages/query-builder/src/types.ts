@@ -1,9 +1,9 @@
 /**
- * Types for the query DSL (`src/dsl/`).
+ * Types for the query builder.
  *
- * The DSL is a thin, SQL-first builder: clauses are structured, but any operand
- * can be a raw SQL fragment. It is intentionally small and only models what the
- * connectors' introspection queries need.
+ * The builder is a thin, SQL-first compiler: clauses are structured, but any
+ * operand can be a raw SQL fragment. It is intentionally small and only models
+ * what the EasySQL connectors' introspection queries need.
  */
 
 /**
@@ -12,8 +12,14 @@
  */
 export type Operand = string | number | boolean | null | Node;
 
-/** How a dialect writes bound parameters. */
-export type PlaceholderStyle = "question" | "dollar";
+/**
+ * How a dialect handles values:
+ * - `question` — positional `?` placeholders (MySQL, SQLite, DuckDB, …).
+ * - `dollar`   — numbered `$1`, `$2`, … placeholders (PostgreSQL).
+ * - `literal`  — values inlined as SQL literals, for dialects whose client
+ *                cannot bind parameters (SQL Server, Oracle, Db2, Snowflake, …).
+ */
+export type PlaceholderStyle = "question" | "dollar" | "literal";
 
 /**
  * The context an operand is rendered in. It decides whether a bare string is a
@@ -58,8 +64,21 @@ export interface SelectSpec {
   columns: Record<string, Operand>;
   from: string;
   joins: JoinSpec[];
+  /** Verbatim clauses emitted after the joins (e.g. `OUTER APPLY (…) AS fk`). */
+  extras: string[];
   where: Operand[];
+  groupBy: string[];
   orderBy: string[];
+}
+
+/** Per-dialect compile options. */
+export interface CompileOptions {
+  /**
+   * Quote character for SELECT aliases, e.g. `"`. Required by engines that fold
+   * unquoted identifiers to uppercase (Oracle, Db2, SAP HANA) so the alias keeps
+   * its exact case. Omit for engines that return the alias as written.
+   */
+  aliasQuote?: string;
 }
 
 /** A compiled query: SQL text with the dialect's placeholders and its values. */
@@ -72,4 +91,5 @@ export interface CompiledQuery {
 export interface RenderState {
   style: PlaceholderStyle;
   values: unknown[];
+  options: CompileOptions;
 }

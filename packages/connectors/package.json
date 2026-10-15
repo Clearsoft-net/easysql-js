@@ -186,6 +186,7 @@
     "trino-client": "^0.2.9"
   },
   "dependencies": {
-    "@easysql/common": "workspace:*"
+    "@easysql/common": "workspace:*",
+    "@easysql/query-builder": "workspace:*"
   }
 }
