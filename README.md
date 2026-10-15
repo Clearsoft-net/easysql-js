@@ -22,6 +22,7 @@ version per repository.
 |---|---|---|---|
 | [`@easysql/client`](./packages/client) | `packages/client` | **Generated** | Typed client for the EasySQL API, generated from `/openapi.json`. |
 | [`@easysql/common`](./packages/common) | `packages/common` | Hand-written | Shared contracts: schema shapes, connector interface, query result. |
+| [`@easysql/query-builder`](./packages/query-builder) | `packages/query-builder` | Hand-written | Thin, SQL-first query builder with context-aware parameter binding, used by the connectors' catalog queries. |
 | [`@easysql/schema-generation`](./packages/schema-generation) | `packages/schema-generation` | Hand-written | Normalizes introspected database metadata into the schema payload the API consumes. |
 | [`@easysql/connectors`](./packages/connectors) | `packages/connectors` | Hand-written | Unified package for database connectors; engine modules and database drivers load on demand. |
 
