@@ -22,21 +22,4 @@ export interface IntrospectResult extends RawSchema {
   engine: "sqlite";
 }
 
-/** Internal — `PRAGMA table_info` row. */
-export interface ColumnRow {
-  cid: number;
-  name: string;
-  type: string;
-  notnull: number;
-  dflt_value: string | null;
-  pk: number;
-}
-
-/** Internal — `PRAGMA foreign_key_list` row. */
-export interface ForeignKeyRow {
-  id: number;
-  seq: number;
-  table: string;
-  from: string;
-  to: string;
-}
+export type { PragmaColumnRow, PragmaForeignKeyRow } from "../types.js";

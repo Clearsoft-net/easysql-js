@@ -36,9 +36,9 @@ export function columnsQuery(): CompiledQuery {
     table_name: "c.TABLE_NAME",
     column_name: "c.COLUMN_NAME",
     data_type: "c.DATA_TYPE",
-    nullable: "c.NULLABLE",
-    data_default: "c.DATA_DEFAULT",
-    column_id: "c.COLUMN_ID",
+    is_nullable: "c.NULLABLE",
+    column_default: "c.DATA_DEFAULT",
+    ordinal: "c.COLUMN_ID",
   })
     .from("ALL_TAB_COLUMNS c")
     .where("c.OWNER", CURRENT_SCHEMA)
@@ -71,8 +71,8 @@ export function foreignKeysQuery(): CompiledQuery {
   return select({
     table_name: "cc.TABLE_NAME",
     column_name: "cc.COLUMN_NAME",
-    foreign_table: "rc.TABLE_NAME",
-    foreign_column: "rcc.COLUMN_NAME",
+    ref_table: "rc.TABLE_NAME",
+    ref_column: "rcc.COLUMN_NAME",
   })
     .from("ALL_CONSTRAINTS c")
     .innerJoin("ALL_CONS_COLUMNS cc", [

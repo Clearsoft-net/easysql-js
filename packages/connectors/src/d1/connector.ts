@@ -29,11 +29,11 @@ import {
   tablesQuery,
 } from "./queries.js";
 import type {
-  ColumnRow,
   D1ConnectionConfig,
   D1ResponseBody,
-  ForeignKeyRow,
   IntrospectResult,
+  PragmaColumnRow,
+  PragmaForeignKeyRow,
   RawColumn,
   RawQueryResult,
   RawTable,
@@ -81,12 +81,12 @@ export class D1Connector extends BaseConnector<boolean> {
       const tables: RawTable[] = [];
       for (const row of tableRows) {
         const name = String(row.name);
-        const columns = await this.readPragma<ColumnRow>(
+        const columns = await this.readPragma<PragmaColumnRow>(
           name,
           tableInfoQuery,
           tableInfoFallbackQuery,
         );
-        const foreignKeys = await this.readPragma<ForeignKeyRow>(
+        const foreignKeys = await this.readPragma<PragmaForeignKeyRow>(
           name,
           foreignKeyListQuery,
           foreignKeyListFallbackQuery,
@@ -94,6 +94,7 @@ export class D1Connector extends BaseConnector<boolean> {
 
         const fkByColumn = new Map<string, { table: string; column: string }>();
         for (const fk of foreignKeys) {
+          if (fk.to === null) continue;
           fkByColumn.set(fk.from, { table: fk.table, column: fk.to });
         }
 
@@ -202,7 +203,7 @@ export class D1Connector extends BaseConnector<boolean> {
 }
 
 function toRawColumn(
-  row: ColumnRow,
+  row: PragmaColumnRow,
   fkByColumn: Map<string, { table: string; column: string }>,
 ): RawColumn {
   return {

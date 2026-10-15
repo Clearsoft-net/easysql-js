@@ -31,31 +31,7 @@ export interface Db2ConnStr extends ConnStr {
   SECURITY?: string;
 }
 
-export type { TableRow } from "../types.js";
-
-/** Internal — `SYSCAT.COLUMNS` row returned by the driver. */
-export interface ColumnRow {
-  table_name: string;
-  column_name: string;
-  data_type: string;
-  nulls: string;
-  column_default: string | null;
-  ordinal: number;
-}
-
-/** Internal — `SYSCAT.KEYCOLUSE` primary-key row returned by the driver. */
-export interface KeyColumnRow {
-  table_name: string;
-  column_name: string;
-}
-
-/** Internal — foreign-key row returned by the driver. */
-export interface ForeignKeyRow {
-  table_name: string;
-  column_name: string;
-  ref_table: string;
-  ref_column: string;
-}
+export type { ColumnRow, ForeignKeyRow, KeyColumnRow, TableRow } from "../types.js";
 
 /** Internal — the lazily loaded `ibm_db` module. */
 export type IbmDbModule = typeof import("ibm_db");

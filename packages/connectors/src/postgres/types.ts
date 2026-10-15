@@ -47,16 +47,4 @@ export interface IntrospectResult extends RawSchema {
   engine: "postgresql";
 }
 
-/** Internal — column row of the `pg_attribute`/`pg_catalog` introspection query. */
-export interface ColumnRow {
-  column_name: string;
-  data_type: string;
-  is_nullable: boolean;
-  column_default: string | null;
-  is_primary: boolean;
-  foreign_table: string | null;
-  foreign_column: string | null;
-  ordinal: number;
-}
-
-export type { TableRow } from "../types.js";
+export type { ColumnRow, TableRow } from "../types.js";

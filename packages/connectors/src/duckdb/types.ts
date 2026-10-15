@@ -19,16 +19,7 @@ export interface IntrospectResult extends RawSchema {
   engine: "duckdb";
 }
 
-/** Internal — `duckdb_columns()` row returned by the driver. */
-export interface ColumnRow {
-  column_name: string;
-  column_index: number;
-  data_type: string;
-  is_nullable: boolean;
-  column_default: string | null;
-}
-
-export type { TableRow } from "../types.js";
+export type { ColumnRow, TableRow } from "../types.js";
 
 /** Internal — `duckdb_constraints()` row returned by the driver. */
 export interface ConstraintRow {

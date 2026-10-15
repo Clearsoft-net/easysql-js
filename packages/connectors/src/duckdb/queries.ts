@@ -40,7 +40,7 @@ export function constraintsQuery(): CompiledQuery {
 export function columnsQuery(table: string): CompiledQuery {
   return select({
     column_name: "column_name",
-    column_index: "column_index",
+    ordinal: "column_index",
     data_type: "data_type",
     is_nullable: "is_nullable",
     column_default: "column_default",

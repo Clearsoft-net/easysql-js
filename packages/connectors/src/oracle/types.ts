@@ -69,23 +69,4 @@ export interface OracleDriver {
   getConnection(options: OracleGetConnectionOptions): Promise<OracleConnection>;
 }
 
-export type { TableRow } from "../types.js";
-
-export interface ColumnRow {
-  table_name: string;
-  column_name: string;
-  data_type: string;
-  nullable: string;
-  data_default: string | null;
-  column_id: number | null;
-}
-
-export interface ConstraintColumnRow {
-  table_name: string;
-  column_name: string;
-}
-
-export interface ForeignKeyRow extends ConstraintColumnRow {
-  foreign_table: string;
-  foreign_column: string;
-}
+export type { ColumnRow, ForeignKeyRow, KeyColumnRow, TableRow } from "../types.js";

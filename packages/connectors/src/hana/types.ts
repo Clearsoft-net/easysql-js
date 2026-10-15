@@ -20,28 +20,7 @@ export interface IntrospectResult extends RawSchema {
   engine: "hana";
 }
 
-export type { TableRow } from "../types.js";
-
-export interface ColumnRow {
-  table_name: string;
-  column_name: string;
-  data_type: string;
-  is_nullable: string;
-  column_default: string | null;
-  ordinal: number;
-}
-
-export interface KeyColumnRow {
-  table_name: string;
-  column_name: string;
-}
-
-export interface ForeignKeyRow {
-  table_name: string;
-  column_name: string;
-  ref_table: string;
-  ref_column: string;
-}
+export type { ColumnRow, ForeignKeyRow, KeyColumnRow, TableRow } from "../types.js";
 
 export interface RowCountRow {
   table_name: string;

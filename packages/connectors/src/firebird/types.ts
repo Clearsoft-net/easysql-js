@@ -40,15 +40,7 @@ export interface ColumnRow {
 }
 
 /** A row of the foreign-key segment query. */
-export interface ForeignKeyRow {
-  fk_name: string;
-  fk_column: string;
-  ref_table: string;
-  ref_column: string;
-  segment: number | null;
-}
-
-export type { TableRow } from "../types.js";
+export type { ForeignKeyRow, TableRow } from "../types.js";
 
 /**
  * The subset of the driver's column metadata that is used here. Declared

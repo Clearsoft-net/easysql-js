@@ -11,9 +11,9 @@ import { DatabaseSync } from "node:sqlite";
 import { SyncBaseConnector } from "../base-connector.js";
 import { foreignKeyListQuery, rowCountQuery, tableInfoQuery, tablesQuery } from "./queries.js";
 import type {
-  ColumnRow,
-  ForeignKeyRow,
   IntrospectResult,
+  PragmaColumnRow,
+  PragmaForeignKeyRow,
   RawColumn,
   RawQueryResult,
   RawTable,
@@ -60,13 +60,14 @@ export class SqliteConnector extends SyncBaseConnector<DatabaseSync> {
 
       const tables: RawTable[] = [];
       for (const { name } of tableRows) {
-        const columns = db.prepare(tableInfoQuery(name)).all() as unknown as ColumnRow[];
+        const columns = db.prepare(tableInfoQuery(name)).all() as unknown as PragmaColumnRow[];
         const foreignKeys = db
           .prepare(foreignKeyListQuery(name))
-          .all() as unknown as ForeignKeyRow[];
+          .all() as unknown as PragmaForeignKeyRow[];
 
         const fkByColumn = new Map<string, { table: string; column: string }>();
         for (const fk of foreignKeys) {
+          if (fk.to === null) continue;
           fkByColumn.set(fk.from, { table: fk.table, column: fk.to });
         }
 
@@ -85,7 +86,7 @@ export class SqliteConnector extends SyncBaseConnector<DatabaseSync> {
 }
 
 function toRawColumn(
-  row: ColumnRow,
+  row: PragmaColumnRow,
   fkByColumn: Map<string, { table: string; column: string }>,
 ): RawColumn {
   return {

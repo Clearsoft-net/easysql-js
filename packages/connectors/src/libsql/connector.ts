@@ -19,10 +19,10 @@ import { BaseConnector } from "../base-connector.js";
 import { pragma } from "../helpers.js";
 import { foreignKeyListQuery, rowCountQuery, tableInfoQuery, tablesQuery } from "./queries.js";
 import type {
-  ColumnRow,
-  ForeignKeyRow,
   IntrospectResult,
   LibSqlConnectionConfig,
+  PragmaColumnRow,
+  PragmaForeignKeyRow,
   RawColumn,
   RawQueryResult,
   RawTable,
@@ -75,8 +75,8 @@ export class LibSqlConnector extends BaseConnector<Client> {
         const columns = await client.execute(tableInfoQuery(name));
         const foreignKeys = await client.execute(foreignKeyListQuery(name));
 
-        const columnRows = columns.rows as unknown as ColumnRow[];
-        const foreignKeyRows = foreignKeys.rows as unknown as ForeignKeyRow[];
+        const columnRows = columns.rows as unknown as PragmaColumnRow[];
+        const foreignKeyRows = foreignKeys.rows as unknown as PragmaForeignKeyRow[];
 
         const fkByColumn = new Map<string, { table: string; column: string }>();
         for (const fk of foreignKeyRows) {
@@ -111,7 +111,7 @@ export class LibSqlConnector extends BaseConnector<Client> {
 }
 
 function toRawColumn(
-  row: ColumnRow,
+  row: PragmaColumnRow,
   fkByColumn: Map<string, { table: string; column: string }>,
 ): RawColumn {
   return {

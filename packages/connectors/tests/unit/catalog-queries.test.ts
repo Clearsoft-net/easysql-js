@@ -31,7 +31,7 @@ describe("DuckDB catalog queries", () => {
       values: [],
     });
     expect(duckdb.columnsQuery("roles")).toEqual({
-      text: `SELECT column_name, column_index, data_type, is_nullable, column_default FROM duckdb_columns() WHERE database_name = current_database() AND schema_name = current_schema() AND table_name = ? ORDER BY column_index`,
+      text: `SELECT column_name, column_index AS ordinal, data_type, is_nullable, column_default FROM duckdb_columns() WHERE database_name = current_database() AND schema_name = current_schema() AND table_name = ? ORDER BY column_index`,
       values: ["roles"],
     });
   });
@@ -66,7 +66,7 @@ describe("Trino catalog queries", () => {
       values: [],
     });
     expect(trino.columnsQuery("orders")).toEqual({
-      text: `SELECT column_name, data_type, is_nullable, column_default, ordinal_position FROM information_schema.columns WHERE table_schema = current_schema AND table_name = 'orders' ORDER BY ordinal_position`,
+      text: `SELECT column_name, data_type, is_nullable, column_default, ordinal_position AS ordinal FROM information_schema.columns WHERE table_schema = current_schema AND table_name = 'orders' ORDER BY ordinal_position`,
       values: [],
     });
   });
@@ -80,8 +80,8 @@ describe("Snowflake catalog queries", () => {
     });
     expect(snowflake.columnsQuery()).toEqual({
       text:
-        `SELECT c.TABLE_NAME AS table_name, c.COLUMN_NAME AS column_name, c.DATA_TYPE AS data_type, c.IS_NULLABLE AS is_nullable, c.COLUMN_DEFAULT AS column_default, c.ORDINAL_POSITION AS ordinal_position, ` +
-        `CASE WHEN pk.CONSTRAINT_TYPE IS NULL THEN 0 ELSE 1 END AS primary_key, fk.TABLE_NAME AS foreign_table, fk.COLUMN_NAME AS foreign_column ` +
+        `SELECT c.TABLE_NAME AS table_name, c.COLUMN_NAME AS column_name, c.DATA_TYPE AS data_type, c.IS_NULLABLE AS is_nullable, c.COLUMN_DEFAULT AS column_default, c.ORDINAL_POSITION AS ordinal, ` +
+        `CASE WHEN pk.CONSTRAINT_TYPE IS NULL THEN 0 ELSE 1 END AS is_primary, fk.TABLE_NAME AS foreign_table, fk.COLUMN_NAME AS foreign_column ` +
         `FROM INFORMATION_SCHEMA.COLUMNS c ` +
         `LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE ku ON ku.TABLE_CATALOG = c.TABLE_CATALOG AND ku.TABLE_SCHEMA = c.TABLE_SCHEMA AND ku.TABLE_NAME = c.TABLE_NAME AND ku.COLUMN_NAME = c.COLUMN_NAME ` +
         `LEFT JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS pk ON pk.CONSTRAINT_CATALOG = ku.CONSTRAINT_CATALOG AND pk.CONSTRAINT_SCHEMA = ku.CONSTRAINT_SCHEMA AND pk.CONSTRAINT_NAME = ku.CONSTRAINT_NAME AND pk.CONSTRAINT_TYPE = 'PRIMARY KEY' ` +
@@ -124,7 +124,7 @@ describe("IBM Db2 catalog queries", () => {
       values: [],
     });
     expect(db2.columnsQuery()).toEqual({
-      text: `SELECT TABNAME AS "table_name", COLNAME AS "column_name", TYPENAME AS "data_type", "NULLS" AS "nulls", "DEFAULT" AS "column_default", COLNO AS "ordinal" FROM SYSCAT.COLUMNS WHERE TABSCHEMA = CURRENT SCHEMA ORDER BY TABNAME, COLNO`,
+      text: `SELECT TABNAME AS "table_name", COLNAME AS "column_name", TYPENAME AS "data_type", "NULLS" AS "is_nullable", "DEFAULT" AS "column_default", COLNO AS "ordinal" FROM SYSCAT.COLUMNS WHERE TABSCHEMA = CURRENT SCHEMA ORDER BY TABNAME, COLNO`,
       values: [],
     });
     expect(db2.primaryKeysQuery()).toEqual({
@@ -145,7 +145,7 @@ describe("Oracle catalog queries", () => {
       values: [],
     });
     expect(oracle.columnsQuery()).toEqual({
-      text: `SELECT c.TABLE_NAME AS "table_name", c.COLUMN_NAME AS "column_name", c.DATA_TYPE AS "data_type", c.NULLABLE AS "nullable", c.DATA_DEFAULT AS "data_default", c.COLUMN_ID AS "column_id" FROM ALL_TAB_COLUMNS c WHERE c.OWNER = SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') AND c.HIDDEN_COLUMN = 'NO' ORDER BY c.TABLE_NAME, c.COLUMN_ID`,
+      text: `SELECT c.TABLE_NAME AS "table_name", c.COLUMN_NAME AS "column_name", c.DATA_TYPE AS "data_type", c.NULLABLE AS "is_nullable", c.DATA_DEFAULT AS "column_default", c.COLUMN_ID AS "ordinal" FROM ALL_TAB_COLUMNS c WHERE c.OWNER = SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') AND c.HIDDEN_COLUMN = 'NO' ORDER BY c.TABLE_NAME, c.COLUMN_ID`,
       values: [],
     });
     expect(oracle.primaryKeysQuery()).toEqual({
@@ -153,7 +153,7 @@ describe("Oracle catalog queries", () => {
       values: [],
     });
     expect(oracle.foreignKeysQuery()).toEqual({
-      text: `SELECT cc.TABLE_NAME AS "table_name", cc.COLUMN_NAME AS "column_name", rc.TABLE_NAME AS "foreign_table", rcc.COLUMN_NAME AS "foreign_column" FROM ALL_CONSTRAINTS c INNER JOIN ALL_CONS_COLUMNS cc ON cc.OWNER = c.OWNER AND cc.CONSTRAINT_NAME = c.CONSTRAINT_NAME INNER JOIN ALL_CONSTRAINTS rc ON rc.OWNER = c.R_OWNER AND rc.CONSTRAINT_NAME = c.R_CONSTRAINT_NAME INNER JOIN ALL_CONS_COLUMNS rcc ON rcc.OWNER = rc.OWNER AND rcc.CONSTRAINT_NAME = rc.CONSTRAINT_NAME AND rcc.POSITION = cc.POSITION WHERE c.OWNER = SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') AND c.CONSTRAINT_TYPE = 'R' ORDER BY cc.TABLE_NAME, cc.POSITION`,
+      text: `SELECT cc.TABLE_NAME AS "table_name", cc.COLUMN_NAME AS "column_name", rc.TABLE_NAME AS "ref_table", rcc.COLUMN_NAME AS "ref_column" FROM ALL_CONSTRAINTS c INNER JOIN ALL_CONS_COLUMNS cc ON cc.OWNER = c.OWNER AND cc.CONSTRAINT_NAME = c.CONSTRAINT_NAME INNER JOIN ALL_CONSTRAINTS rc ON rc.OWNER = c.R_OWNER AND rc.CONSTRAINT_NAME = c.R_CONSTRAINT_NAME INNER JOIN ALL_CONS_COLUMNS rcc ON rcc.OWNER = rc.OWNER AND rcc.CONSTRAINT_NAME = rc.CONSTRAINT_NAME AND rcc.POSITION = cc.POSITION WHERE c.OWNER = SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') AND c.CONSTRAINT_TYPE = 'R' ORDER BY cc.TABLE_NAME, cc.POSITION`,
       values: [],
     });
   });
@@ -176,7 +176,7 @@ describe("Firebird catalog queries", () => {
     });
     expect(firebird.foreignKeysQuery("T")).toEqual({
       text:
-        `SELECT TRIM(fk.RDB$FIELD_NAME) AS "fk_column", TRIM(fk.RDB$RELATION_NAME) AS "ref_table", TRIM(refs.RDB$FIELD_NAME) AS "ref_column", fk.RDB$FIELD_POSITION AS "segment", TRIM(rc.RDB$CONSTRAINT_NAME) AS "fk_name" ` +
+        `SELECT TRIM(fk.RDB$FIELD_NAME) AS "column_name", TRIM(fk.RDB$RELATION_NAME) AS "ref_table", TRIM(refs.RDB$FIELD_NAME) AS "ref_column" ` +
         `FROM RDB$RELATION_CONSTRAINTS rc ` +
         `INNER JOIN RDB$REF_CONSTRAINTS refc ON refc.RDB$CONSTRAINT_NAME = rc.RDB$CONSTRAINT_NAME ` +
         `INNER JOIN RDB$RELATION_CONSTRAINTS urc ON urc.RDB$CONSTRAINT_NAME = refc.RDB$CONST_NAME_UQ ` +
@@ -196,8 +196,8 @@ describe("SQL Server catalog queries", () => {
     });
     expect(sqlserver.columnsQuery()).toEqual({
       text:
-        `SELECT t.object_id AS table_id, s.name AS schema_name, t.name AS table_name, c.name AS column_name, ty.name AS data_type, c.is_nullable AS is_nullable, dc.definition AS default_value, ` +
-        `CASE WHEN pk.column_id IS NULL THEN 0 ELSE 1 END AS is_primary_key, fk.referenced_table AS foreign_table, fk.referenced_column AS foreign_column, c.column_id AS ordinal ` +
+        `SELECT t.object_id AS table_id, s.name AS schema_name, t.name AS table_name, c.name AS column_name, ty.name AS data_type, c.is_nullable AS is_nullable, dc.definition AS column_default, ` +
+        `CASE WHEN pk.column_id IS NULL THEN 0 ELSE 1 END AS is_primary, fk.referenced_table AS foreign_table, fk.referenced_column AS foreign_column, c.column_id AS ordinal ` +
         `FROM sys.tables AS t INNER JOIN sys.schemas AS s ON s.schema_id = t.schema_id INNER JOIN sys.columns AS c ON c.object_id = t.object_id INNER JOIN sys.types AS ty ON ty.user_type_id = c.user_type_id ` +
         `LEFT JOIN sys.default_constraints AS dc ON dc.parent_object_id = c.object_id AND dc.parent_column_id = c.column_id ` +
         `LEFT JOIN (SELECT ic.object_id AS object_id, ic.column_id AS column_id FROM sys.indexes AS i INNER JOIN sys.index_columns AS ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id WHERE i.is_primary_key = 1) AS pk ON pk.object_id = c.object_id AND pk.column_id = c.column_id ` +

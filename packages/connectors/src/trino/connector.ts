@@ -17,6 +17,7 @@
 import type { Trino as TrinoClient } from "trino-client";
 import { BasicAuth, Trino } from "trino-client";
 import { BaseConnector } from "../base-connector.js";
+import { toOrdinal } from "../internal.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
   Collected,
@@ -153,12 +154,12 @@ function toRawColumn(row: ColumnRow): RawColumn {
     name: row.column_name,
     dataType: row.data_type,
     // information_schema reports the string "YES"/"NO".
-    nullable: row.is_nullable.toUpperCase() === "YES",
+    nullable: String(row.is_nullable).toUpperCase() === "YES",
     // Trino exposes no key metadata through information_schema.
     primaryKey: false,
     defaultValue: row.column_default,
     foreignKey: null,
-    ordinal: Number(row.ordinal_position),
+    ordinal: toOrdinal(row.ordinal),
   };
 }
 

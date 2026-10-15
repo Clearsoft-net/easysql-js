@@ -28,6 +28,16 @@ export function notConnectedError(name: string): Error {
 }
 
 /**
+ * Normalises a driver's ordinal (a number, a numeric string, `bigint` or `null`)
+ * to the {@link RawColumn.ordinal} shape, dropping anything non-finite.
+ */
+export function toOrdinal(value: string | number | bigint | null | undefined): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : undefined;
+}
+
+/**
  * Assembles the public {@link QueryResult} from an engine's {@link RawQueryResult}.
  * `rowCount` defaults to the number of returned rows, which every engine except
  * the ones reporting an affected-row count relies on.

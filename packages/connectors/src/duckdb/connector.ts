@@ -11,6 +11,7 @@
 import type { DuckDBConnection, DuckDBValue } from "@duckdb/node-api";
 import { DuckDBInstance } from "@duckdb/node-api";
 import { BaseConnector } from "../base-connector.js";
+import { toOrdinal } from "../internal.js";
 import { columnsQuery, constraintsQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
@@ -157,11 +158,11 @@ function toRawColumn(
     dataType: row.data_type,
     // A primary key is never nullable; DuckDB reports NOT NULL separately,
     // but the constraint is authoritative.
-    nullable: primaryKey ? false : row.is_nullable,
+    nullable: primaryKey ? false : row.is_nullable === true,
     primaryKey,
     defaultValue: row.column_default,
     foreignKey: foreignKeys.get(row.column_name) ?? null,
-    ordinal: row.column_index,
+    ordinal: toOrdinal(row.ordinal),
   };
 }
 

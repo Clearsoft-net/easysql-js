@@ -51,13 +51,7 @@ export interface TrinoHttpClient {
 }
 
 /** Internal — row shape of the `information_schema.columns` query. */
-export interface ColumnRow {
-  column_name: string;
-  data_type: string;
-  is_nullable: string;
-  column_default: string | null;
-  ordinal_position: number | string;
-}
+export type { ColumnRow } from "../types.js";
 
 /** Internal — result of draining every page of one Trino query. */
 export interface Collected {

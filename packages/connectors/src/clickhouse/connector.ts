@@ -10,6 +10,7 @@
 
 import { type ClickHouseClient, createClient } from "@clickhouse/client";
 import { BaseConnector } from "../base-connector.js";
+import { toOrdinal } from "../internal.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
   ClickhouseConnectionConfig,
@@ -108,6 +109,6 @@ function toRawColumn(row: ColumnRow): RawColumn {
     primaryKey: row.is_primary === true || Number(row.is_primary) === 1,
     defaultValue: row.column_default ? row.column_default : null,
     foreignKey: null,
-    ordinal: Number(row.ordinal),
+    ordinal: toOrdinal(row.ordinal),
   };
 }

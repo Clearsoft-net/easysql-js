@@ -97,7 +97,7 @@ export class FirebirdConnector extends BaseConnector<firebird.Database> {
 
         const fkByColumn = new Map<string, { table: string; column: string }>();
         for (const fk of foreignKeys) {
-          fkByColumn.set(trimName(fk.fk_column), {
+          fkByColumn.set(trimName(fk.column_name), {
             table: trimName(fk.ref_table),
             column: trimName(fk.ref_column),
           });

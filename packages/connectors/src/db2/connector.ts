@@ -13,6 +13,7 @@
 import type { ConnStr, Database, ODBCResult, SQLResults } from "ibm_db";
 import { BaseConnector } from "../base-connector.js";
 import { columnKey } from "../helpers.js";
+import { toOrdinal } from "../internal.js";
 import { columnsQuery, foreignKeysQuery, primaryKeysQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
@@ -107,7 +108,7 @@ export class Db2Connector extends BaseConnector<Database> {
       const primaryKeyRows = await this.query<KeyColumnRow>(database, primaryKeysQuery().text);
       const foreignKeyRows = await this.query<ForeignKeyRow>(database, foreignKeysQuery().text);
 
-      const columnsByTable = groupBy(columnRows, (row) => row.table_name);
+      const columnsByTable = groupBy(columnRows, (row) => row.table_name ?? "");
       const primaryKeys = new Set(
         primaryKeyRows.map((row) => columnKey(row.table_name, row.column_name)),
       );
@@ -195,15 +196,15 @@ function toRawColumn(
   primaryKeys: Set<string>,
   foreignKeys: Map<string, { table: string; column: string }>,
 ): RawColumn {
-  const key = columnKey(row.table_name, row.column_name);
+  const key = columnKey(row.table_name ?? "", row.column_name);
   return {
     name: row.column_name,
     dataType: row.data_type,
-    nullable: row.nulls === "Y",
+    nullable: row.is_nullable === "Y",
     primaryKey: primaryKeys.has(key),
     defaultValue: row.column_default,
     foreignKey: foreignKeys.get(key) ?? null,
-    ordinal: row.ordinal,
+    ordinal: toOrdinal(row.ordinal),
   };
 }
 

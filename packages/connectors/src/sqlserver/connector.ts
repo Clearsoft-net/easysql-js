@@ -15,6 +15,7 @@
 import type { ConnectionPool, IColumnMetadata, IRecordSet } from "mssql";
 import sql from "mssql";
 import { BaseConnector } from "../base-connector.js";
+import { toOrdinal } from "../internal.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
@@ -116,13 +117,13 @@ function toRawColumn(row: ColumnRow): RawColumn {
   return {
     name: row.column_name,
     dataType: row.data_type,
-    nullable: row.is_nullable,
-    primaryKey: Boolean(row.is_primary_key),
-    defaultValue: row.default_value,
+    nullable: row.is_nullable === true,
+    primaryKey: Boolean(row.is_primary),
+    defaultValue: row.column_default,
     foreignKey:
       row.foreign_table && row.foreign_column
         ? { table: row.foreign_table, column: row.foreign_column }
         : null,
-    ordinal: row.ordinal,
+    ordinal: toOrdinal(row.ordinal),
   };
 }

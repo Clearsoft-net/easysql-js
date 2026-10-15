@@ -14,6 +14,7 @@
 import type { Connection } from "@sap/hana-client";
 import { BaseConnector } from "../base-connector.js";
 import { columnKey } from "../helpers.js";
+import { toOrdinal } from "../internal.js";
 import {
   columnsQuery,
   foreignKeysQuery,
@@ -114,7 +115,7 @@ export class HanaConnector extends BaseConnector<Connection> {
       const foreignKeyRows = (await this.exec<ForeignKeyRow[]>(foreignKeysQuery().text)) ?? [];
       const rowCounts = await this.loadRowCounts();
 
-      const columnsByTable = groupBy(columnRows, (row) => row.table_name);
+      const columnsByTable = groupBy(columnRows, (row) => row.table_name ?? "");
       const primaryKeys = new Set(
         primaryKeyRows.map((row) => columnKey(row.table_name, row.column_name)),
       );
@@ -191,7 +192,7 @@ function toRawColumn(
   primaryKeys: Set<string>,
   foreignKeys: Map<string, { table: string; column: string }>,
 ): RawColumn {
-  const key = columnKey(row.table_name, row.column_name);
+  const key = columnKey(row.table_name ?? "", row.column_name);
   return {
     name: row.column_name,
     dataType: row.data_type,
@@ -199,7 +200,7 @@ function toRawColumn(
     primaryKey: primaryKeys.has(key),
     defaultValue: row.column_default,
     foreignKey: foreignKeys.get(key) ?? null,
-    ordinal: row.ordinal,
+    ordinal: toOrdinal(row.ordinal),
   };
 }
 
