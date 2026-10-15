@@ -23,18 +23,18 @@
     },
     "packages/client": {
       "name": "@easysql/client",
-      "version": "4.1.0",
+      "version": "4.2.0",
       "dependencies": {
         "openapi-fetch": "^0.13.0",
       },
     },
     "packages/common": {
       "name": "@easysql/common",
-      "version": "4.1.0",
+      "version": "4.2.0",
     },
     "packages/connectors": {
       "name": "@easysql/connectors",
-      "version": "4.1.0",
+      "version": "4.2.0",
       "dependencies": {
         "@easysql/common": "workspace:*",
         "@easysql/query-builder": "workspace:*",
@@ -92,11 +92,11 @@
     },
     "packages/query-builder": {
       "name": "@easysql/query-builder",
-      "version": "4.1.0",
+      "version": "4.2.0",
     },
     "packages/schema-generation": {
       "name": "@easysql/schema-generation",
-      "version": "4.1.0",
+      "version": "4.2.0",
       "dependencies": {
         "@easysql/common": "workspace:*",
       },

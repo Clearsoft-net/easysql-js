@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/Clearsoft-net/easysql-js/compare/v4.1.0...v4.2.0) (2026-10-15)
+
+
+### Features
+
+* **query-builder:** extract the SQL DSL into @easysql/query-builder and migrate every engine ([#28](https://github.com/Clearsoft-net/easysql-js/issues/28)) ([dc05201](https://github.com/Clearsoft-net/easysql-js/commit/dc05201ff720ec0b3094f2d9ba967538bd59320f))
+
 # [4.1.0](https://github.com/Clearsoft-net/easysql-js/compare/v4.0.1...v4.1.0) (2026-10-14)
 
 
