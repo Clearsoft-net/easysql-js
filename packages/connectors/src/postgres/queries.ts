@@ -61,7 +61,7 @@ export function columnsQuery(table: string): CompiledQuery {
     ])
     .where("n.nspname", fn("current_schema"))
     .where("c.relname", table)
-    .where(gt("a.attnum", 0))
+    .where(gt("a.attnum", lit(0)))
     .where(not("a.attisdropped"))
     .orderBy("a.attnum")
     .compile("dollar");

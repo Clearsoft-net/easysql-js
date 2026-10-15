@@ -19,6 +19,7 @@
  * remembered for the rest of the connection.
  */
 
+import type { CompiledQuery } from "@easysql/query-builder";
 import { BaseConnector } from "../base-connector.js";
 import {
   foreignKeyListFallbackQuery,
@@ -183,7 +184,7 @@ export class D1Connector extends BaseConnector<boolean> {
   private async readPragma<T>(
     table: string,
     pragmaSql: (table: string) => string,
-    fallbackSql: () => string,
+    fallbackSql: (table: string) => CompiledQuery,
   ): Promise<T[]> {
     if (this.pragmaSupported !== false) {
       try {
@@ -195,7 +196,8 @@ export class D1Connector extends BaseConnector<boolean> {
         this.pragmaSupported = false;
       }
     }
-    return (await this.selectRows(fallbackSql(), [table])) as unknown as T[];
+    const fallback = fallbackSql(table);
+    return (await this.selectRows(fallback.text, fallback.values)) as unknown as T[];
   }
 }
 

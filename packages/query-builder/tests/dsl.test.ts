@@ -1,5 +1,23 @@
 import { describe, expect, it } from "bun:test";
-import { eq, exists, fn, gt, idx, lit, not, or, ref, select } from "../src/index.js";
+import {
+  caseWhen,
+  derived,
+  eq,
+  exists,
+  fn,
+  gt,
+  idx,
+  isNull,
+  like,
+  lit,
+  not,
+  notLike,
+  or,
+  ref,
+  select,
+  sub,
+  value,
+} from "../src/index.js";
 
 describe("query builder — binding by context", () => {
   it("binds the right side of a where comparison", () => {
@@ -71,6 +89,80 @@ describe("query builder — binding by context", () => {
     );
     // Only the two `where` values are bound; every reference/expression is not.
     expect(q.values).toEqual(["t", 0]);
+  });
+
+  it("defaults to SELECT * when no columns are given", () => {
+    expect(select().from("t").where("a", 1).compile("question")).toEqual({
+      text: "SELECT * FROM t WHERE a = ?",
+      values: [1],
+    });
+    expect(select({}).from("t").compile("question").text).toBe("SELECT * FROM t");
+  });
+
+  it("nests SELECTs via sub(), derived() and outerApply()", () => {
+    const scalar = select({
+      pk: sub(
+        select({ c: fn("COUNT", "*") })
+          .from("s")
+          .where("s.a", ref("o.a")),
+      ),
+    })
+      .from("o")
+      .compile("question");
+    expect(scalar.text).toBe("SELECT (SELECT COUNT(*) AS c FROM s WHERE s.a = o.a) AS pk FROM o");
+    expect(scalar.values).toEqual([]);
+
+    const joined = select({ x: "t.x" })
+      .from("t")
+      .leftJoin(derived(select({ id: "d.id" }).from("d").where("d.ok", 1), "d"), "d.id", "t.id")
+      .compile("literal");
+    expect(joined.text).toBe(
+      "SELECT t.x AS x FROM t LEFT JOIN (SELECT d.id AS id FROM d WHERE d.ok = 1) AS d ON d.id = t.id",
+    );
+
+    const applied = select({ x: "t.x" })
+      .from("t")
+      .outerApply(select({ v: "s.v" }).prefix("TOP 1").from("s").orderBy("s.v"), "f")
+      .compile("literal");
+    expect(applied.text).toBe(
+      "SELECT t.x AS x FROM t OUTER APPLY (SELECT TOP 1 s.v AS v FROM s ORDER BY s.v) AS f",
+    );
+  });
+
+  it("renders a table-valued function in FROM and binds a value()", () => {
+    expect(select().from(fn("duckdb_tables")).where("x", 1).compile("question")).toEqual({
+      text: "SELECT * FROM duckdb_tables() WHERE x = ?",
+      values: [1],
+    });
+    expect(
+      select()
+        .from(fn("pragma_table_info", value("roles")))
+        .compile("question"),
+    ).toEqual({
+      text: "SELECT * FROM pragma_table_info(?)",
+      values: ["roles"],
+    });
+  });
+
+  it("inlines a numeric literal with lit()", () => {
+    const q = select({ x: "a" })
+      .from("t")
+      .where(gt("n", lit(0)))
+      .compile("dollar");
+    expect(q.text).toBe("SELECT a AS x FROM t WHERE n > 0");
+    expect(q.values).toEqual([]);
+  });
+
+  it("renders LIKE / NOT LIKE and CASE WHEN", () => {
+    const q = select({ flag: caseWhen(isNull("pk.id"), 0, 1) })
+      .from("t")
+      .where(notLike("name", lit("sqlite_%")))
+      .where(like("kind", lit("a%")))
+      .compile("literal");
+    expect(q.text).toBe(
+      "SELECT CASE WHEN pk.id IS NULL THEN 0 ELSE 1 END AS flag FROM t WHERE name NOT LIKE 'sqlite_%' AND kind LIKE 'a%'",
+    );
+    expect(q.values).toEqual([]);
   });
 
   it("supports OR and array conditions (implicit AND)", () => {

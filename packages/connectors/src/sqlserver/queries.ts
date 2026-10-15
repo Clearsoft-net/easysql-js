@@ -7,7 +7,7 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { eq, expr, fn, select } from "@easysql/query-builder";
+import { caseWhen, derived, eq, fn, inList, isNull, ref, select } from "@easysql/query-builder";
 
 /**
  * Base tables with an approximate row count. `sys.partitions` holds one row per
@@ -27,29 +27,13 @@ export function tablesQuery(): CompiledQuery {
     .innerJoin("sys.schemas AS s", "s.schema_id", "t.schema_id")
     .leftJoin("sys.partitions AS p", [
       eq("p.object_id", "t.object_id"),
-      expr("p.index_id IN (0, 1)"),
+      inList("p.index_id", [0, 1]),
     ])
     .where("t.is_ms_shipped", 0)
     .groupBy("t.object_id", "s.name", "t.name")
     .orderBy("s.name", "t.name", "t.object_id")
     .compile("literal");
 }
-
-/** The primary-key derived table, joined back on the column's object/column id. */
-const PRIMARY_KEYS_JOIN =
-  "(SELECT ic.object_id, ic.column_id FROM sys.indexes AS i " +
-  "JOIN sys.index_columns AS ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id " +
-  "WHERE i.is_primary_key = 1) AS pk";
-
-/** The `OUTER APPLY` that picks at most one foreign-key target per column. */
-const FOREIGN_KEY_APPLY =
-  "OUTER APPLY (SELECT TOP 1 ref_t.name AS referenced_table, ref_c.name AS referenced_column " +
-  "FROM sys.foreign_key_columns AS fkc " +
-  "JOIN sys.tables AS ref_t ON ref_t.object_id = fkc.referenced_object_id " +
-  "JOIN sys.columns AS ref_c ON ref_c.object_id = fkc.referenced_object_id " +
-  "AND ref_c.column_id = fkc.referenced_column_id " +
-  "WHERE fkc.parent_object_id = c.object_id AND fkc.parent_column_id = c.column_id " +
-  "ORDER BY fkc.constraint_object_id, fkc.constraint_column_id) AS fk";
 
 /**
  * Every column of every user table in a single joined result set:
@@ -68,7 +52,7 @@ export function columnsQuery(): CompiledQuery {
     data_type: "ty.name",
     is_nullable: "c.is_nullable",
     default_value: "dc.definition",
-    is_primary_key: expr("CASE WHEN pk.column_id IS NULL THEN 0 ELSE 1 END"),
+    is_primary_key: caseWhen(isNull("pk.column_id"), 0, 1),
     foreign_table: "fk.referenced_table",
     foreign_column: "fk.referenced_column",
     ordinal: "c.column_id",
@@ -81,11 +65,33 @@ export function columnsQuery(): CompiledQuery {
       eq("dc.parent_object_id", "c.object_id"),
       eq("dc.parent_column_id", "c.column_id"),
     ])
-    .leftJoin(PRIMARY_KEYS_JOIN, [
-      eq("pk.object_id", "c.object_id"),
-      eq("pk.column_id", "c.column_id"),
-    ])
-    .raw(FOREIGN_KEY_APPLY)
+    .leftJoin(
+      derived(
+        select({ object_id: "ic.object_id", column_id: "ic.column_id" })
+          .from("sys.indexes AS i")
+          .innerJoin("sys.index_columns AS ic", [
+            eq("ic.object_id", "i.object_id"),
+            eq("ic.index_id", "i.index_id"),
+          ])
+          .where("i.is_primary_key", 1),
+        "pk",
+      ),
+      [eq("pk.object_id", "c.object_id"), eq("pk.column_id", "c.column_id")],
+    )
+    .outerApply(
+      select({ referenced_table: "ref_t.name", referenced_column: "ref_c.name" })
+        .prefix("TOP 1")
+        .from("sys.foreign_key_columns AS fkc")
+        .innerJoin("sys.tables AS ref_t", "ref_t.object_id", "fkc.referenced_object_id")
+        .innerJoin("sys.columns AS ref_c", [
+          eq("ref_c.object_id", "fkc.referenced_object_id"),
+          eq("ref_c.column_id", "fkc.referenced_column_id"),
+        ])
+        .where("fkc.parent_object_id", ref("c.object_id"))
+        .where("fkc.parent_column_id", ref("c.column_id"))
+        .orderBy("fkc.constraint_object_id", "fkc.constraint_column_id"),
+      "fk",
+    )
     .where("t.is_ms_shipped", 0)
     .orderBy("s.name", "t.name", "t.object_id", "c.column_id")
     .compile("literal");

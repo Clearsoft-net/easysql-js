@@ -125,10 +125,12 @@ engine adds a single line there.
 
 `packages/query-builder` is `@easysql/query-builder`, a small, SQL-first builder
 shared by every engine's `queries.ts`. It models only what the catalog queries
-need — `select`, `from`, joins, `where`, `groupBy`, `orderBy` — over raw SQL
-fragments, and binds parameters by position (a bare string is a raw fragment in
+need — `select`, `from`, joins, `where`, `groupBy`, `orderBy` and nested
+SELECTs (`sub`/`derived`/`outerApply`) — over raw SQL fragments, and binds
+parameters by position (a bare string is a raw fragment in
 an expression, a bound value on the right of a `where` comparison and a
-reference in a join `ON`; `ref`/`lit`/`expr`/`fn`/`idx` force the intent).
+reference in a join `ON`; `ref`/`lit`/`expr`/`fn`/`idx`/`value` force the
+intent).
 `compile(style, options?)` returns a `CompiledQuery` (`{ text, values }`): the
 style is `question` (`?`), `dollar` (`$1…`) or `literal` (values inlined, for
 drivers that cannot bind), and `aliasQuote` wraps SELECT aliases for engines that

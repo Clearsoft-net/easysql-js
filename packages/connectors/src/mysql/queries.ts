@@ -8,14 +8,14 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { eq, isNotNull, select } from "@easysql/query-builder";
+import { eq, isNotNull, lit, select } from "@easysql/query-builder";
 
 /** Lists the base tables in the configured schema. */
 export function tablesQuery(database: string): CompiledQuery {
   return select({ table_name: "TABLE_NAME", table_rows: "TABLE_ROWS" })
     .from("information_schema.TABLES")
     .where("TABLE_SCHEMA", database)
-    .where("TABLE_TYPE", "BASE TABLE")
+    .where("TABLE_TYPE", lit("BASE TABLE"))
     .orderBy("TABLE_NAME")
     .compile("question");
 }

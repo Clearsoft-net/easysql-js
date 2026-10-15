@@ -12,7 +12,7 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { eq, expr, fn, lit, ne, select } from "@easysql/query-builder";
+import { caseWhen, eq, fn, isNull, lit, ne, select } from "@easysql/query-builder";
 
 /** Lists the `BASE TABLE`s in the current database/schema. */
 export function tablesQuery(): CompiledQuery {
@@ -34,7 +34,7 @@ export function columnsQuery(): CompiledQuery {
     is_nullable: "c.IS_NULLABLE",
     column_default: "c.COLUMN_DEFAULT",
     ordinal_position: "c.ORDINAL_POSITION",
-    primary_key: expr("CASE WHEN pk.CONSTRAINT_TYPE IS NULL THEN 0 ELSE 1 END"),
+    primary_key: caseWhen(isNull("pk.CONSTRAINT_TYPE"), 0, 1),
     foreign_table: "fk.TABLE_NAME",
     foreign_column: "fk.COLUMN_NAME",
   })

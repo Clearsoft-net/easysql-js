@@ -10,6 +10,8 @@
 export {
   and,
   between,
+  caseWhen,
+  derived,
   eq,
   exists,
   expr,
@@ -20,15 +22,19 @@ export {
   inList,
   isNotNull,
   isNull,
+  like,
   lit,
   lt,
   lte,
   ne,
   not,
+  notLike,
   or,
   ref,
   SelectBuilder,
   select,
+  sub,
+  value,
 } from "./build.js";
 export type {
   CompiledQuery,

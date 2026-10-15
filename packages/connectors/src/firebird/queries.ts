@@ -8,13 +8,13 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { eq, expr, isNull, lit, or, select } from "@easysql/query-builder";
+import { eq, fn, isNull, lit, or, ref, select, sub } from "@easysql/query-builder";
 
 /** Base user tables (system tables and views excluded). */
 export function tablesQuery(): CompiledQuery {
-  return select({ table_name: expr("TRIM(r.RDB$RELATION_NAME)"), rows_approx: "r.RDB$STATISTICS" })
+  return select({ table_name: fn("TRIM", "r.RDB$RELATION_NAME"), rows_approx: "r.RDB$STATISTICS" })
     .from("RDB$RELATIONS r")
-    .where(or([eq("r.RDB$SYSTEM_FLAG", expr("0")), isNull("r.RDB$SYSTEM_FLAG")]))
+    .where(or([eq("r.RDB$SYSTEM_FLAG", lit(0)), isNull("r.RDB$SYSTEM_FLAG")]))
     .where(isNull("r.RDB$VIEW_BLR"))
     .orderBy("1")
     .compile("question", { aliasQuote: '"' });
@@ -28,23 +28,24 @@ export function tablesQuery(): CompiledQuery {
  */
 export function columnsQuery(table: string): CompiledQuery {
   return select({
-    field_name: expr("TRIM(rf.RDB$FIELD_NAME)"),
+    field_name: fn("TRIM", "rf.RDB$FIELD_NAME"),
     field_position: "rf.RDB$FIELD_POSITION",
     null_flag: "rf.RDB$NULL_FLAG",
     default_source: "rf.RDB$DEFAULT_SOURCE",
-    type_name: expr("TRIM(ty.RDB$TYPE_NAME)"),
+    type_name: fn("TRIM", "ty.RDB$TYPE_NAME"),
     field_type: "f.RDB$FIELD_TYPE",
     field_sub_type: "f.RDB$FIELD_SUB_TYPE",
     character_length: "f.RDB$CHARACTER_LENGTH",
     field_length: "f.RDB$FIELD_LENGTH",
     field_precision: "f.RDB$FIELD_PRECISION",
     field_scale: "f.RDB$FIELD_SCALE",
-    pk: expr(
-      "(SELECT COUNT(*) FROM RDB$INDEX_SEGMENTS s " +
-        "JOIN RDB$RELATION_CONSTRAINTS rc ON rc.RDB$INDEX_NAME = s.RDB$INDEX_NAME " +
-        "WHERE rc.RDB$RELATION_NAME = rf.RDB$RELATION_NAME " +
-        "AND rc.RDB$CONSTRAINT_TYPE = 'PRIMARY KEY' " +
-        "AND s.RDB$FIELD_NAME = rf.RDB$FIELD_NAME)",
+    pk: sub(
+      select({ c: fn("COUNT", "*") })
+        .from("RDB$INDEX_SEGMENTS s")
+        .innerJoin("RDB$RELATION_CONSTRAINTS rc", "rc.RDB$INDEX_NAME", "s.RDB$INDEX_NAME")
+        .where("rc.RDB$RELATION_NAME", ref("rf.RDB$RELATION_NAME"))
+        .where("rc.RDB$CONSTRAINT_TYPE", lit("PRIMARY KEY"))
+        .where("s.RDB$FIELD_NAME", ref("rf.RDB$FIELD_NAME")),
     ),
   })
     .from("RDB$RELATION_FIELDS rf")
@@ -66,11 +67,11 @@ export function columnsQuery(table: string): CompiledQuery {
  */
 export function foreignKeysQuery(table: string): CompiledQuery {
   return select({
-    fk_column: expr("TRIM(fk.RDB$FIELD_NAME)"),
-    ref_table: expr("TRIM(fk.RDB$RELATION_NAME)"),
-    ref_column: expr("TRIM(refs.RDB$FIELD_NAME)"),
+    fk_column: fn("TRIM", "fk.RDB$FIELD_NAME"),
+    ref_table: fn("TRIM", "fk.RDB$RELATION_NAME"),
+    ref_column: fn("TRIM", "refs.RDB$FIELD_NAME"),
     segment: "fk.RDB$FIELD_POSITION",
-    fk_name: expr("TRIM(rc.RDB$CONSTRAINT_NAME)"),
+    fk_name: fn("TRIM", "rc.RDB$CONSTRAINT_NAME"),
   })
     .from("RDB$RELATION_CONSTRAINTS rc")
     .innerJoin("RDB$REF_CONSTRAINTS refc", "refc.RDB$CONSTRAINT_NAME", "rc.RDB$CONSTRAINT_NAME")
