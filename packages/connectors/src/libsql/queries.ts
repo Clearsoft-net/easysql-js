@@ -7,7 +7,7 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { lit, notLike, select } from "@easysql/query-builder";
+import { fn, lit, notLike, select } from "@easysql/query-builder";
 import { pragma, quoteIdent } from "../helpers.js";
 
 /** Lists the user tables in the database, in name order. */
@@ -32,5 +32,7 @@ export function foreignKeyListQuery(table: string): string {
 
 /** Builds the statement that counts the rows of `table`. */
 export function rowCountQuery(table: string): CompiledQuery {
-  return select({ c: "COUNT(*)" }).from(quoteIdent(table)).compile("question");
+  return select({ c: fn("COUNT", "*") })
+    .from(quoteIdent(table))
+    .compile("question");
 }
