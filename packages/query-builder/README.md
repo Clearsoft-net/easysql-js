@@ -72,10 +72,10 @@ A bare string is interpreted by **position**:
 - in a join **`ON`** it is a **reference** (both sides).
 
 Use the markers when the context does not say it for you: `ref()` forces a
-reference, `lit()` a quoted string literal, `expr()` a raw fragment, `fn()` a
-function call, `idx()` an array subscript and `value()` a value that is always
-bound. Only `value()` (and a bare number or boolean) binds regardless of
-context; every other marker is never bound.
+reference, `lit()` a literal (a string is quoted, a number is emitted as-is),
+`expr()` a raw fragment, `fn()` a function call, `idx()` an array subscript and
+`value()` a value that is always bound. Only `value()` (and a bare number or
+boolean) binds regardless of context; every other marker is never bound.
 
 The convention the connectors follow: a **dynamic** value (a schema or table
 name) is passed bare so it binds, a fixed **constant** is wrapped in `lit()` so

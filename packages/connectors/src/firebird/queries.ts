@@ -14,7 +14,7 @@ import { eq, fn, isNull, lit, or, ref, select, sub } from "@easysql/query-builde
 export function tablesQuery(): CompiledQuery {
   return select({ table_name: fn("TRIM", "r.RDB$RELATION_NAME"), rows_approx: "r.RDB$STATISTICS" })
     .from("RDB$RELATIONS r")
-    .where(or([eq("r.RDB$SYSTEM_FLAG", 0), isNull("r.RDB$SYSTEM_FLAG")]))
+    .where(or([eq("r.RDB$SYSTEM_FLAG", lit(0)), isNull("r.RDB$SYSTEM_FLAG")]))
     .where(isNull("r.RDB$VIEW_BLR"))
     .orderBy("1")
     .compile("question", { aliasQuote: '"' });

@@ -162,8 +162,8 @@ describe("Oracle catalog queries", () => {
 describe("Firebird catalog queries", () => {
   it("trims catalog names and binds the table name", () => {
     expect(firebird.tablesQuery()).toEqual({
-      text: `SELECT TRIM(r.RDB$RELATION_NAME) AS "table_name", r.RDB$STATISTICS AS "rows_approx" FROM RDB$RELATIONS r WHERE (r.RDB$SYSTEM_FLAG = ? OR r.RDB$SYSTEM_FLAG IS NULL) AND r.RDB$VIEW_BLR IS NULL ORDER BY 1`,
-      values: [0],
+      text: `SELECT TRIM(r.RDB$RELATION_NAME) AS "table_name", r.RDB$STATISTICS AS "rows_approx" FROM RDB$RELATIONS r WHERE (r.RDB$SYSTEM_FLAG = 0 OR r.RDB$SYSTEM_FLAG IS NULL) AND r.RDB$VIEW_BLR IS NULL ORDER BY 1`,
+      values: [],
     });
     expect(firebird.columnsQuery("T")).toEqual({
       text:

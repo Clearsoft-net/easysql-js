@@ -25,8 +25,8 @@ import type {
 export const ref = (name: string): Node => ({ kind: "ref", name });
 /** A value that is always bound as a parameter (unlike a bare string). */
 export const value = (v: unknown): Node => ({ kind: "value", value: v });
-/** A quoted string literal (never bound). */
-export const lit = (value: string): Node => ({ kind: "literal", value });
+/** A literal (never bound): a string is quoted, a number is emitted as-is. */
+export const lit = (value: string | number): Node => ({ kind: "literal", value });
 /** A raw SQL fragment (never bound). */
 export const expr = (sql: string): Node => ({ kind: "raw", sql });
 /** A function call, e.g. `fn("format_type", "a.atttypid")`. */
@@ -156,7 +156,7 @@ function renderNode(node: Node, context: RenderContext, state: RenderState): str
     case "value":
       return bind(state, node.value);
     case "literal":
-      return quoteString(node.value);
+      return typeof node.value === "number" ? String(node.value) : quoteString(node.value);
     case "raw":
       return node.sql;
     case "fn":

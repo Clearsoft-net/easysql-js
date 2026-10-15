@@ -144,6 +144,15 @@ describe("query builder — binding by context", () => {
     });
   });
 
+  it("inlines a numeric literal with lit()", () => {
+    const q = select({ x: "a" })
+      .from("t")
+      .where(gt("n", lit(0)))
+      .compile("dollar");
+    expect(q.text).toBe("SELECT a AS x FROM t WHERE n > 0");
+    expect(q.values).toEqual([]);
+  });
+
   it("renders LIKE / NOT LIKE and CASE WHEN", () => {
     const q = select({ flag: caseWhen(isNull("pk.id"), 0, 1) })
       .from("t")

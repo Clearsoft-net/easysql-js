@@ -34,7 +34,7 @@ export type RenderContext = "expr" | "where" | "on";
 export type Node =
   | { kind: "ref"; name: string }
   | { kind: "value"; value: unknown }
-  | { kind: "literal"; value: string }
+  | { kind: "literal"; value: string | number }
   | { kind: "raw"; sql: string }
   | { kind: "fn"; name: string; args: Operand[] }
   | { kind: "index"; operand: Operand; index: number }
