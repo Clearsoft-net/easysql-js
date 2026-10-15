@@ -7,7 +7,7 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { eq, expr, fn, select } from "@easysql/query-builder";
+import { caseWhen, eq, fn, inList, isNull, select } from "@easysql/query-builder";
 
 /**
  * Base tables with an approximate row count. `sys.partitions` holds one row per
@@ -27,7 +27,7 @@ export function tablesQuery(): CompiledQuery {
     .innerJoin("sys.schemas AS s", "s.schema_id", "t.schema_id")
     .leftJoin("sys.partitions AS p", [
       eq("p.object_id", "t.object_id"),
-      expr("p.index_id IN (0, 1)"),
+      inList("p.index_id", [0, 1]),
     ])
     .where("t.is_ms_shipped", 0)
     .groupBy("t.object_id", "s.name", "t.name")
@@ -68,7 +68,7 @@ export function columnsQuery(): CompiledQuery {
     data_type: "ty.name",
     is_nullable: "c.is_nullable",
     default_value: "dc.definition",
-    is_primary_key: expr("CASE WHEN pk.column_id IS NULL THEN 0 ELSE 1 END"),
+    is_primary_key: caseWhen(isNull("pk.column_id"), 0, 1),
     foreign_table: "fk.referenced_table",
     foreign_column: "fk.referenced_column",
     ordinal: "c.column_id",

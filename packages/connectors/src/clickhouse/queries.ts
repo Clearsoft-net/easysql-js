@@ -7,14 +7,14 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { expr, fn, select } from "@easysql/query-builder";
+import { expr, fn, lit, notLike, select } from "@easysql/query-builder";
 
 /** Lists the tables of the current database, excluding views. */
 export function tablesQuery(): CompiledQuery {
   return select({ table_name: "name", rows_approx: "total_rows" })
     .from("system.tables")
     .where("database", fn("currentDatabase"))
-    .where(expr("engine NOT LIKE '%View'"))
+    .where(notLike("engine", lit("%View")))
     .orderBy("name")
     .compile("literal");
 }

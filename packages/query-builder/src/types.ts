@@ -39,6 +39,7 @@ export type Node =
   | { kind: "fn"; name: string; args: Operand[] }
   | { kind: "index"; operand: Operand; index: number }
   | { kind: "binary"; op: string; left: Operand; right: Operand }
+  | { kind: "case"; when: Operand; then: Operand; otherwise: Operand }
   | { kind: "not"; operand: Operand }
   | { kind: "isNull"; operand: Operand; negated: boolean }
   | { kind: "inList"; operand: Operand; items: Operand[] }

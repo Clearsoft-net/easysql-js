@@ -68,6 +68,18 @@ export const lte = (left: Operand, right: Operand): Node => ({
   left,
   right,
 });
+export const like = (left: Operand, right: Operand): Node => ({
+  kind: "binary",
+  op: "LIKE",
+  left,
+  right,
+});
+export const notLike = (left: Operand, right: Operand): Node => ({
+  kind: "binary",
+  op: "NOT LIKE",
+  left,
+  right,
+});
 export const isNull = (operand: Operand): Node => ({ kind: "isNull", operand, negated: false });
 export const isNotNull = (operand: Operand): Node => ({ kind: "isNull", operand, negated: true });
 export const inList = (operand: Operand, items: Operand[]): Node => ({
@@ -82,6 +94,13 @@ export const between = (operand: Operand, lo: Operand, hi: Operand): Node => ({
   hi,
 });
 export const not = (operand: Operand): Node => ({ kind: "not", operand });
+/** A `CASE WHEN <when> THEN <then> ELSE <otherwise> END` expression. */
+export const caseWhen = (when: Operand, then: Operand, otherwise: Operand): Node => ({
+  kind: "case",
+  when,
+  then,
+  otherwise,
+});
 export const and = (items: Operand[]): Node => ({ kind: "logical", op: "AND", items });
 export const or = (items: Operand[]): Node => ({ kind: "logical", op: "OR", items });
 /** A correlated subquery, rendered as `EXISTS (SELECT 1 FROM ... WHERE ...)`. */
@@ -142,6 +161,13 @@ function renderNode(node: Node, context: RenderContext, state: RenderState): str
       )}`;
     case "not":
       return `NOT (${renderOperand(node.operand, "left", context, state)})`;
+    case "case":
+      return `CASE WHEN ${renderOperand(node.when, "left", "expr", state)} THEN ${renderOperand(
+        node.then,
+        "left",
+        "expr",
+        state,
+      )} ELSE ${renderOperand(node.otherwise, "left", "expr", state)} END`;
     case "isNull":
       return `${renderOperand(node.operand, "left", context, state)} IS ${node.negated ? "NOT " : ""}NULL`;
     case "inList":

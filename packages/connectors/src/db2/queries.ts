@@ -7,7 +7,7 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { eq, expr, select } from "@easysql/query-builder";
+import { eq, expr, ref, select } from "@easysql/query-builder";
 
 /** Db2's current-schema keyword is the SQL-standard `CURRENT SCHEMA` (no parens). */
 const CURRENT_SCHEMA = expr("CURRENT SCHEMA");
@@ -28,8 +28,8 @@ export function columnsQuery(): CompiledQuery {
     table_name: "TABNAME",
     column_name: "COLNAME",
     data_type: "TYPENAME",
-    nulls: expr('"NULLS"'),
-    column_default: expr('"DEFAULT"'),
+    nulls: ref('"NULLS"'),
+    column_default: ref('"DEFAULT"'),
     ordinal: "COLNO",
   })
     .from("SYSCAT.COLUMNS")

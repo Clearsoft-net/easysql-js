@@ -21,3 +21,11 @@ export function quoteLiteral(value: string): string {
 export function columnKey(table: string, column: string): string {
   return `${table}\u0000${column}`;
 }
+
+/**
+ * Builds a `PRAGMA name` / `PRAGMA name(arg)` statement (the SQLite family).
+ * `arg` is inserted verbatim, so callers pass an already-quoted identifier.
+ */
+export function pragma(name: string, arg?: string): string {
+  return arg === undefined ? `PRAGMA ${name}` : `PRAGMA ${name}(${arg})`;
+}

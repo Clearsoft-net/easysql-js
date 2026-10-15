@@ -1,5 +1,20 @@
 import { describe, expect, it } from "bun:test";
-import { eq, exists, fn, gt, idx, lit, not, or, ref, select } from "../src/index.js";
+import {
+  caseWhen,
+  eq,
+  exists,
+  fn,
+  gt,
+  idx,
+  isNull,
+  like,
+  lit,
+  not,
+  notLike,
+  or,
+  ref,
+  select,
+} from "../src/index.js";
 
 describe("query builder — binding by context", () => {
   it("binds the right side of a where comparison", () => {
@@ -71,6 +86,18 @@ describe("query builder — binding by context", () => {
     );
     // Only the two `where` values are bound; every reference/expression is not.
     expect(q.values).toEqual(["t", 0]);
+  });
+
+  it("renders LIKE / NOT LIKE and CASE WHEN", () => {
+    const q = select({ flag: caseWhen(isNull("pk.id"), 0, 1) })
+      .from("t")
+      .where(notLike("name", lit("sqlite_%")))
+      .where(like("kind", lit("a%")))
+      .compile("literal");
+    expect(q.text).toBe(
+      "SELECT CASE WHEN pk.id IS NULL THEN 0 ELSE 1 END AS flag FROM t WHERE name NOT LIKE 'sqlite_%' AND kind LIKE 'a%'",
+    );
+    expect(q.values).toEqual([]);
   });
 
   it("supports OR and array conditions (implicit AND)", () => {

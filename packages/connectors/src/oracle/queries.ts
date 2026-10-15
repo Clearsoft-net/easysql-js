@@ -8,10 +8,10 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { eq, expr, select } from "@easysql/query-builder";
+import { eq, fn, lit, notLike, select } from "@easysql/query-builder";
 
 /** Metadata name of the schema the session is currently resolving names in. */
-const CURRENT_SCHEMA = expr("SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA')");
+const CURRENT_SCHEMA = fn("SYS_CONTEXT", lit("USERENV"), lit("CURRENT_SCHEMA"));
 
 /**
  * Base tables owned by the current schema. `NUM_ROWS` comes from optimizer
@@ -25,7 +25,7 @@ export function tablesQuery(): CompiledQuery {
     .where("t.OWNER", CURRENT_SCHEMA)
     .where("t.NESTED", "NO")
     .where("t.SECONDARY", "NO")
-    .where(expr("t.TABLE_NAME NOT LIKE 'BIN$%'"))
+    .where(notLike("t.TABLE_NAME", lit("BIN$%")))
     .orderBy("t.TABLE_NAME")
     .compile("literal", { aliasQuote: '"' });
 }

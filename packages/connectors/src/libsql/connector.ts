@@ -16,6 +16,7 @@
 import type { Client } from "@libsql/client";
 import { createClient } from "@libsql/client";
 import { BaseConnector } from "../base-connector.js";
+import { pragma } from "../helpers.js";
 import { foreignKeyListQuery, rowCountQuery, tableInfoQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
@@ -52,7 +53,7 @@ export class LibSqlConnector extends BaseConnector<Client> {
     });
     await client.execute("SELECT 1");
     if (this.config.readonly && isFileUrl(this.config.url)) {
-      await client.execute("PRAGMA query_only = ON");
+      await client.execute(pragma("query_only = ON"));
     }
     return client;
   }
