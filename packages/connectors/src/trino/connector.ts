@@ -17,6 +17,7 @@
 import type { Trino as TrinoClient } from "trino-client";
 import { BasicAuth, Trino } from "trino-client";
 import { BaseConnector } from "../base-connector.js";
+import { columnsQuery, TABLES_SQL } from "./queries.js";
 import type {
   Collected,
   ColumnRow,
@@ -76,30 +77,12 @@ export class TrinoConnector extends BaseConnector<TrinoClient> {
   async introspect(): Promise<IntrospectResult> {
     const client = this.requireHandle();
     try {
-      const tablesPage = await collect(
-        client,
-        `SELECT table_name
-         FROM information_schema.tables
-         WHERE table_schema = current_schema
-           AND table_type = 'BASE TABLE'
-         ORDER BY table_name`,
-      );
+      const tablesPage = await collect(client, TABLES_SQL);
 
       const tables: RawTable[] = [];
       for (const row of tablesPage.rows) {
         const tableName = String(row.table_name);
-        const columnsPage = await collect(
-          client,
-          `SELECT column_name,
-                  data_type,
-                  is_nullable,
-                  column_default,
-                  ordinal_position
-           FROM information_schema.columns
-           WHERE table_schema = current_schema
-             AND table_name = ${quoteLiteral(tableName)}
-           ORDER BY ordinal_position`,
-        );
+        const columnsPage = await collect(client, columnsQuery(tableName));
 
         tables.push({
           name: tableName,
@@ -183,11 +166,6 @@ function toRawColumn(row: ColumnRow): RawColumn {
 function shortName(name: string): string {
   const dot = name.lastIndexOf(".");
   return dot === -1 ? name : name.slice(dot + 1);
-}
-
-/** Single-quotes a SQL string literal, doubling embedded quotes. */
-function quoteLiteral(value: string): string {
-  return `'${value.replace(/'/g, "''")}'`;
 }
 
 /** Builds the coordinator base URL from host/port/ssl. */

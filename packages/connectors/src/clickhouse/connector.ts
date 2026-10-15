@@ -10,6 +10,7 @@
 
 import { type ClickHouseClient, createClient } from "@clickhouse/client";
 import { BaseConnector } from "../base-connector.js";
+import { COLUMNS_SQL, TABLES_SQL } from "./queries.js";
 import type {
   ClickhouseConnectionConfig,
   ColumnRow,
@@ -71,11 +72,7 @@ export class ClickhouseConnector extends BaseConnector<ClickHouseClient> {
     const client = this.requireHandle();
     try {
       const tablesResult = await client.query({
-        query: `SELECT name AS table_name, total_rows AS rows_approx
-                FROM system.tables
-                WHERE database = currentDatabase()
-                  AND engine NOT LIKE '%View'
-                ORDER BY name`,
+        query: TABLES_SQL,
         format: "JSONEachRow",
       });
       const tableRows = await tablesResult.json<TableRow>();
@@ -83,12 +80,7 @@ export class ClickhouseConnector extends BaseConnector<ClickHouseClient> {
       const tables: RawTable[] = [];
       for (const table of tableRows) {
         const columnsResult = await client.query({
-          query: `SELECT name AS column_name, type AS data_type,
-                         default_expression AS column_default,
-                         is_in_primary_key AS is_primary, position AS ordinal
-                  FROM system.columns
-                  WHERE database = currentDatabase() AND table = {table:String}
-                  ORDER BY position`,
+          query: COLUMNS_SQL,
           query_params: { table: table.table_name },
           format: "JSONEachRow",
         });

@@ -24,6 +24,7 @@
 
 import snowflake from "snowflake-sdk";
 import { BaseConnector } from "../base-connector.js";
+import { COLUMNS_SQL, TABLES_SQL } from "./queries.js";
 import type {
   ColumnRow,
   IntrospectResult,
@@ -100,47 +101,9 @@ export class SnowflakeConnector extends BaseConnector<snowflake.Connection> {
   async introspect(): Promise<IntrospectResult> {
     const connection = this.requireHandle();
     try {
-      const tableRows = await this.run<TableRow>(
-        connection,
-        `SELECT TABLE_NAME AS table_name
-         FROM INFORMATION_SCHEMA.TABLES
-         WHERE TABLE_CATALOG = CURRENT_DATABASE()
-           AND TABLE_SCHEMA = CURRENT_SCHEMA()
-           AND TABLE_TYPE = 'BASE TABLE'
-         ORDER BY TABLE_NAME`,
-      );
+      const tableRows = await this.run<TableRow>(connection, TABLES_SQL);
 
-      const columnRows = await this.run<ColumnRow>(
-        connection,
-        `SELECT c.TABLE_NAME AS table_name,
-                c.COLUMN_NAME AS column_name,
-                c.DATA_TYPE AS data_type,
-                c.IS_NULLABLE AS is_nullable,
-                c.COLUMN_DEFAULT AS column_default,
-                c.ORDINAL_POSITION AS ordinal_position,
-                CASE WHEN pk.CONSTRAINT_TYPE IS NULL THEN 0 ELSE 1 END AS primary_key,
-                fk.TABLE_NAME AS foreign_table,
-                fk.COLUMN_NAME AS foreign_column
-         FROM INFORMATION_SCHEMA.COLUMNS c
-         LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE ku
-           ON ku.TABLE_CATALOG = c.TABLE_CATALOG
-          AND ku.TABLE_SCHEMA = c.TABLE_SCHEMA
-          AND ku.TABLE_NAME = c.TABLE_NAME
-          AND ku.COLUMN_NAME = c.COLUMN_NAME
-         LEFT JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS pk
-           ON pk.CONSTRAINT_CATALOG = ku.CONSTRAINT_CATALOG
-          AND pk.CONSTRAINT_SCHEMA = ku.CONSTRAINT_SCHEMA
-          AND pk.CONSTRAINT_NAME = ku.CONSTRAINT_NAME
-          AND pk.CONSTRAINT_TYPE = 'PRIMARY KEY'
-         LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE fk
-           ON fk.CONSTRAINT_CATALOG = ku.CONSTRAINT_CATALOG
-          AND fk.CONSTRAINT_SCHEMA = ku.CONSTRAINT_SCHEMA
-          AND fk.CONSTRAINT_NAME = ku.CONSTRAINT_NAME
-          AND fk.TABLE_NAME <> ku.TABLE_NAME
-         WHERE c.TABLE_CATALOG = CURRENT_DATABASE()
-           AND c.TABLE_SCHEMA = CURRENT_SCHEMA()
-         ORDER BY c.TABLE_NAME, c.ORDINAL_POSITION`,
-      );
+      const columnRows = await this.run<ColumnRow>(connection, COLUMNS_SQL);
 
       const columnsByTable = new Map<string, RawColumn[]>();
       for (const row of columnRows) {

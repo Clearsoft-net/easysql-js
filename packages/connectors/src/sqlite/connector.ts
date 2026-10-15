@@ -9,6 +9,7 @@
 
 import { DatabaseSync } from "node:sqlite";
 import { SyncBaseConnector } from "../base-connector.js";
+import { foreignKeyListQuery, rowCountQuery, TABLES_SQL, tableInfoQuery } from "./queries.js";
 import type {
   ColumnRow,
   ForeignKeyRow,
@@ -55,19 +56,13 @@ export class SqliteConnector extends SyncBaseConnector<DatabaseSync> {
   introspect(): IntrospectResult {
     const db = this.requireHandle();
     try {
-      const tableRows = db
-        .prepare(
-          "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
-        )
-        .all() as { name: string }[];
+      const tableRows = db.prepare(TABLES_SQL).all() as { name: string }[];
 
       const tables: RawTable[] = [];
       for (const { name } of tableRows) {
-        const columns = db
-          .prepare(`PRAGMA table_info(${quoteIdent(name)})`)
-          .all() as unknown as ColumnRow[];
+        const columns = db.prepare(tableInfoQuery(name)).all() as unknown as ColumnRow[];
         const foreignKeys = db
-          .prepare(`PRAGMA foreign_key_list(${quoteIdent(name)})`)
+          .prepare(foreignKeyListQuery(name))
           .all() as unknown as ForeignKeyRow[];
 
         const fkByColumn = new Map<string, { table: string; column: string }>();
@@ -108,16 +103,9 @@ function toRawColumn(
 
 function countRows(db: DatabaseSync, table: string): number | null {
   try {
-    const row = db.prepare(`SELECT COUNT(*) AS c FROM ${quoteIdent(table)}`).get() as
-      | { c: number }
-      | undefined;
+    const row = db.prepare(rowCountQuery(table)).get() as { c: number } | undefined;
     return row?.c ?? null;
   } catch {
     return null;
   }
-}
-
-/** Quotes an identifier with double quotes, doubling embedded quotes. */
-function quoteIdent(name: string): string {
-  return `"${name.replace(/"/g, '""')}"`;
 }

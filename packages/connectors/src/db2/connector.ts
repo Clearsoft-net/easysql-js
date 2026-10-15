@@ -12,6 +12,8 @@
 
 import type { ConnStr, Database, ODBCResult, SQLResults } from "ibm_db";
 import { BaseConnector } from "../base-connector.js";
+import { columnKey } from "../helpers.js";
+import { COLUMNS_SQL, FOREIGN_KEYS_SQL, PRIMARY_KEYS_SQL, TABLES_SQL } from "./queries.js";
 import type {
   ColumnRow,
   Db2ConnectionConfig,
@@ -100,54 +102,10 @@ export class Db2Connector extends BaseConnector<Database> {
     const database = this.requireHandle();
     try {
       // Four batched queries: one per metadata concern, never one per table.
-      // Aliases are quoted because Db2 folds unquoted identifiers to uppercase.
-      const tableRows = await this.query<TableRow>(
-        database,
-        `SELECT TABNAME AS "table_name", CARD AS "rows_approx"
-         FROM SYSCAT.TABLES
-         WHERE TYPE = 'T' AND TABSCHEMA = CURRENT SCHEMA
-         ORDER BY TABNAME`,
-      );
-      const columnRows = await this.query<ColumnRow>(
-        database,
-        `SELECT TABNAME AS "table_name", COLNAME AS "column_name", TYPENAME AS "data_type",
-                "NULLS" AS "nulls", "DEFAULT" AS "column_default", COLNO AS "ordinal"
-         FROM SYSCAT.COLUMNS
-         WHERE TABSCHEMA = CURRENT SCHEMA
-         ORDER BY TABNAME, COLNO`,
-      );
-      const primaryKeyRows = await this.query<KeyColumnRow>(
-        database,
-        `SELECT k.TABNAME AS "table_name", k.COLNAME AS "column_name"
-         FROM SYSCAT.KEYCOLUSE k
-         JOIN SYSCAT.TABCONST c
-           ON c.CONSTNAME = k.CONSTNAME
-          AND c.TABSCHEMA = k.TABSCHEMA
-          AND c.TABNAME = k.TABNAME
-         WHERE c.TYPE = 'P' AND k.TABSCHEMA = CURRENT SCHEMA
-         ORDER BY k.TABNAME, k.COLNAME`,
-      );
-      const foreignKeyRows = await this.query<ForeignKeyRow>(
-        database,
-        `SELECT k.TABNAME AS "table_name", k.COLNAME AS "column_name",
-                r.REFTABNAME AS "ref_table", rk.COLNAME AS "ref_column"
-         FROM SYSCAT.KEYCOLUSE k
-         JOIN SYSCAT.TABCONST c
-           ON c.CONSTNAME = k.CONSTNAME
-          AND c.TABSCHEMA = k.TABSCHEMA
-          AND c.TABNAME = k.TABNAME
-         JOIN SYSCAT.REFERENCES r
-           ON r.CONSTNAME = c.CONSTNAME
-          AND r.TABSCHEMA = c.TABSCHEMA
-          AND r.TABNAME = c.TABNAME
-         JOIN SYSCAT.KEYCOLUSE rk
-           ON rk.CONSTNAME = r.REFKEYNAME
-          AND rk.TABSCHEMA = r.REFTABSCHEMA
-          AND rk.TABNAME = r.REFTABNAME
-          AND rk.COLSEQ = k.COLSEQ
-         WHERE c.TYPE = 'F' AND k.TABSCHEMA = CURRENT SCHEMA
-         ORDER BY k.TABNAME, k.COLNAME`,
-      );
+      const tableRows = await this.query<TableRow>(database, TABLES_SQL);
+      const columnRows = await this.query<ColumnRow>(database, COLUMNS_SQL);
+      const primaryKeyRows = await this.query<KeyColumnRow>(database, PRIMARY_KEYS_SQL);
+      const foreignKeyRows = await this.query<ForeignKeyRow>(database, FOREIGN_KEYS_SQL);
 
       const columnsByTable = groupBy(columnRows, (row) => row.table_name);
       const primaryKeys = new Set(
@@ -257,10 +215,6 @@ function normalizeCard(value: number | string | null | undefined): number | null
   if (value === null || value === undefined) return null;
   const card = Number(value);
   return Number.isFinite(card) && card >= 0 ? card : null;
-}
-
-function columnKey(table: string, column: string): string {
-  return `${table}\u0000${column}`;
 }
 
 function groupBy<T>(rows: T[], key: (row: T) => string): Map<string, T[]> {

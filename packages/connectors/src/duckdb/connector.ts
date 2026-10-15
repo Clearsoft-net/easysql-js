@@ -11,6 +11,7 @@
 import type { DuckDBConnection } from "@duckdb/node-api";
 import { DuckDBInstance } from "@duckdb/node-api";
 import { BaseConnector } from "../base-connector.js";
+import { COLUMNS_SQL, CONSTRAINTS_SQL, TABLES_SQL } from "./queries.js";
 import type {
   ColumnRow,
   ConstraintRow,
@@ -61,28 +62,9 @@ export class DuckDbConnector extends BaseConnector<DuckDbHandles> {
   async introspect(): Promise<IntrospectResult> {
     const { connection } = this.requireHandle();
     try {
-      const tableRows = await readAll<TableRow>(
-        connection,
-        `SELECT table_name, estimated_size
-         FROM duckdb_tables()
-         WHERE NOT internal
-           AND database_name = current_database()
-           AND schema_name = current_schema()
-         ORDER BY table_name`,
-      );
+      const tableRows = await readAll<TableRow>(connection, TABLES_SQL);
 
-      const constraintRows = await readAll<ConstraintRow>(
-        connection,
-        `SELECT table_name,
-                constraint_type,
-                constraint_column_names,
-                referenced_table,
-                referenced_column_names
-         FROM duckdb_constraints()
-         WHERE database_name = current_database()
-           AND schema_name = current_schema()
-         ORDER BY table_name, constraint_index`,
-      );
+      const constraintRows = await readAll<ConstraintRow>(connection, CONSTRAINTS_SQL);
 
       const primaryKeys = new Map<string, Set<string>>();
       const foreignKeys = new Map<string, Map<string, { table: string; column: string }>>();
@@ -109,20 +91,7 @@ export class DuckDbConnector extends BaseConnector<DuckDbHandles> {
 
       const tables: RawTable[] = [];
       for (const row of tableRows) {
-        const columns = await readAll<ColumnRow>(
-          connection,
-          `SELECT column_name,
-                  column_index,
-                  data_type,
-                  is_nullable,
-                  column_default
-           FROM duckdb_columns()
-           WHERE database_name = current_database()
-             AND schema_name = current_schema()
-             AND table_name = ?
-           ORDER BY column_index`,
-          [row.table_name],
-        );
+        const columns = await readAll<ColumnRow>(connection, COLUMNS_SQL, [row.table_name]);
 
         tables.push({
           name: row.table_name,

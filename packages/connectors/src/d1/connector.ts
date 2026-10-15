@@ -20,6 +20,13 @@
  */
 
 import { BaseConnector } from "../base-connector.js";
+import {
+  foreignKeyListFallbackQuery,
+  foreignKeyListQuery,
+  TABLES_SQL,
+  tableInfoFallbackQuery,
+  tableInfoQuery,
+} from "./queries.js";
 import type {
   ColumnRow,
   D1ConnectionConfig,
@@ -68,22 +75,20 @@ export class D1Connector extends BaseConnector<boolean> {
   async introspect(): Promise<IntrospectResult> {
     this.requireHandle();
     try {
-      const tableRows = await this.selectRows(
-        "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
-      );
+      const tableRows = await this.selectRows(TABLES_SQL);
 
       const tables: RawTable[] = [];
       for (const row of tableRows) {
         const name = String(row.name);
         const columns = await this.readPragma<ColumnRow>(
           name,
-          "table_info",
-          (table) => `PRAGMA table_info(${quoteIdent(table)})`,
+          tableInfoQuery,
+          tableInfoFallbackQuery,
         );
         const foreignKeys = await this.readPragma<ForeignKeyRow>(
           name,
-          "foreign_key_list",
-          (table) => `PRAGMA foreign_key_list(${quoteIdent(table)})`,
+          foreignKeyListQuery,
+          foreignKeyListFallbackQuery,
         );
 
         const fkByColumn = new Map<string, { table: string; column: string }>();
@@ -177,8 +182,8 @@ export class D1Connector extends BaseConnector<boolean> {
    */
   private async readPragma<T>(
     table: string,
-    name: "table_info" | "foreign_key_list",
     pragmaSql: (table: string) => string,
+    fallbackSql: () => string,
   ): Promise<T[]> {
     if (this.pragmaSupported !== false) {
       try {
@@ -190,7 +195,7 @@ export class D1Connector extends BaseConnector<boolean> {
         this.pragmaSupported = false;
       }
     }
-    return (await this.selectRows(`SELECT * FROM pragma_${name}(?)`, [table])) as unknown as T[];
+    return (await this.selectRows(fallbackSql(), [table])) as unknown as T[];
   }
 }
 
@@ -209,11 +214,6 @@ function toRawColumn(
     foreignKey: fkByColumn.get(row.name) ?? null,
     ordinal: row.cid,
   };
-}
-
-/** Quotes an identifier with double quotes, doubling embedded quotes. */
-function quoteIdent(name: string): string {
-  return `"${name.replace(/"/g, '""')}"`;
 }
 
 function normalizeBaseUrl(baseUrl: string | undefined): string {

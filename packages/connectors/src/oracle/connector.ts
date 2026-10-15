@@ -15,6 +15,8 @@
 // @ts-ignore -- TS7016: module 'oracledb' has no declaration file.
 import oracledb from "oracledb";
 import { BaseConnector } from "../base-connector.js";
+import { columnKey } from "../helpers.js";
+import { COLUMNS_SQL, FOREIGN_KEYS_SQL, PRIMARY_KEYS_SQL, TABLES_SQL } from "./queries.js";
 import type {
   ColumnRow,
   ConstraintColumnRow,
@@ -30,72 +32,6 @@ import type {
 } from "./types.js";
 
 const driver = oracledb as OracleDriver;
-
-/** Metadata name of the schema the session is currently resolving names in. */
-const CURRENT_SCHEMA = "SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA')";
-
-/**
- * Base tables owned by the current schema. `NUM_ROWS` comes from optimizer
- * statistics, so it is `NULL` until the table has been analysed and may be
- * stale afterwards. Recycle-bin, nested and secondary (domain index) tables are
- * excluded. Aliases are quoted so the object keys keep their exact case.
- */
-const TABLES_SQL = `SELECT t.TABLE_NAME AS "table_name",
-                           t.NUM_ROWS AS "rows_approx"
-                    FROM ALL_TABLES t
-                    WHERE t.OWNER = ${CURRENT_SCHEMA}
-                      AND t.NESTED = 'NO'
-                      AND t.SECONDARY = 'NO'
-                      AND t.TABLE_NAME NOT LIKE 'BIN$%'
-                    ORDER BY t.TABLE_NAME`;
-
-/** Every visible column of the current schema, batched (no per-table query). */
-const COLUMNS_SQL = `SELECT c.TABLE_NAME AS "table_name",
-                            c.COLUMN_NAME AS "column_name",
-                            c.DATA_TYPE AS "data_type",
-                            c.NULLABLE AS "nullable",
-                            c.DATA_DEFAULT AS "data_default",
-                            c.COLUMN_ID AS "column_id"
-                     FROM ALL_TAB_COLUMNS c
-                     WHERE c.OWNER = ${CURRENT_SCHEMA}
-                       AND c.HIDDEN_COLUMN = 'NO'
-                     ORDER BY c.TABLE_NAME, c.COLUMN_ID`;
-
-/** Primary-key columns (`CONSTRAINT_TYPE = 'P'`) for the current schema. */
-const PRIMARY_KEYS_SQL = `SELECT cc.TABLE_NAME AS "table_name",
-                                 cc.COLUMN_NAME AS "column_name"
-                          FROM ALL_CONSTRAINTS c
-                          JOIN ALL_CONS_COLUMNS cc
-                            ON cc.OWNER = c.OWNER
-                           AND cc.CONSTRAINT_NAME = c.CONSTRAINT_NAME
-                          WHERE c.OWNER = ${CURRENT_SCHEMA}
-                            AND c.CONSTRAINT_TYPE = 'P'
-                          ORDER BY cc.TABLE_NAME, cc.POSITION`;
-
-/**
- * Foreign-key columns (`CONSTRAINT_TYPE = 'R'`). The referenced constraint is
- * resolved through `R_CONSTRAINT_NAME`; composite keys pair the two
- * `ALL_CONS_COLUMNS` rows by `POSITION`, which is the column's position inside
- * its constraint.
- */
-const FOREIGN_KEYS_SQL = `SELECT cc.TABLE_NAME AS "table_name",
-                                 cc.COLUMN_NAME AS "column_name",
-                                 rc.TABLE_NAME AS "foreign_table",
-                                 rcc.COLUMN_NAME AS "foreign_column"
-                          FROM ALL_CONSTRAINTS c
-                          JOIN ALL_CONS_COLUMNS cc
-                            ON cc.OWNER = c.OWNER
-                           AND cc.CONSTRAINT_NAME = c.CONSTRAINT_NAME
-                          JOIN ALL_CONSTRAINTS rc
-                            ON rc.OWNER = c.R_OWNER
-                           AND rc.CONSTRAINT_NAME = c.R_CONSTRAINT_NAME
-                          JOIN ALL_CONS_COLUMNS rcc
-                            ON rcc.OWNER = rc.OWNER
-                           AND rcc.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
-                           AND rcc.POSITION = cc.POSITION
-                          WHERE c.OWNER = ${CURRENT_SCHEMA}
-                            AND c.CONSTRAINT_TYPE = 'R'
-                          ORDER BY cc.TABLE_NAME, cc.POSITION`;
 
 export class OracleConnector extends BaseConnector<OracleConnection> {
   private readonly config: Required<Pick<OracleConnectionConfig, "port" | "connectTimeoutMs">> &
@@ -229,10 +165,6 @@ export class OracleConnector extends BaseConnector<OracleConnection> {
     );
     return result.rows ?? [];
   }
-}
-
-function columnKey(table: string, column: string): string {
-  return `${table}\u0000${column}`;
 }
 
 /** Oracle returns `DATA_DEFAULT` as a padded `LONG`; normalise it to trimmed text. */

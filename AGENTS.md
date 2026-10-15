@@ -52,13 +52,14 @@ release per repository; generated code is kept strictly separate from hand-writt
 │       ├── src/create-connector.ts # factory: lazy-loads the engine, calls its create()
 │       ├── src/base-connector.ts   # BaseConnector (async) + SyncBaseConnector (sync) lifecycles
 │       ├── src/internal.ts         # shared QueryResult assembly + redaction helpers
+│       ├── src/helpers.ts          # shared SQL helpers (quoteIdent/quoteLiteral/columnKey)
 │       ├── src/normalize.ts        # connection-string → explicit-fields helpers
 │       ├── src/driver-loading.ts   # loadDriver(): missing driver → actionable error
 │       ├── src/types.ts            # engine IDs, connection/option types, internal shapes
 │       ├── src/mysql/              # MySQL/MariaDB introspection (mysql2)
 │       ├── src/postgres/           # pg_catalog introspection (pg); session.ts adds
-│       │                           #   Neon HTTP/WebSocket transports, introspection.ts
-│       │                           #   holds provider-safe catalog queries (Redshift)
+│       │                           #   Neon HTTP/WebSocket transports, queries.ts holds
+│       │                           #   provider-safe catalog queries (Redshift)
 │       ├── src/clickhouse/         # system tables over HTTP (@clickhouse/client)
 │       ├── src/sqlite/             # sqlite_master/PRAGMA (node:sqlite)
 │       ├── src/sqlserver/          # sys.* catalogs (mssql)
@@ -107,20 +108,24 @@ synchronous `sqlite`); both own idempotent `connect`/`close`, the `execute`
 template (timing + `QueryResult` assembly) and credential redaction, all built on
 the pure helpers in `src/internal.ts`. An engine's `connector.ts` therefore
 implements only its driver seams — `openHandle`/`closeHandle`/`runQuery` plus the
-engine-specific `introspect` — and keeps its driver-row interfaces inline;
-`src/types.ts` holds only the public engine IDs and discriminated options.
+engine-specific `introspect` — and declares its catalog SQL in `queries.ts` and
+its types (connection config, `IntrospectResult`, driver-row shapes) in
+`types.ts`; the package-level `src/types.ts` holds the public engine IDs and
+discriminated options, and `src/helpers.ts` holds the shared SQL helpers
+(`quoteIdent`/`quoteLiteral`/`columnKey`).
 `src/create-connector.ts` is a thin lazy-loading `switch`: each `case` loads the
 engine module and calls the `create()` that its `index.ts` exports, so adding an
 engine adds a single line there.
 
-Adding an engine means: a `src/<engine>/{types,connector,index}.ts` triple whose
-`connector.ts` extends `BaseConnector`/`SyncBaseConnector` and whose `index.ts`
+Adding an engine means: a `src/<engine>/{types,connector,index}.ts` triple (plus
+`queries.ts` when it reads a system catalog) whose `connector.ts` extends
+`BaseConnector`/`SyncBaseConnector` and whose `index.ts`
 exports `create()`, a subpath export and optional peer/dev dependency in
 `package.json`, a one-line `case` in `src/create-connector.ts`, an entry in
 `src/types.ts` (engine const + options), a mapper in
 `packages/schema-generation/src/type-map.ts` (the `ENGINE_MAPPERS` record is
 exhaustive, so a missing mapper fails typecheck), the engine id in
-`packages/common/src/schema.ts` (`ConnectorEngine`) and its port plus URL scheme
+`packages/common/src/types.ts` (`ConnectorEngine`) and its port plus URL scheme
 in `packages/common/src/url.ts`, unit + integration tests, and the README table.
 Introspection queries are written against each engine's documented system
 catalogs and are only exercised end-to-end by the env-gated integration suites —
