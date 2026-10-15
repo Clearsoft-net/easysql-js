@@ -22,6 +22,7 @@ version per repository.
 |---|---|---|---|
 | [`@easysql/client`](./packages/client) | `packages/client` | **Generated** | Typed client for the EasySQL API, generated from `/openapi.json`. |
 | [`@easysql/common`](./packages/common) | `packages/common` | Hand-written | Shared contracts: schema shapes, connector interface, query result. |
+| [`@easysql/query-builder`](./packages/query-builder) | `packages/query-builder` | Hand-written | Thin, SQL-first query builder with context-aware parameter binding, used by the connectors' catalog queries. |
 | [`@easysql/schema-generation`](./packages/schema-generation) | `packages/schema-generation` | Hand-written | Normalizes introspected database metadata into the schema payload the API consumes. |
 | [`@easysql/connectors`](./packages/connectors) | `packages/connectors` | Hand-written | Unified package for database connectors; engine modules and database drivers load on demand. |
 
@@ -30,9 +31,10 @@ hand-written lives inside it and no manual edit survives regeneration.
 
 Each connector introspects its engine locally and returns the raw shape that
 `@easysql/schema-generation` normalizes; credentials never leave the machine.
-The unified connector package currently implements MySQL/MariaDB, PostgreSQL,
-ClickHouse and SQLite. Additional engines and provider-specific transports are
-planned and will be documented as supported after implementation and testing.
+The unified connector package implements MySQL/MariaDB, PostgreSQL, ClickHouse,
+SQLite, SQL Server, Oracle, Firebird, Db2, DuckDB, libSQL/Turso, Cloudflare D1,
+Snowflake, BigQuery, Trino and SAP HANA, with Redshift, CockroachDB and Neon
+supported as PostgreSQL providers.
 
 ## Installation
 
