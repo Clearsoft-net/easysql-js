@@ -349,7 +349,7 @@ export interface paths {
         put?: never;
         /**
          * Create feedback (append-only; no read/update/delete)
-         * @description O usuário só cria feedback (N por query, a qualquer momento). Não há endpoints de leitura/edição na API pública; feedbacks são lidos apenas no backoffice (R2 SQL).
+         * @description Users can only create feedback (N per query, at any time). There are no read/update endpoints in the public API; feedback is only read in the backoffice (R2 SQL).
          */
         post: operations["create_feedback_v1_feedbacks_post"];
         delete?: never;
@@ -697,7 +697,7 @@ export interface components {
         OidcLogoutResponse: {
             /**
              * Format: uri
-             * @description URL para RP-initiated logout. null se o usuário não veio via OIDC.
+             * @description URL for RP-initiated logout. null if the user did not log in through OIDC.
              */
             end_session_url: string | null;
         };
@@ -710,13 +710,13 @@ export interface components {
         } | null;
         UserMeResponse: components["schemas"]["UserResponse"] & {
             active_plan: components["schemas"]["ActivePlan"];
-            /** @description Claims completos do ID token OIDC (fonte do perfil). */
+            /** @description Full OIDC ID token claims (source of the profile). */
             claims: {
                 [key: string]: unknown;
             } | null;
             /**
              * Format: uri
-             * @description URL da interface de usuário do IdP para editar o perfil.
+             * @description IdP user interface URL for editing the profile.
              */
             idp_profile_url: string | null;
         };
@@ -868,7 +868,7 @@ export interface components {
             fetched_at: string;
         };
         FlagsResponse: {
-            /** @description Visibilidade da tela Analytics no dashboard web (flag analytics-screen). */
+            /** @description Visibility of the Analytics screen in the web dashboard (analytics-screen flag). */
             analytics_screen: boolean;
         };
         AnalyticsQueryEvent: {
