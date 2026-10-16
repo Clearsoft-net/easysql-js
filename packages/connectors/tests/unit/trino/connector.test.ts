@@ -43,7 +43,7 @@ function respond(sql: string, url: string): StubPage {
           { name: "data_type", type: "varchar" },
           { name: "is_nullable", type: "varchar" },
           { name: "column_default", type: "varchar" },
-          { name: "ordinal_position", type: "bigint" },
+          { name: "ordinal", type: "bigint" },
         ],
         data: [
           ["id", "bigint", "NO", null, 1],
@@ -57,7 +57,7 @@ function respond(sql: string, url: string): StubPage {
         { name: "data_type", type: "varchar" },
         { name: "is_nullable", type: "varchar" },
         { name: "column_default", type: "varchar" },
-        { name: "ordinal_position", type: "bigint" },
+        { name: "ordinal", type: "bigint" },
       ],
       data: [["email", "varchar", "YES", null, 1]],
     };

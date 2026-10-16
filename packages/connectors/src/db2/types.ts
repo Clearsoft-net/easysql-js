@@ -1,8 +1,7 @@
-import type { RawSchema } from "@easysql/common";
 import type { ConnStr } from "ibm_db";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Explicit connection configuration for an IBM Db2 server. */
 export interface Db2ConnectionConfig {
@@ -19,9 +18,7 @@ export interface Db2ConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "db2";
-}
+export type IntrospectResult = EngineSchema<"db2">;
 
 /**
  * Internal — `ibm_db` accepts the documented connection-string keywords as an
@@ -29,32 +26,6 @@ export interface IntrospectResult extends RawSchema {
  */
 export interface Db2ConnStr extends ConnStr {
   SECURITY?: string;
-}
-
-export type { TableRow } from "../types.js";
-
-/** Internal — `SYSCAT.COLUMNS` row returned by the driver. */
-export interface ColumnRow {
-  table_name: string;
-  column_name: string;
-  data_type: string;
-  nulls: string;
-  column_default: string | null;
-  ordinal: number;
-}
-
-/** Internal — `SYSCAT.KEYCOLUSE` primary-key row returned by the driver. */
-export interface KeyColumnRow {
-  table_name: string;
-  column_name: string;
-}
-
-/** Internal — foreign-key row returned by the driver. */
-export interface ForeignKeyRow {
-  table_name: string;
-  column_name: string;
-  ref_table: string;
-  ref_column: string;
 }
 
 /** Internal — the lazily loaded `ibm_db` module. */

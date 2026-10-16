@@ -1,7 +1,6 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Explicit connection configuration for a Google BigQuery project. */
 export interface BigQueryConnectionConfig {
@@ -13,9 +12,7 @@ export interface BigQueryConnectionConfig {
   location?: string;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "bigquery";
-}
+export type IntrospectResult = EngineSchema<"bigquery">;
 
 /** Internal — table metadata fields this connector reads. */
 export interface TableMetadata {

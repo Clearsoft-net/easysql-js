@@ -1,7 +1,6 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /**
  * Explicit connection configuration for an Oracle Database server.
@@ -23,9 +22,7 @@ export interface OracleConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "oracle";
-}
+export type IntrospectResult = EngineSchema<"oracle">;
 
 /** Column metadata returned by `connection.execute`. */
 export interface OracleColumnMetadata {
@@ -67,25 +64,4 @@ export interface OracleGetConnectionOptions {
 export interface OracleDriver {
   readonly OUT_FORMAT_OBJECT: number;
   getConnection(options: OracleGetConnectionOptions): Promise<OracleConnection>;
-}
-
-export type { TableRow } from "../types.js";
-
-export interface ColumnRow {
-  table_name: string;
-  column_name: string;
-  data_type: string;
-  nullable: string;
-  data_default: string | null;
-  column_id: number | null;
-}
-
-export interface ConstraintColumnRow {
-  table_name: string;
-  column_name: string;
-}
-
-export interface ForeignKeyRow extends ConstraintColumnRow {
-  foreign_table: string;
-  foreign_column: string;
 }

@@ -12,17 +12,16 @@
 
 import firebird from "node-firebird";
 import { BaseConnector } from "../base-connector.js";
+import { toNullableNumber } from "../internal.js";
+import type { ForeignKeyRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, foreignKeysQuery, tablesQuery } from "./queries.js";
 import type {
   ColumnRow,
   FirebirdConnectionConfig,
   FirebirdField,
-  ForeignKeyRow,
   IntrospectResult,
   RawColumn,
-  RawQueryResult,
   RawTable,
-  TableRow,
 } from "./types.js";
 
 export class FirebirdConnector extends BaseConnector<firebird.Database> {
@@ -97,7 +96,7 @@ export class FirebirdConnector extends BaseConnector<firebird.Database> {
 
         const fkByColumn = new Map<string, { table: string; column: string }>();
         for (const fk of foreignKeys) {
-          fkByColumn.set(trimName(fk.fk_column), {
+          fkByColumn.set(trimName(fk.column_name), {
             table: trimName(fk.ref_table),
             column: trimName(fk.ref_column),
           });
@@ -175,12 +174,6 @@ function sanitizeDefault(value: string | null): string | null {
 /** Trims Firebird's fixed-width, space-padded catalog names. */
 function trimName(value: string | null | undefined): string {
   return (value ?? "").trim();
-}
-
-function toNullableNumber(value: number | string | bigint | null | undefined): number | null {
-  if (value === null || value === undefined) return null;
-  const numeric = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(numeric) ? numeric : null;
 }
 
 /**

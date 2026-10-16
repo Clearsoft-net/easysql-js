@@ -15,16 +15,10 @@
 import type { ConnectionPool, IColumnMetadata, IRecordSet } from "mssql";
 import sql from "mssql";
 import { BaseConnector } from "../base-connector.js";
+import { toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
-import type {
-  ColumnRow,
-  IntrospectResult,
-  RawColumn,
-  RawQueryResult,
-  RawTable,
-  SqlServerConnectionConfig,
-  TableRow,
-} from "./types.js";
+import type { IntrospectResult, RawColumn, RawTable, SqlServerConnectionConfig } from "./types.js";
 
 export class SqlServerConnector extends BaseConnector<ConnectionPool> {
   private readonly config: Required<
@@ -116,13 +110,13 @@ function toRawColumn(row: ColumnRow): RawColumn {
   return {
     name: row.column_name,
     dataType: row.data_type,
-    nullable: row.is_nullable,
-    primaryKey: Boolean(row.is_primary_key),
-    defaultValue: row.default_value,
+    nullable: row.is_nullable === true,
+    primaryKey: Boolean(row.is_primary),
+    defaultValue: row.column_default,
     foreignKey:
       row.foreign_table && row.foreign_column
         ? { table: row.foreign_table, column: row.foreign_column }
         : null,
-    ordinal: row.ordinal,
+    ordinal: toOrdinal(row.ordinal),
   };
 }

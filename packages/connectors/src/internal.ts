@@ -28,6 +28,39 @@ export function notConnectedError(name: string): Error {
 }
 
 /**
+ * Normalises a driver's ordinal (a number, a numeric string, `bigint` or `null`)
+ * to the {@link RawColumn.ordinal} shape, dropping anything non-finite.
+ */
+export function toOrdinal(value: string | number | bigint | null | undefined): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : undefined;
+}
+
+/**
+ * Normalises a driver's row estimate (a number, a numeric string, `bigint` or
+ * `null`) to `number | null`, dropping anything non-finite.
+ */
+export function toNullableNumber(
+  value: string | number | bigint | null | undefined,
+): number | null {
+  if (value === null || value === undefined) return null;
+  const numeric = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+/** Groups rows by a string key, preserving the first-seen order. */
+export function groupBy<T>(rows: T[], key: (row: T) => string): Map<string, T[]> {
+  const grouped = new Map<string, T[]>();
+  for (const row of rows) {
+    const group = grouped.get(key(row));
+    if (group) group.push(row);
+    else grouped.set(key(row), [row]);
+  }
+  return grouped;
+}
+
+/**
  * Assembles the public {@link QueryResult} from an engine's {@link RawQueryResult}.
  * `rowCount` defaults to the number of returned rows, which every engine except
  * the ones reporting an affected-row count relies on.

@@ -10,18 +10,19 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { SqlServerConnectionConfig } from "../../src/sqlserver/index";
 import { SqlServerConnector } from "../../src/sqlserver/index";
+import { decodeTestUrl, skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_SQLSERVER_URL;
 const enabled = Boolean(url);
 
 function configFromUrl(raw: string): SqlServerConnectionConfig {
-  const parsed = new URL(raw);
+  const { host, port, user, password, database } = decodeTestUrl(raw);
   return {
-    host: parsed.hostname,
-    port: parsed.port ? Number(parsed.port) : 1433,
-    user: decodeURIComponent(parsed.username),
-    password: decodeURIComponent(parsed.password),
-    database: parsed.pathname.replace(/^\//, ""),
+    host,
+    port: port ?? 1433,
+    user,
+    password,
+    database,
     // The stock local/CI image uses a self-signed certificate.
     trustServerCertificate: true,
   };
@@ -55,8 +56,4 @@ describe.skipIf(!enabled)("SqlServerConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("SqlServerConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_SQLSERVER_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("SqlServerConnector", "EASYSQL_TEST_SQLSERVER_URL", enabled);

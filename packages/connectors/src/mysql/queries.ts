@@ -8,7 +8,7 @@
  */
 
 import type { CompiledQuery } from "@easysql/query-builder";
-import { eq, isNotNull, lit, select } from "@easysql/query-builder";
+import { caseWhen, eq, isNotNull, lit, select } from "@easysql/query-builder";
 
 /** Lists the base tables in the configured schema. */
 export function tablesQuery(database: string): CompiledQuery {
@@ -27,10 +27,10 @@ export function columnsQuery(database: string, table: string): CompiledQuery {
     data_type: "c.DATA_TYPE",
     is_nullable: "c.IS_NULLABLE",
     column_default: "c.COLUMN_DEFAULT",
-    column_key: "c.COLUMN_KEY",
-    referenced_table_name: "k.REFERENCED_TABLE_NAME",
-    referenced_column_name: "k.REFERENCED_COLUMN_NAME",
-    ordinal_position: "c.ORDINAL_POSITION",
+    is_primary: caseWhen(eq("c.COLUMN_KEY", lit("PRI")), lit(1), lit(0)),
+    foreign_table: "k.REFERENCED_TABLE_NAME",
+    foreign_column: "k.REFERENCED_COLUMN_NAME",
+    ordinal: "c.ORDINAL_POSITION",
   })
     .from("information_schema.COLUMNS c")
     .leftJoin("information_schema.KEY_COLUMN_USAGE k", [

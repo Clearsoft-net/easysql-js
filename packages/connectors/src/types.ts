@@ -1,4 +1,4 @@
-import type { Connector, ConnectorEngine as SchemaEngine } from "@easysql/common";
+import type { Connector, RawSchema, ConnectorEngine as SchemaEngine } from "@easysql/common";
 import type { BigQueryConnectionConfig } from "./bigquery/types.js";
 import type { ClickhouseConnectionConfig } from "./clickhouse/types.js";
 import type { D1ConnectionConfig } from "./d1/types.js";
@@ -21,6 +21,13 @@ import type { TrinoConnectionConfig } from "./trino/types.js";
 
 export type { Connector, QueryResult } from "@easysql/common";
 export type { PostgresProvider, PostgresTransport } from "./postgres/types.js";
+
+/**
+ * A connector's introspection result: the shared {@link RawSchema} tagged with
+ * the engine that produced it. Each engine aliases this as its public
+ * `IntrospectResult`.
+ */
+export type EngineSchema<E extends SchemaEngine> = RawSchema & { engine: E };
 
 /**
  * Engines implemented by this package. MariaDB is served by the MySQL engine,
@@ -201,6 +208,63 @@ export interface TableRow {
   rows_approx?: string | number | bigint | null;
   table_id?: number;
   schema_name?: string;
+}
+
+/**
+ * Internal — a (table, column) key row, for the engines that return primary keys
+ * as their own result set instead of a flag on the column row.
+ */
+export interface KeyColumnRow {
+  table_name: string;
+  column_name: string;
+}
+
+/** Internal — a foreign-key column row: the referencing column and its target. */
+export interface ForeignKeyRow {
+  table_name: string;
+  column_name: string;
+  ref_table: string;
+  ref_column: string;
+}
+
+/**
+ * Internal — one column of an engine's column-listing query, under canonical
+ * aliases. A field is omitted when the engine does not provide it (ClickHouse
+ * derives nullability from the type; DuckDB, Oracle, Db2 and HANA return keys
+ * as their own result set). The value types stay permissive because drivers
+ * disagree (`is_nullable` is a boolean in PostgreSQL, `"YES"`/`"NO"` in MySQL).
+ */
+export interface ColumnRow {
+  column_name: string;
+  data_type: string;
+  is_nullable?: string | boolean;
+  column_default?: string | null;
+  is_primary?: string | boolean | number | null;
+  foreign_table?: string | null;
+  foreign_column?: string | null;
+  ordinal?: string | number;
+  table_name?: string;
+  table_id?: number;
+  schema_name?: string;
+}
+
+/** Internal — the SQLite family's `PRAGMA table_info` row. */
+export interface PragmaColumnRow {
+  cid: number;
+  name: string;
+  type: string;
+  notnull: number;
+  dflt_value: string | null;
+  pk: number;
+}
+
+/** Internal — the SQLite family's `PRAGMA foreign_key_list` row. */
+export interface PragmaForeignKeyRow {
+  id: number;
+  seq: number;
+  table: string;
+  from: string;
+  to: string | null;
 }
 
 /**

@@ -1,7 +1,6 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Configuration for a Firebird database (remote or embedded). */
 export interface FirebirdConnectionConfig {
@@ -19,9 +18,7 @@ export interface FirebirdConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "firebird";
-}
+export type IntrospectResult = EngineSchema<"firebird">;
 
 /** A row of `RDB$RELATION_FIELDS` enriched with catalog joins. */
 export interface ColumnRow {
@@ -38,17 +35,6 @@ export interface ColumnRow {
   field_scale: number | null;
   pk: number | null;
 }
-
-/** A row of the foreign-key segment query. */
-export interface ForeignKeyRow {
-  fk_name: string;
-  fk_column: string;
-  ref_table: string;
-  ref_column: string;
-  segment: number | null;
-}
-
-export type { TableRow } from "../types.js";
 
 /**
  * The subset of the driver's column metadata that is used here. Declared

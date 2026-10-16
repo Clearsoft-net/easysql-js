@@ -1,7 +1,6 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Configuration for a Trino coordinator. */
 export interface TrinoConnectionConfig {
@@ -23,9 +22,7 @@ export interface TrinoConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "trino";
-}
+export type IntrospectResult = EngineSchema<"trino">;
 
 /** Internal — one page of a Trino query response, as returned by the REST API. */
 export interface QueryPage {
@@ -48,15 +45,6 @@ export interface QueryPage {
  */
 export interface TrinoHttpClient {
   request<T>(config: { method?: string; url: string; data?: unknown }): Promise<T>;
-}
-
-/** Internal — row shape of the `information_schema.columns` query. */
-export interface ColumnRow {
-  column_name: string;
-  data_type: string;
-  is_nullable: string;
-  column_default: string | null;
-  ordinal_position: number | string;
 }
 
 /** Internal — result of draining every page of one Trino query. */

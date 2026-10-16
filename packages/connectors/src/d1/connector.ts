@@ -21,6 +21,8 @@
 
 import type { CompiledQuery } from "@easysql/query-builder";
 import { BaseConnector } from "../base-connector.js";
+import { PROBE_SQL } from "../helpers.js";
+import type { PragmaColumnRow, PragmaForeignKeyRow, RawQueryResult } from "../types.js";
 import {
   foreignKeyListFallbackQuery,
   foreignKeyListQuery,
@@ -29,13 +31,10 @@ import {
   tablesQuery,
 } from "./queries.js";
 import type {
-  ColumnRow,
   D1ConnectionConfig,
   D1ResponseBody,
-  ForeignKeyRow,
   IntrospectResult,
   RawColumn,
-  RawQueryResult,
   RawTable,
 } from "./types.js";
 
@@ -63,7 +62,7 @@ export class D1Connector extends BaseConnector<boolean> {
   /** Validates the configuration and verifies the database is reachable. */
   protected async openHandle(): Promise<boolean> {
     // A cheap round-trip proves the account, database and token all work.
-    await this.query("SELECT 1");
+    await this.query(PROBE_SQL);
     return true;
   }
 
@@ -81,12 +80,12 @@ export class D1Connector extends BaseConnector<boolean> {
       const tables: RawTable[] = [];
       for (const row of tableRows) {
         const name = String(row.name);
-        const columns = await this.readPragma<ColumnRow>(
+        const columns = await this.readPragma<PragmaColumnRow>(
           name,
           tableInfoQuery,
           tableInfoFallbackQuery,
         );
-        const foreignKeys = await this.readPragma<ForeignKeyRow>(
+        const foreignKeys = await this.readPragma<PragmaForeignKeyRow>(
           name,
           foreignKeyListQuery,
           foreignKeyListFallbackQuery,
@@ -94,6 +93,7 @@ export class D1Connector extends BaseConnector<boolean> {
 
         const fkByColumn = new Map<string, { table: string; column: string }>();
         for (const fk of foreignKeys) {
+          if (fk.to === null) continue;
           fkByColumn.set(fk.from, { table: fk.table, column: fk.to });
         }
 
@@ -202,7 +202,7 @@ export class D1Connector extends BaseConnector<boolean> {
 }
 
 function toRawColumn(
-  row: ColumnRow,
+  row: PragmaColumnRow,
   fkByColumn: Map<string, { table: string; column: string }>,
 ): RawColumn {
   return {

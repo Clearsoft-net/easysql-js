@@ -11,6 +11,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { D1ConnectionConfig } from "../../src/d1/index";
 import { D1Connector } from "../../src/d1/index";
+import { skipSuite } from "./support";
 
 const accountId = process.env.EASYSQL_TEST_D1_ACCOUNT_ID;
 const databaseId = process.env.EASYSQL_TEST_D1_DATABASE_ID;
@@ -97,8 +98,4 @@ describe.skipIf(!enabled)("D1Connector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("D1Connector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_D1_* credentials", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("D1Connector", "EASYSQL_TEST_D1_* credentials", enabled);

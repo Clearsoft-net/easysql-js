@@ -14,6 +14,7 @@ import pg from "pg";
 import type { PostgresConnectionConfig } from "../../src/postgres/index";
 import { PostgresConnector } from "../../src/postgres/index";
 import { failureOf } from "./failure";
+import { decodeTestUrl, skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_POSTGRES_URL;
 const enabled = Boolean(url);
@@ -36,14 +37,8 @@ const DDL = [
 ];
 
 function configFromUrl(raw: string): PostgresConnectionConfig {
-  const parsed = new URL(raw);
-  return {
-    host: parsed.hostname,
-    port: parsed.port ? Number(parsed.port) : 5432,
-    user: decodeURIComponent(parsed.username),
-    password: decodeURIComponent(parsed.password),
-    database: parsed.pathname.replace(/^\//, ""),
-  };
+  const { host, port, user, password, database } = decodeTestUrl(raw);
+  return { host, port: port ?? 5432, user, password, database };
 }
 
 describe.skipIf(!enabled)("PostgresConnector integration", () => {
@@ -126,8 +121,4 @@ describe.skipIf(!enabled)("PostgresConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("PostgresConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_POSTGRES_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("PostgresConnector", "EASYSQL_TEST_POSTGRES_URL", enabled);

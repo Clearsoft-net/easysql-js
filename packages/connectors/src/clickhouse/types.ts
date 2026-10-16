@@ -1,7 +1,6 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Explicit connection configuration for a ClickHouse server (HTTP interface). */
 export interface ClickhouseConnectionConfig {
@@ -17,17 +16,4 @@ export interface ClickhouseConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "clickhouse";
-}
-
-export type { TableRow } from "../types.js";
-
-/** Internal — `system.columns` row returned by the driver. */
-export interface ColumnRow {
-  column_name: string;
-  data_type: string;
-  column_default: string | null;
-  is_primary: number | boolean;
-  ordinal: string | number;
-}
+export type IntrospectResult = EngineSchema<"clickhouse">;

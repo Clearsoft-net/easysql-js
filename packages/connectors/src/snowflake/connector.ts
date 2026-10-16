@@ -24,16 +24,10 @@
 
 import snowflake from "snowflake-sdk";
 import { BaseConnector } from "../base-connector.js";
+import { toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
-import type {
-  ColumnRow,
-  IntrospectResult,
-  RawColumn,
-  RawQueryResult,
-  RawTable,
-  SnowflakeConnectionConfig,
-  TableRow,
-} from "./types.js";
+import type { IntrospectResult, RawColumn, RawTable, SnowflakeConnectionConfig } from "./types.js";
 
 /** Default connection timeout; cloud warehouses are slower to connect. */
 const DEFAULT_CONNECT_TIMEOUT_MS = 60_000;
@@ -107,9 +101,9 @@ export class SnowflakeConnector extends BaseConnector<snowflake.Connection> {
 
       const columnsByTable = new Map<string, RawColumn[]>();
       for (const row of columnRows) {
-        const columns = columnsByTable.get(row.table_name) ?? [];
+        const columns = columnsByTable.get(row.table_name ?? "") ?? [];
         columns.push(toRawColumn(row));
-        columnsByTable.set(row.table_name, columns);
+        columnsByTable.set(row.table_name ?? "", columns);
       }
 
       const tables: RawTable[] = tableRows
@@ -200,12 +194,12 @@ function toRawColumn(row: ColumnRow): RawColumn {
     name: row.column_name,
     dataType: row.data_type,
     nullable: row.is_nullable === true || row.is_nullable === "YES",
-    primaryKey: row.primary_key === true || row.primary_key === 1 || row.primary_key === "1",
+    primaryKey: row.is_primary === true || row.is_primary === 1 || row.is_primary === "1",
     defaultValue: row.column_default,
     foreignKey:
       row.foreign_table && row.foreign_column
         ? { table: row.foreign_table, column: row.foreign_column }
         : null,
-    ordinal: Number(row.ordinal_position),
+    ordinal: toOrdinal(row.ordinal),
   };
 }

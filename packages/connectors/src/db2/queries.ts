@@ -28,7 +28,7 @@ export function columnsQuery(): CompiledQuery {
     table_name: "TABNAME",
     column_name: "COLNAME",
     data_type: "TYPENAME",
-    nulls: ref('"NULLS"'),
+    is_nullable: ref('"NULLS"'),
     column_default: ref('"DEFAULT"'),
     ordinal: "COLNO",
   })

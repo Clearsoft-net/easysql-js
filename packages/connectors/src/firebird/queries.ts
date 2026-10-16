@@ -67,11 +67,9 @@ export function columnsQuery(table: string): CompiledQuery {
  */
 export function foreignKeysQuery(table: string): CompiledQuery {
   return select({
-    fk_column: fn("TRIM", "fk.RDB$FIELD_NAME"),
+    column_name: fn("TRIM", "fk.RDB$FIELD_NAME"),
     ref_table: fn("TRIM", "fk.RDB$RELATION_NAME"),
     ref_column: fn("TRIM", "refs.RDB$FIELD_NAME"),
-    segment: "fk.RDB$FIELD_POSITION",
-    fk_name: fn("TRIM", "rc.RDB$CONSTRAINT_NAME"),
   })
     .from("RDB$RELATION_CONSTRAINTS rc")
     .innerJoin("RDB$REF_CONSTRAINTS refc", "refc.RDB$CONSTRAINT_NAME", "rc.RDB$CONSTRAINT_NAME")

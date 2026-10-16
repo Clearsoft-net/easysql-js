@@ -11,18 +11,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { HanaConnectionConfig } from "../../src/hana/index";
 import { HanaConnector } from "../../src/hana/index";
+import { decodeTestUrl, skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_HANA_URL;
 const enabled = Boolean(url);
 
 function configFromUrl(raw: string): HanaConnectionConfig {
-  const parsed = new URL(raw);
-  return {
-    host: parsed.hostname,
-    port: parsed.port ? Number(parsed.port) : 30_015,
-    user: decodeURIComponent(parsed.username),
-    password: decodeURIComponent(parsed.password),
-  };
+  const { host, port, user, password } = decodeTestUrl(raw);
+  return { host, port: port ?? 30_015, user, password };
 }
 
 describe.skipIf(!enabled)("HanaConnector integration", () => {
@@ -52,8 +48,4 @@ describe.skipIf(!enabled)("HanaConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("HanaConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_HANA_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("HanaConnector", "EASYSQL_TEST_HANA_URL", enabled);

@@ -9,16 +9,10 @@
 
 import { type Connection, createConnection } from "mysql2/promise";
 import { BaseConnector } from "../base-connector.js";
+import { toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
-import type {
-  ColumnRow,
-  IntrospectResult,
-  MysqlConnectionConfig,
-  RawColumn,
-  RawQueryResult,
-  RawTable,
-  TableRow,
-} from "./types.js";
+import type { IntrospectResult, MysqlConnectionConfig, RawColumn, RawTable } from "./types.js";
 
 export class MysqlConnector extends BaseConnector<Connection> {
   private readonly config: Required<
@@ -100,12 +94,12 @@ function toRawColumn(row: ColumnRow): RawColumn {
     name: row.column_name,
     dataType: row.data_type,
     nullable: row.is_nullable === "YES",
-    primaryKey: row.column_key === "PRI",
+    primaryKey: Number(row.is_primary) === 1,
     defaultValue: row.column_default,
     foreignKey:
-      row.referenced_table_name && row.referenced_column_name
-        ? { table: row.referenced_table_name, column: row.referenced_column_name }
+      row.foreign_table && row.foreign_column
+        ? { table: row.foreign_table, column: row.foreign_column }
         : null,
-    ordinal: row.ordinal_position,
+    ordinal: toOrdinal(row.ordinal),
   };
 }

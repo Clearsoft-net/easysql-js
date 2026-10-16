@@ -28,7 +28,7 @@ export function columnsQuery(tableName: string): CompiledQuery {
     data_type: "data_type",
     is_nullable: "is_nullable",
     column_default: "column_default",
-    ordinal_position: "ordinal_position",
+    ordinal: "ordinal_position",
   })
     .from("information_schema.columns")
     .where("table_schema", expr("current_schema"))

@@ -11,17 +11,16 @@
 import type { DuckDBConnection, DuckDBValue } from "@duckdb/node-api";
 import { DuckDBInstance } from "@duckdb/node-api";
 import { BaseConnector } from "../base-connector.js";
+import { toNullableNumber, toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, constraintsQuery, tablesQuery } from "./queries.js";
 import type {
-  ColumnRow,
   ConstraintRow,
   DuckDbConnectionConfig,
   DuckDbHandles,
   IntrospectResult,
   RawColumn,
-  RawQueryResult,
   RawTable,
-  TableRow,
 } from "./types.js";
 
 export class DuckDbConnector extends BaseConnector<DuckDbHandles> {
@@ -157,18 +156,12 @@ function toRawColumn(
     dataType: row.data_type,
     // A primary key is never nullable; DuckDB reports NOT NULL separately,
     // but the constraint is authoritative.
-    nullable: primaryKey ? false : row.is_nullable,
+    nullable: primaryKey ? false : row.is_nullable === true,
     primaryKey,
     defaultValue: row.column_default,
     foreignKey: foreignKeys.get(row.column_name) ?? null,
-    ordinal: row.column_index,
+    ordinal: toOrdinal(row.ordinal),
   };
-}
-
-function toNullableNumber(value: string | number | bigint | null | undefined): number | null {
-  if (value === null || value === undefined) return null;
-  const numeric = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(numeric) ? numeric : null;
 }
 
 /**

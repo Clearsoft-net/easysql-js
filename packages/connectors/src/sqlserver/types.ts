@@ -1,7 +1,6 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Explicit connection configuration for a Microsoft SQL Server instance. */
 export interface SqlServerConnectionConfig {
@@ -19,23 +18,4 @@ export interface SqlServerConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "sqlserver";
-}
-
-export type { TableRow } from "../types.js";
-
-/** Internal — row shape of the `sys.columns` introspection query. */
-export interface ColumnRow {
-  table_id: number;
-  schema_name: string;
-  table_name: string;
-  column_name: string;
-  data_type: string;
-  is_nullable: boolean;
-  default_value: string | null;
-  is_primary_key: number | boolean;
-  foreign_table: string | null;
-  foreign_column: string | null;
-  ordinal: number;
-}
+export type IntrospectResult = EngineSchema<"sqlserver">;

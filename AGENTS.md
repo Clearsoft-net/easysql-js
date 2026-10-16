@@ -179,13 +179,16 @@ Every hand-written source directory declares its types in that directory's
 |---|---|
 | `packages/common/src/` | every contract: `RawSchema`, `TableSchema`/`ColumnSchema`, `SchemaType`, `Connector`, `QueryResult`, `ParsedConnection` |
 | `packages/query-builder/src/` | the builder's node model: `Operand`, `Node`, `SelectSpec`, `CompiledQuery`, `PlaceholderStyle`, `CompileOptions` |
-| `packages/connectors/src/` | engine IDs, connection and factory option types, `NormalizedConnection`, and the shared `TableRow` (the table-listing row every engine maps to) |
+| `packages/connectors/src/` | engine IDs, connection and factory option types, `NormalizedConnection`, and the shared catalog row shapes (`TableRow`, `ColumnRow`, `KeyColumnRow`, `ForeignKeyRow`, plus the SQLite family's `PragmaColumnRow`/`PragmaForeignKeyRow`) |
 | `packages/connectors/src/<engine>/` | engine config (`MysqlConnectionConfig`), `IntrospectResult`, and the driver row shapes of that engine's queries |
 
 Rules that make it work:
 
 - No other module declares `interface`/`type`/`enum`; they `import type` from
-  `./types.js`.
+  their directory's `./types.js`. Types that live in a parent directory's
+  `types.ts` (e.g. an engine's connector importing the shared catalog rows from
+  `../types.js`) are imported from there directly, not re-exported through the
+  engine's `types.ts`.
 - `types.ts` exports everything so sibling modules can import it. **The public API
   is the `index.ts` barrels**, not `types.ts`: internal types
   (`NormalizedConnection`, `ColumnRow`) are marked *Internal* in their doc comment

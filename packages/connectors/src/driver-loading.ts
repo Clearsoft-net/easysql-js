@@ -31,3 +31,18 @@ function isMissingModule(error: unknown): boolean {
     code === "ERR_UNKNOWN_BUILTIN_MODULE"
   );
 }
+
+/**
+ * Memoises a lazy driver import so the module (often a native binding) is loaded
+ * at most once; a failed import is retried on the next call.
+ */
+export function memoizedImport<T>(load: () => Promise<T>): () => Promise<T> {
+  let promise: Promise<T> | null = null;
+  return () => {
+    promise ??= load().catch((error: unknown) => {
+      promise = null;
+      throw error;
+    });
+    return promise;
+  };
+}

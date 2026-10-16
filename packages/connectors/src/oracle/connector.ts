@@ -16,19 +16,16 @@
 import oracledb from "oracledb";
 import { BaseConnector } from "../base-connector.js";
 import { columnKey } from "../helpers.js";
+import { toNullableNumber, toOrdinal } from "../internal.js";
+import type { ColumnRow, ForeignKeyRow, KeyColumnRow, RawQueryResult, TableRow } from "../types.js";
 import { columnsQuery, foreignKeysQuery, primaryKeysQuery, tablesQuery } from "./queries.js";
 import type {
-  ColumnRow,
-  ConstraintColumnRow,
-  ForeignKeyRow,
   IntrospectResult,
   OracleConnection,
   OracleConnectionConfig,
   OracleDriver,
   RawColumn,
-  RawQueryResult,
   RawTable,
-  TableRow,
 } from "./types.js";
 
 const driver = oracledb as OracleDriver;
@@ -102,10 +99,7 @@ export class OracleConnector extends BaseConnector<OracleConnection> {
     try {
       const tableRows = await this.query<TableRow>(connection, tablesQuery().text);
       const columnRows = await this.query<ColumnRow>(connection, columnsQuery().text);
-      const primaryKeyRows = await this.query<ConstraintColumnRow>(
-        connection,
-        primaryKeysQuery().text,
-      );
+      const primaryKeyRows = await this.query<KeyColumnRow>(connection, primaryKeysQuery().text);
       const foreignKeyRows = await this.query<ForeignKeyRow>(connection, foreignKeysQuery().text);
 
       const tables = new Map<string, RawTable>();
@@ -113,31 +107,25 @@ export class OracleConnector extends BaseConnector<OracleConnection> {
         tables.set(row.table_name, {
           name: row.table_name,
           columns: [],
-          rowsApprox:
-            row.rows_approx === null || row.rows_approx === undefined
-              ? null
-              : Number(row.rows_approx),
+          rowsApprox: toNullableNumber(row.rows_approx),
         });
       }
 
       const columns = new Map<string, RawColumn>();
       for (const row of columnRows) {
-        const table = tables.get(row.table_name);
+        const table = tables.get(row.table_name ?? "");
         if (!table) continue;
         const column: RawColumn = {
           name: row.column_name,
           dataType: row.data_type,
-          nullable: row.nullable === "Y",
-          defaultValue: normalizeDefault(row.data_default),
+          nullable: row.is_nullable === "Y",
+          defaultValue: normalizeDefault(row.column_default ?? null),
           primaryKey: false,
           foreignKey: null,
-          ordinal:
-            row.column_id === null || row.column_id === undefined
-              ? undefined
-              : Number(row.column_id),
+          ordinal: toOrdinal(row.ordinal),
         };
         table.columns.push(column);
-        columns.set(columnKey(row.table_name, row.column_name), column);
+        columns.set(columnKey(row.table_name ?? "", row.column_name), column);
       }
 
       for (const row of primaryKeyRows) {
@@ -148,7 +136,7 @@ export class OracleConnector extends BaseConnector<OracleConnection> {
       for (const row of foreignKeyRows) {
         const column = columns.get(columnKey(row.table_name, row.column_name));
         if (column) {
-          column.foreignKey = { table: row.foreign_table, column: row.foreign_column };
+          column.foreignKey = { table: row.ref_table, column: row.ref_column };
         }
       }
 

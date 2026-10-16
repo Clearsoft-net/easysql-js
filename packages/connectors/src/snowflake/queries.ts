@@ -33,8 +33,8 @@ export function columnsQuery(): CompiledQuery {
     data_type: "c.DATA_TYPE",
     is_nullable: "c.IS_NULLABLE",
     column_default: "c.COLUMN_DEFAULT",
-    ordinal_position: "c.ORDINAL_POSITION",
-    primary_key: caseWhen(isNull("pk.CONSTRAINT_TYPE"), 0, 1),
+    ordinal: "c.ORDINAL_POSITION",
+    is_primary: caseWhen(isNull("pk.CONSTRAINT_TYPE"), 0, 1),
     foreign_table: "fk.TABLE_NAME",
     foreign_column: "fk.COLUMN_NAME",
   })

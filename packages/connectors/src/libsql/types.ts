@@ -1,7 +1,6 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Configuration for a local libSQL file or a remote Turso database. */
 export interface LibSqlConnectionConfig {
@@ -17,23 +16,4 @@ export interface LibSqlConnectionConfig {
   readonly?: boolean;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "libsql";
-}
-
-export interface ColumnRow {
-  cid: number;
-  name: string;
-  type: string;
-  notnull: number;
-  dflt_value: string | null;
-  pk: number;
-}
-
-export interface ForeignKeyRow {
-  id: number;
-  seq: number;
-  table: string;
-  from: string;
-  to: string | null;
-}
+export type IntrospectResult = EngineSchema<"libsql">;

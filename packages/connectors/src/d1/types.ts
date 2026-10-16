@@ -7,10 +7,9 @@
  * an API token.
  */
 
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Configuration for a Cloudflare D1 database reached over the REST API. */
 export interface D1ConnectionConfig {
@@ -21,9 +20,7 @@ export interface D1ConnectionConfig {
   baseUrl?: string;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "d1";
-}
+export type IntrospectResult = EngineSchema<"d1">;
 
 /** Internal — error entry of a Cloudflare API response envelope. */
 export interface D1Error {
@@ -52,23 +49,4 @@ export interface D1ResponseBody {
   errors?: D1Error[] | null;
   result?: D1QueryResult[] | null;
   success?: boolean;
-}
-
-/** Internal — `PRAGMA table_info` row. */
-export interface ColumnRow {
-  cid: number;
-  name: string;
-  type: string;
-  notnull: number;
-  dflt_value: string | null;
-  pk: number;
-}
-
-/** Internal — `PRAGMA foreign_key_list` row. */
-export interface ForeignKeyRow {
-  id: number;
-  seq: number;
-  table: string;
-  from: string;
-  to: string;
 }

@@ -1,7 +1,6 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Configuration for a local SQLite database. */
 export interface SqliteConnectionConfig {
@@ -18,25 +17,4 @@ export interface SqliteConnectionConfig {
   socket?: never;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "sqlite";
-}
-
-/** Internal — `PRAGMA table_info` row. */
-export interface ColumnRow {
-  cid: number;
-  name: string;
-  type: string;
-  notnull: number;
-  dflt_value: string | null;
-  pk: number;
-}
-
-/** Internal — `PRAGMA foreign_key_list` row. */
-export interface ForeignKeyRow {
-  id: number;
-  seq: number;
-  table: string;
-  from: string;
-  to: string;
-}
+export type IntrospectResult = EngineSchema<"sqlite">;

@@ -17,14 +17,15 @@
 import type { Trino as TrinoClient } from "trino-client";
 import { BasicAuth, Trino } from "trino-client";
 import { BaseConnector } from "../base-connector.js";
+import { PROBE_SQL } from "../helpers.js";
+import { toOrdinal } from "../internal.js";
+import type { ColumnRow, RawQueryResult } from "../types.js";
 import { columnsQuery, tablesQuery } from "./queries.js";
 import type {
   Collected,
-  ColumnRow,
   IntrospectResult,
   QueryPage,
   RawColumn,
-  RawQueryResult,
   RawTable,
   TrinoConnectionConfig,
   TrinoHttpClient,
@@ -60,7 +61,7 @@ export class TrinoConnector extends BaseConnector<TrinoClient> {
     });
     // Trino.create() only stores options; the first query is what actually
     // reaches the coordinator, so probe once to fail fast on a bad endpoint.
-    await collect(client, "SELECT 1");
+    await collect(client, PROBE_SQL);
     return client;
   }
 
@@ -153,12 +154,12 @@ function toRawColumn(row: ColumnRow): RawColumn {
     name: row.column_name,
     dataType: row.data_type,
     // information_schema reports the string "YES"/"NO".
-    nullable: row.is_nullable.toUpperCase() === "YES",
+    nullable: String(row.is_nullable).toUpperCase() === "YES",
     // Trino exposes no key metadata through information_schema.
     primaryKey: false,
     defaultValue: row.column_default,
     foreignKey: null,
-    ordinal: Number(row.ordinal_position),
+    ordinal: toOrdinal(row.ordinal),
   };
 }
 

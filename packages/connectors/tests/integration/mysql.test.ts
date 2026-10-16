@@ -14,6 +14,7 @@ import { type Connection, createConnection } from "mysql2/promise";
 import type { MysqlConnectionConfig } from "../../src/mysql/index";
 import { MysqlConnector } from "../../src/mysql/index";
 import { failureOf } from "./failure";
+import { decodeTestUrl, skipSuite } from "./support";
 
 const url = process.env.EASYSQL_TEST_MYSQL_URL;
 const enabled = Boolean(url);
@@ -37,14 +38,8 @@ const DDL = [
 ];
 
 function configFromUrl(raw: string): MysqlConnectionConfig {
-  const parsed = new URL(raw);
-  return {
-    host: parsed.hostname,
-    port: parsed.port ? Number(parsed.port) : 3306,
-    user: decodeURIComponent(parsed.username),
-    password: decodeURIComponent(parsed.password),
-    database: parsed.pathname.replace(/^\//, ""),
-  };
+  const { host, port, user, password, database } = decodeTestUrl(raw);
+  return { host, port: port ?? 3306, user, password, database };
 }
 
 describe.skipIf(!enabled)("MysqlConnector integration", () => {
@@ -123,8 +118,4 @@ describe.skipIf(!enabled)("MysqlConnector integration", () => {
   });
 });
 
-describe.skipIf(enabled)("MysqlConnector integration (skipped)", () => {
-  it("is skipped without EASYSQL_TEST_MYSQL_URL", () => {
-    expect(enabled).toBe(false);
-  });
-});
+skipSuite("MysqlConnector", "EASYSQL_TEST_MYSQL_URL", enabled);

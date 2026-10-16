@@ -13,7 +13,10 @@
 
 import type { Connection } from "@sap/hana-client";
 import { BaseConnector } from "../base-connector.js";
+import { memoizedImport } from "../driver-loading.js";
 import { columnKey } from "../helpers.js";
+import { groupBy, toOrdinal } from "../internal.js";
+import type { ColumnRow, ForeignKeyRow, KeyColumnRow, RawQueryResult, TableRow } from "../types.js";
 import {
   columnsQuery,
   foreignKeysQuery,
@@ -22,33 +25,20 @@ import {
   tablesQuery,
 } from "./queries.js";
 import type {
-  ColumnRow,
-  ForeignKeyRow,
   HanaConnectionConfig,
   HanaModule,
   IntrospectResult,
-  KeyColumnRow,
   RawColumn,
-  RawQueryResult,
   RawTable,
   RowCountRow,
-  TableRow,
 } from "./types.js";
-
-let driverPromise: Promise<HanaModule> | null = null;
 
 /**
  * `@sap/hana-client` is a native, optional peer dependency, so it is imported
  * lazily when a connection is actually opened. Importing the connector (and the
  * unit tests) therefore never requires the native binding to be present.
  */
-function loadDriver(): Promise<HanaModule> {
-  driverPromise ??= import("@sap/hana-client").catch((error: unknown) => {
-    driverPromise = null;
-    throw error;
-  });
-  return driverPromise;
-}
+const loadDriver = memoizedImport<HanaModule>(() => import("@sap/hana-client"));
 
 export class HanaConnector extends BaseConnector<Connection> {
   private readonly config: Required<
@@ -114,7 +104,7 @@ export class HanaConnector extends BaseConnector<Connection> {
       const foreignKeyRows = (await this.exec<ForeignKeyRow[]>(foreignKeysQuery().text)) ?? [];
       const rowCounts = await this.loadRowCounts();
 
-      const columnsByTable = groupBy(columnRows, (row) => row.table_name);
+      const columnsByTable = groupBy(columnRows, (row) => row.table_name ?? "");
       const primaryKeys = new Set(
         primaryKeyRows.map((row) => columnKey(row.table_name, row.column_name)),
       );
@@ -191,7 +181,7 @@ function toRawColumn(
   primaryKeys: Set<string>,
   foreignKeys: Map<string, { table: string; column: string }>,
 ): RawColumn {
-  const key = columnKey(row.table_name, row.column_name);
+  const key = columnKey(row.table_name ?? "", row.column_name);
   return {
     name: row.column_name,
     dataType: row.data_type,
@@ -199,16 +189,6 @@ function toRawColumn(
     primaryKey: primaryKeys.has(key),
     defaultValue: row.column_default,
     foreignKey: foreignKeys.get(key) ?? null,
-    ordinal: row.ordinal,
+    ordinal: toOrdinal(row.ordinal),
   };
-}
-
-function groupBy<T>(rows: T[], key: (row: T) => string): Map<string, T[]> {
-  const grouped = new Map<string, T[]>();
-  for (const row of rows) {
-    const group = grouped.get(key(row));
-    if (group) group.push(row);
-    else grouped.set(key(row), [row]);
-  }
-  return grouped;
 }

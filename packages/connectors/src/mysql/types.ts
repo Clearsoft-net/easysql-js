@@ -1,7 +1,6 @@
-import type { RawSchema } from "@easysql/common";
+import type { EngineSchema } from "../types.js";
 
 export type { Connector, QueryResult, RawColumn, RawSchema, RawTable } from "@easysql/common";
-export type { RawQueryResult } from "../types.js";
 
 /** Explicit connection configuration for a MySQL/MariaDB server. */
 export interface MysqlConnectionConfig {
@@ -19,20 +18,4 @@ export interface MysqlConnectionConfig {
   connectTimeoutMs?: number;
 }
 
-export interface IntrospectResult extends RawSchema {
-  engine: "mysql" | "mariadb";
-}
-
-/** Internal — `information_schema.COLUMNS` row returned by the driver. */
-export interface ColumnRow {
-  column_name: string;
-  data_type: string;
-  is_nullable: string;
-  column_default: string | null;
-  column_key: string;
-  referenced_table_name: string | null;
-  referenced_column_name: string | null;
-  ordinal_position: number;
-}
-
-export type { TableRow } from "../types.js";
+export type IntrospectResult = EngineSchema<"mysql" | "mariadb">;
